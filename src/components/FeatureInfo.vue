@@ -1,0 +1,58 @@
+<template lang="pug">
+div(v-if="p")
+    img.image(v-if="imageUrl" :src="imageUrl")
+    h2
+        a(:href="`https://geohashing.site/geohashing/${p.id}`" target="_blank") {{ p.id }}
+    div(v-if="p.success") Successful geohash!
+    div(v-if="!p.success") Failed geohash
+
+
+    h4  Participants
+    ul
+        li(v-for="participant in JSON.parse(p.participants)") {{ participant }}
+
+
+    //- table#FeatureInfo(v-if="feature").bg-white.b--gray.ba.helvetica.ma1
+
+    //-     tr(v-for="(value, prop) in p")
+    //-         template(v-if="ignoreProps.indexOf(prop) === -1")
+    //-             th.f6 {{ prop }}
+    //-             td.f6 {{ value }}
+</template>
+
+<script>
+import { EventBus } from '../EventBus';
+export default {
+    name: 'FeatureInfo',
+    data: () => ({
+        feature: undefined,
+        ignoreProps: ['id', 'Longitude', 'Latitude', 'image_url'],
+    }),
+    computed: {
+        p() {
+            return this.feature && this.feature.properties;
+        },
+        imageUrl() {
+            return this.p && this.p.image_url;
+        },
+    },
+    created() {
+        window.app.FeatureInfo = this;
+        EventBus.$on('select-feature', (feature) => (this.feature = feature));
+    },
+};
+</script>
+
+<style scoped>
+#FeatureInfo th {
+    text-align: right;
+}
+
+.image {
+    width: 100%;
+}
+
+li {
+    list-style-type: none;
+}
+</style>
