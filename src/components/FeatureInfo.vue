@@ -8,8 +8,10 @@ div(v-if="p")
 
 
     h4  Participants
-    ul
-        li(v-for="participant in JSON.parse(p.participants)") {{ participant }}
+    div(v-for="participant in JSON.parse(p.participants)") {{ participant }}
+
+    h4 Experience
+    div Years (most experienced): {{(p.experienceDaysMax / 365).toFixed(2) }}
 
 
     //- table#FeatureInfo(v-if="feature").bg-white.b--gray.ba.helvetica.ma1
