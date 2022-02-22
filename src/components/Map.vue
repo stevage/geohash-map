@@ -28,13 +28,10 @@ export default {
             outcome: 'all',
         },
         animationDay: 0,
-        // colorVis: 'experienceMax',
-        // colorVis: 'year',
     }),
     async mounted() {
-        // replace this Mapbox access token with your own
         mapboxgl.accessToken =
-            'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja25keW5pYTkxZGx3Mm5vb2UxdzE4cno2In0.ZjjS8eUNwE_vsBzg7hML8w';
+            'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja3p5cGZvOHowMmZpM21tOW40M3ZnOG5rIn0.c5qZKNfmItrPsv2UiCJxag';
         const map = new mapboxgl.Map({
             container: 'map',
             center: [144.96, -37.81],
