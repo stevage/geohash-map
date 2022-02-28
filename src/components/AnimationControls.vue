@@ -1,8 +1,8 @@
 <template lang="pug">
 #AnimationControls
   h3 Animation
-  button(@click="toggleAnimation") {{ running ? 'Stop' : 'Start' }}
-  p(v-if="running && animationDay") {{ (new Date(8.64e7 * animationDay)).toISOString().slice(0,7) }}
+  .ma3.pa2.button.tc.br3.pointer(@click="toggleAnimation") {{ running ? 'Stop' : 'Start' }}
+  .tc.f2(v-if="running && animationDay") {{ (new Date(8.64e7 * animationDay)).toISOString().slice(0,7) }}
 </template>
 
 <script>
@@ -36,4 +36,10 @@ export default {
 </script>
 
 <style scoped>
+.button:hover {
+    background: #555;
+}
+.button {
+    border: 1px solid #666;
+}
 </style>

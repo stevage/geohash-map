@@ -2,10 +2,10 @@ import { EventBus } from '@/EventBus';
 
 let graticules = {};
 const string0 = (n) => (Object.is(n, -0) ? '-0' : String(n));
-EventBus.$on('hashes-loaded', ({ local, ...hashes }) => {
+EventBus.$on('expeditions-loaded', ({ local, ...hashes }) => {
     if (local) {
         // avoid computing graticules twice
-        return;
+        // return;
     }
     graticules = {};
     for (const hash of hashes.features) {

@@ -107,4 +107,19 @@ h4,
 h5 {
     margin-bottom: 0.25em;
 }
+
+.container select,
+.container input[type='checkbox'] {
+    background: #333;
+    color: #ddd;
+    border: 1px solid #666;
+}
+.container input[type='text'],
+.container input[type='number'] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: #333;
+    color: #ddd;
+    border: #666 solid 1px;
+}
 </style>

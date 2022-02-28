@@ -4,17 +4,24 @@
             //- h1 Geohash expeditions map
         #middle.flex.flex-auto
             #sidebar.br.b--light-gray.overflow-auto.pa2-ns(:class="{ collapsed: !sidebarOpen}")
-                .container.br.bg-white.b--light-gray.overflow-auto.pa2.bw2
+                .container.br.b--light-gray.light-gray.overflow-auto.pa2.bw2
                     .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de">fippe</a>.
-                    FeatureInfo
-                    Filters
-                    AnimationControls
-                    HashStats
+                    .tabs.mw8.center.flex
+                        .tab.mb5.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
+                            | Expeditions
+                        .tab.mb5.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
+                            | Geohash
+
+                    div(v-if="tab === 'expeditions'")
+                        FeatureInfo
+                        Filters
+                        AnimationControls
+                        HashStats
 
             #sidebar-rim.relative.br.b--gray.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
             #map-container.relative.flex-auto
                 Map
-                #sidebarToggle.absolute.bg-white.f3.br.bt.bb.br--right.br-100.b--magenta.bw1.magenta.pa1.pointer.grow.fw8(@click="sidebarOpen = !sidebarOpen")
+                #sidebarToggle.absolute.bg-black-50.white-90.f3.br.bt.bb.br--right.br-100.b--magenta.bw1.magenta.pa1.pointer.grow.fw8(@click="sidebarOpen = !sidebarOpen")
                   span(v-if="!sidebarOpen") &rarr;
                   span(v-if="sidebarOpen") &larr;
                 #overlay.absolute.h-100.w-100
@@ -48,6 +55,7 @@ export default {
     data() {
         return {
             sidebarOpen: true,
+            tab: 'expeditions',
         };
     },
     created() {
@@ -57,6 +65,9 @@ export default {
     watch: {
         sidebarOpen() {
             this.$nextTick(() => window.map.resize());
+        },
+        tab() {
+            EventBus.$emit('tab-change', this.tab);
         },
     },
 };
@@ -117,6 +128,14 @@ body {
     background: hsl(220, 100%, 95%);
 }
 
+#sidebar {
+    background: #333;
+}
+.container {
+    background: #333;
+    color: #ddd;
+}
+
 /* Exists to ensure whole sidebar animates together */
 .collapsed .container {
     height: 100vh;
@@ -141,6 +160,22 @@ body {
 
 .credits a {
     color: #88f;
+}
+
+.dark-border {
+}
+
+.tab {
+    color: #555;
+    cursor: pointer;
+}
+.tab:hover {
+    background: #555;
+    color: #999;
+}
+.activeTab {
+    border: 1px solid #eee;
+    color: white;
 }
 </style>
 

@@ -16,6 +16,7 @@ import {
     resetHashAnimation,
 } from './mappingExpeditions';
 import { updateMeridians } from './mappingMeridians';
+import { updateGeohashes } from './mappingGeohashes';
 
 import { updateGraticuleStyle } from './mappingGraticules';
 
@@ -79,6 +80,10 @@ export default {
             (running) =>
                 running ? this.startAnimation() : this.stopAnimation()
         );
+        EventBus.$on('tab-change', (tab) => {
+            this.map.U.toggle(/^expeditions/, tab === 'expeditions');
+            this.map.U.toggle(/^geohash/, tab === 'geohash');
+        });
     },
     methods: {
         findPairs(expeditions) {
@@ -142,6 +147,7 @@ export default {
             start = performance.now();
             updateStreakStyle({ map, filters: this.filters });
             console.log('updated streaks', performance.now() - start);
+            updateGeohashes(map);
             // console.log(performance.now() - start);
         },
         startAnimation() {
