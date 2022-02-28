@@ -2,34 +2,34 @@ import { Expression } from 'mapgl-expression';
 import { EventBus } from '@/EventBus';
 import { dateToDays } from './util';
 
-let hashes;
-let loadedHashes;
+let expeditions;
+let loadedExpeditions;
 
-async function getHashes(local, map) {
+async function getExpeditions(local, map) {
     const url = local
         ? 'alldata.json'
         : 'https://fippe-geojson.glitch.me/alldata.json';
-    const newHashes = await window.fetch(url).then((x) => x.json());
+    const newExpeditions = await window.fetch(url).then((x) => x.json());
 
-    if (loadedHashes && local) {
+    if (loadedExpeditions && local) {
         // if non-cached data loads first for some reason, abort
         return;
     }
-    hashes = newHashes;
+    expeditions = newExpeditions;
     const participants = {};
-    hashes.features.forEach((f, i) => {
+    expeditions.features.forEach((f, i) => {
         f.id = i;
         const [date, y, x] = f.properties.id.split('_');
         f.properties.year = +date.slice(0, 4);
         f.properties.days = dateToDays(f.properties.id.slice(0, 10));
         // if (x !== undefined && y !== undefined) {
-        // sigh globalhashes
+        // sigh globalexpeditions
         f.properties.x = +x || 0;
         f.properties.y = +y || 0;
         f.properties.global = /global/.test(f.properties.id);
     });
-    hashes.features.sort((a, b) => a.properties.days - b.properties.days);
-    for (const f of hashes.features) {
+    expeditions.features.sort((a, b) => a.properties.days - b.properties.days);
+    for (const f of expeditions.features) {
         // }
         for (const p of f.properties.participants) {
             if (!participants[p]) {
@@ -65,13 +65,13 @@ async function getHashes(local, map) {
             : 0;
     }
 
-    map.U.setData('hashes', hashes);
-    EventBus.$emit('hashes-loaded', { local, ...hashes });
-    window.hashes = hashes;
+    map.U.setData('expeditions', expeditions);
+    EventBus.$emit('expeditions-loaded', { local, ...expeditions });
+    window.expeditions = expeditions;
     // this.stopAnimation();
     resetHashAnimation({ map });
-    loadedHashes = true;
-    // this.findPairs(hashes);
+    loadedExpeditions = true;
+    // this.findPairs(expeditions);
 }
 
 function yearColorFunc() {
@@ -219,7 +219,7 @@ function updateFilters({ map, filters }) {
         filters.outcome === 'all'
             ? true
             : ['==', ['get', 'success'], filters.outcome === 'success'];
-    map.U.setFilter(/hashes-/, [
+    map.U.setFilter(/expeditions-/, [
         'all',
         filters.participants || ''
             ? [
@@ -233,7 +233,7 @@ function updateFilters({ map, filters }) {
         ['<=', ['get', 'year'], filters.maxYear],
         successFilter,
     ]);
-    map.U.setCircleRadius('hashes-circles', circleRadiusFunc({ filters }));
+    map.U.setCircleRadius('expeditions-circles', circleRadiusFunc({ filters }));
 }
 
 export function updateHashStyle({ map, filters }) {
@@ -241,19 +241,19 @@ export function updateHashStyle({ map, filters }) {
 
     const dark = true;
 
-    const first = !map.getLayer('hashes-circles');
+    const first = !map.getLayer('expeditions-circles');
 
     if (first) {
-        map.U.addGeoJSON('hashes'); //, 'hashes.json');
-        getHashes(true, map).then(() =>
+        map.U.addGeoJSON('expeditions'); //, 'expeditions.json');
+        getExpeditions(true, map).then(() =>
             resetHashAnimation({ map, filters, show: true })
         );
-        getHashes(false, map).then(() =>
+        getExpeditions(false, map).then(() =>
             resetHashAnimation({ map, filters, show: true })
         );
     }
 
-    map.U.addCircle('hashes-glow', 'hashes', {
+    map.U.addCircle('expeditions-glow', 'expeditions', {
         circleColor: [
             'step',
             ['zoom'],
@@ -267,7 +267,7 @@ export function updateHashStyle({ map, filters }) {
         circleRadius: circleRadiusFunc({ isGlow: true, filters }),
         circleSortKey: ['get', 'days'],
     });
-    map.U.addCircle('hashes-circles', 'hashes', {
+    map.U.addCircle('expeditions-circles', 'expeditions', {
         circleStrokeColor: [
             'case',
             ['get', 'success'],
@@ -313,7 +313,7 @@ export function updateHashStyle({ map, filters }) {
         circleOpacity: ['feature-state', 'opacity'],
         circleStrokeOpacity: ['case', ['feature-state', 'show'], 1, 0],
     });
-    map.U.addCircle('hashes-flash', 'hashes', {
+    map.U.addCircle('expeditions-flash', 'expeditions', {
         circleStrokeColor: [
             'case',
             ['get', 'success'],
@@ -341,7 +341,7 @@ export function updateHashStyle({ map, filters }) {
         circleStrokeOpacity: ['case', ['feature-state', 'show'], 1, 0],
         circleBlur: 1.5,
     });
-    map.U.addSymbol('hashes-label', 'hashes', {
+    map.U.addSymbol('expeditions-label', 'expeditions', {
         textField: [
             'step',
             ['zoom'],
@@ -368,18 +368,18 @@ export function updateHashStyle({ map, filters }) {
     updateFilters({ map, filters });
 
     if (first) {
-        map.U.hoverPointer(/hashes-circles/);
-        map.on('click', 'hashes-circles', (e) => {
+        map.U.hoverPointer(/expeditions-circles/);
+        map.on('click', 'expeditions-circles', (e) => {
             console.log(e);
             EventBus.$emit('select-feature', e.features[0]);
         });
-        map.on('click', 'hashes-glow', (e) => {
+        map.on('click', 'expeditions-glow', (e) => {
             console.log(e);
             EventBus.$emit('select-feature', e.features[0]);
         });
 
         map.U.hoverPopup(
-            'hashes-glow',
+            'expeditions-glow',
             (f) =>
                 `<div>${f.properties.id}</div> ${JSON.parse(
                     f.properties.participants
@@ -395,9 +395,9 @@ export function updateHashStyle({ map, filters }) {
 }
 
 export function resetHashAnimation({ map, filters, show }) {
-    for (const f of hashes.features) {
+    for (const f of expeditions.features) {
         map.setFeatureState(
-            { id: f.id, source: 'hashes' },
+            { id: f.id, source: 'expeditions' },
             { opacity: show ? 1 : 0, show, flashOpacity: 0 }
         );
     }
@@ -413,7 +413,7 @@ export function updateHashAnimation({
     animationDay,
 }) {
     let updated = 0;
-    for (const f of hashes.features) {
+    for (const f of expeditions.features) {
         // heh, why did I do it this way? could just use actual x/y, not graticule x/y
         if (
             (f.properties.x >= minx &&
@@ -435,7 +435,7 @@ export function updateHashAnimation({
             }
             if (age >= 0 && age <= 730) {
                 map.setFeatureState(
-                    { id: f.id, source: 'hashes' },
+                    { id: f.id, source: 'expeditions' },
                     {
                         show: age > 0,
                         opacity:

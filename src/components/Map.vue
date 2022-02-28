@@ -14,7 +14,7 @@ import {
     updateHashStyle,
     updateHashAnimation,
     resetHashAnimation,
-} from './mappingHashes';
+} from './mappingExpeditions';
 import { updateMeridians } from './mappingMeridians';
 
 import { updateGraticuleStyle } from './mappingGraticules';
@@ -81,10 +81,10 @@ export default {
         );
     },
     methods: {
-        findPairs(hashes) {
+        findPairs(expeditions) {
             const pairs = {};
             let max = [0, null];
-            for (const f of hashes.features) {
+            for (const f of expeditions.features) {
                 for (const p of f.properties.participants) {
                     if (!pairs[p]) {
                         pairs[p] = {};
@@ -135,7 +135,7 @@ export default {
             console.log('updated meridians', performance.now() - start);
             start = performance.now();
             updateHashStyle({ map: this.map, filters: this.filters });
-            console.log('updated hashes', performance.now() - start);
+            console.log('updated expeditions', performance.now() - start);
             start = performance.now();
             updateGraticuleStyle({ map: this.map, filters: this.filters });
             console.log('updated graticules', performance.now() - start);
@@ -215,7 +215,7 @@ TODO a feature-state version of this
 
 renderFunc = () => {
   days+=20;
-  map.setFilter('hashes-circles', ['all', ['<',['get','days'], days], ['>', ['get','x'], -1130]])
+  map.setFilter('expeditions-circles', ['all', ['<',['get','days'], days], ['>', ['get','x'], -1130]])
   console.log(days)
 }
 
