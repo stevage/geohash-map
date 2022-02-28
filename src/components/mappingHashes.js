@@ -1,4 +1,4 @@
-import { Expression } from 'mapbox-expression';
+import { Expression } from 'mapgl-expression';
 import { EventBus } from '@/EventBus';
 import { dateToDays } from './util';
 
@@ -9,9 +9,7 @@ async function getHashes(local, map) {
     const url = local
         ? 'alldata.json'
         : 'https://fippe-geojson.glitch.me/alldata.json';
-    console.log('1', map);
     const newHashes = await window.fetch(url).then((x) => x.json());
-    console.log('2', map);
 
     if (loadedHashes && local) {
         // if non-cached data loads first for some reason, abort
@@ -42,16 +40,21 @@ async function getHashes(local, map) {
             }
             participants[p].expeditions++;
         }
-        f.properties.participantsString = f.properties.participants
-            .join(', ')
-            .toLowerCase();
+        f.properties.participantsString = f.properties.participants.join(', ');
+        f.properties.participantsStringLower = f.properties.participantsString.toLowerCase();
         f.properties.participantsCount = f.properties.participants.length;
         const expeditions = f.properties.participants.map(
             (p) => participants[p].expeditions
         );
-        f.properties.experienceMax = Math.max(...expeditions);
-        f.properties.experienceMin = Math.min(...expeditions);
-        f.properties.experienceTotal = expeditions.reduce((a, b) => a + b, 0);
+        f.properties.experienceMax = expeditions.length
+            ? Math.max(...expeditions)
+            : 0;
+        f.properties.experienceMin = expeditions.length
+            ? Math.min(...expeditions)
+            : 0;
+        f.properties.experienceTotal = expeditions.length
+            ? expeditions.reduce((a, b) => a + b, 0)
+            : 0;
         const days = f.properties.participants.map(
             (p) => f.properties.days - participants[p].firstExpeditionDays
         );
@@ -63,10 +66,9 @@ async function getHashes(local, map) {
     }
 
     map.U.setData('hashes', hashes);
-    EventBus.$emit('hashes-loaded', hashes);
+    EventBus.$emit('hashes-loaded', { local, ...hashes });
     window.hashes = hashes;
     // this.stopAnimation();
-    console.log('3', map);
     resetHashAnimation({ map });
     loadedHashes = true;
     // this.findPairs(hashes);
@@ -219,11 +221,13 @@ function updateFilters({ map, filters }) {
             : ['==', ['get', 'success'], filters.outcome === 'success'];
     map.U.setFilter(/hashes-/, [
         'all',
-        [
-            'in',
-            (filters.participants || '').replace(/ /g, '_').toLowerCase(),
-            ['get', 'participantsString'],
-        ],
+        filters.participants || ''
+            ? [
+                  'in',
+                  (filters.participants || '').replace(/ /g, '_').toLowerCase(),
+                  ['get', 'participantsStringLower'],
+              ]
+            : true,
         ['>=', ['get', 'participantsCount'], filters.minParticipants],
         ['>=', ['get', 'year'], filters.minYear],
         ['<=', ['get', 'year'], filters.maxYear],

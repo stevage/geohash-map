@@ -4,37 +4,51 @@
   label.mb2
     div Participant name
     input#filter-by-participants.mr1(type="text" v-model="filters.participants" :disabled="!enabled")
-  label.mb2
-    div Minimum participants
-    input#filter-by-participants.mr1(type="number" v-model.number="filters.minParticipants" min="1" :disabled="!enabled")
-  label.mb2
-    div Minimum year
-    input#filter-by-participants.mr1(type="number" v-model.number="filters.minYear" min="2008" :max="filters.maxYear" :disabled="!enabled")
-  label
-    div Maximum year
-    input#filter-by-participants.mr1(type="number" v-model.number="filters.maxYear" min="2008" max="2030" :disabled="!enabled")
+  label.mv2.db
+    .dib At least
+    input#filter-by-participants.mr1.w3.dib(type="number" size="2" v-model.number="filters.minParticipants" min="0" :disabled="!enabled")
+    .dib participants
+  label.mv2.dib
+    div.dib Between
+    input.w3.dib#filter-by-participants.mr1.ml1(type="number" v-model.number="filters.minYear" min="2008" :max="filters.maxYear" :disabled="!enabled")
+  label.dib
+    .dib and
+    input#filter-by-participants.dib.w3.mr1.ml1(type="number" v-model.number="filters.maxYear" min="2008" max="2030" :disabled="!enabled")
   h5 Outcome
-  label
+  label.db
     input.mr1(type="radio" v-model="filters.outcome" value="all" :disabled="!enabled")
     | All
-  label
+  label.db
     input.mr1(type="radio" v-model="filters.outcome" value="success" :disabled="!enabled")
     | Successes
-  label
+  label.db
     input.mr1(type="radio" v-model="filters.outcome" value="failure" :disabled="!enabled")
     | Failures
 
   h4.mb1 Visualisation
-  label.mb2
+  label.mb2.db
     span Color by
     select(v-model="filters.colorVis" :disabled="!enabled")
       option(value="year") Year
       option(value="experienceMax") Hasher's previous expeditions
       option(value="experienceDaysMax") Hasher's years of experience
 
-  label
+  label.db
     input#filter-by-participants.mr1(type="checkbox" v-model="filters.scaleExpedition" :disabled="!enabled")
     span Scale by expedition size
+
+  label.db
+    input.mr1(type="checkbox" v-model="filters.showStreaks" :disabled="!enabled")
+    span Show streaks
+
+  label.db.ml3(v-if="filters.showStreaks")
+    span Minimum streak length
+    input.w3(type="number" v-model.number="filters.minStreakLength" min="2" size="2" :disabled="!enabled")
+  label.db.ml3(v-if="filters.showStreaks")
+    input.mr1(type="checkbox" v-model.number="filters.onlySuccessStreaks" :disabled="!enabled")
+    span Only show 100% success treaks
+    div(style="color: #888; font-size: 0.8em") Excludes success-streaks that have a fail before or after
+
 </template>
 
 <script>
@@ -51,6 +65,9 @@ export default {
             maxYear: 2022,
             outcome: 'all',
             colorVis: 'year',
+            showStreaks: false,
+            minStreakLength: 3,
+            onlySuccessStreaks: true,
         },
     }),
     created() {
@@ -76,7 +93,7 @@ export default {
 
 <style scoped>
 label {
-    display: block;
+    /* display: block; */
     /* margin-bottom: 1em; */
 }
 

@@ -5,11 +5,12 @@
         #middle.flex.flex-auto
             #sidebar.br.b--light-gray.overflow-auto.pa2-ns(:class="{ collapsed: !sidebarOpen}")
                 .container.br.bg-white.b--light-gray.overflow-auto.pa2.bw2
+                    .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de">fippe</a>.
                     FeatureInfo
                     Filters
                     AnimationControls
+                    HashStats
 
-                    p.credits Made by <a href="https://hire.stevebennett.me">Steve Bennett</a>. <br> Data comes from https://fippe.de
             #sidebar-rim.relative.br.b--gray.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
             #map-container.relative.flex-auto
                 Map
@@ -27,6 +28,7 @@ import FeatureInfo from './components/FeatureInfo.vue';
 import Legend from '@/components/Legend.vue';
 import Filters from '@/components/Filters.vue';
 import AnimationControls from '@/components/AnimationControls.vue';
+import HashStats from '@/components/HashStats.vue';
 
 import { EventBus } from './EventBus';
 window.app = {};
@@ -41,6 +43,7 @@ export default {
         Legend,
         Filters,
         AnimationControls,
+        HashStats,
     },
     data() {
         return {
@@ -125,10 +128,22 @@ body {
 
 .credits {
     position: absolute;
-    bottom: 2em;
-    width: 290px;
+    padding: 10px 5px;
+    bottom: 0;
+    width: 310px;
+    z-index: -1;
+    background: #333;
+    color: #fff;
+    margin: 0;
+    left: 0;
+    right: 0;
+}
+
+.credits a {
+    color: #88f;
 }
 </style>
+
 <style>
 @media screen and (min-width: 768px) {
     .only-mobile {

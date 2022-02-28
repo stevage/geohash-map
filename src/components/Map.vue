@@ -3,9 +3,11 @@
 </template>
 
 <script>
-import mapboxgl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import U from 'mapbox-gl-utils';
+// import mapboxgl from 'maplibre-gl';
+// import 'maplibre-gl/dist/maplibre-gl.css';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import U from 'map-gl-utils';
 import { EventBus } from '../EventBus';
 
 import {
@@ -13,11 +15,12 @@ import {
     updateHashAnimation,
     resetHashAnimation,
 } from './mappingHashes';
+import { updateMeridians } from './mappingMeridians';
 
 import { updateGraticuleStyle } from './mappingGraticules';
 
 import { dateToDays, getGraticuleBounds } from './util';
-
+import { updateStreakStyle } from './mappingStreaks';
 export default {
     data: () => ({
         filters: {
@@ -31,7 +34,10 @@ export default {
     }),
     async mounted() {
         mapboxgl.accessToken =
-            'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja3p5cGZvOHowMmZpM21tOW40M3ZnOG5rIn0.c5qZKNfmItrPsv2UiCJxag';
+            // 'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja3p5cGZvOHowMmZpM21tOW40M3ZnOG5rIn0.c5qZKNfmItrPsv2UiCJxag';
+            //  pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja25keW5pYTkxZGx3Mm5vb2UxdzE4cno2In0.ZjjS8eUNwE_vsBzg7hML8w
+            'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja3p5cHdtOGEwMm1hM2RtdzJlYXJrajhrIn0.veC37cfBaslGu1MteavjNA';
+        const globe = window.location.hash.match(/globe/);
         const map = new mapboxgl.Map({
             container: 'map',
             center: [144.96, -37.81],
@@ -39,6 +45,9 @@ export default {
             // style: 'mapbox://styles/mapbox/light-v9',
             style: 'mapbox://styles/stevage/ckzoqlsr1000115qtr5pendfa/draft', // geohash-dark
             hash: 'center',
+            projection: globe
+                ? { name: 'globe', center: [0, 0], parallels: [30, 30] }
+                : 'mercator',
         });
         U.init(map, mapboxgl);
 
@@ -48,6 +57,17 @@ export default {
         window.app.Map = this;
 
         await map.U.onLoad();
+        if (globe) {
+            map.addSource('mapbox-dem', {
+                type: 'raster-dem',
+                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                tileSize: 512,
+                maxzoom: 14,
+            });
+            // add the DEM source as a terrain layer with exaggerated height
+            map.setTerrain({ source: 'mapbox-dem', exaggeration: 0 });
+        }
+        EventBus.$emit('map-loaded', map);
         this.filters = window.Filters.filters;
         this.initMapContent(map);
         EventBus.$on('filters-change', (filters) => {
@@ -109,12 +129,28 @@ export default {
             this.updateMapStyle();
         },
         updateMapStyle() {
+            let start = performance.now();
+            const map = this.map;
+            updateMeridians({ map });
+            console.log('updated meridians', performance.now() - start);
+            start = performance.now();
             updateHashStyle({ map: this.map, filters: this.filters });
+            console.log('updated hashes', performance.now() - start);
+            start = performance.now();
             updateGraticuleStyle({ map: this.map, filters: this.filters });
+            console.log('updated graticules', performance.now() - start);
+            start = performance.now();
+            updateStreakStyle({ map, filters: this.filters });
+            console.log('updated streaks', performance.now() - start);
+            // console.log(performance.now() - start);
         },
         startAnimation() {
             this.stopAnimation();
-            this.animationDay = dateToDays(`${this.filters.minYear}-01-01`);
+            if (this.filters.minYear == 2008) {
+                this.animationDay = dateToDays(`2008-05-01`); // geohashing started on May 21st 2008
+            } else {
+                this.animationDay = dateToDays(`${this.filters.minYear}-01-01`);
+            }
             resetHashAnimation({
                 map: this.map,
                 filters: this.filters,
