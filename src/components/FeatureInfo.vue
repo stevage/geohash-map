@@ -1,17 +1,16 @@
 <template lang="pug">
 div(v-if="p")
-    img.image(v-if="imageUrl" :src="imageUrl")
-    h2
-        a(:href="`https://geohashing.site/geohashing/${p.id}`" target="_blank") {{ p.id }}
-    div(v-if="p.success") Successful geohash!
-    div(v-if="!p.success") Failed geohash
+    //- img.image(v-if="imageUrl" :src="imageUrl")
+    h2.mt0.mb2 {{ p.success ? 'Successful' : 'Failed' }} expedition
+
+    a.b(:href="`https://geohashing.site/geohashing/${p.id}`" target="_blank") {{ p.id }}
 
 
-    h4  Participants
+    h4.mb2  Participants
     div(v-for="participant in JSON.parse(p.participants)") {{ participant }}
 
-    h4 Experience
-    div Years (most experienced): {{(p.experienceDaysMax / 365).toFixed(2) }}
+    //- h4.mb2 Experience
+    //- div Years (most experienced): {{(p.experienceDaysMax / 365).toFixed(2) }}
 
 
     //- table#FeatureInfo(v-if="feature").bg-white.b--gray.ba.helvetica.ma1
@@ -46,6 +45,11 @@ export default {
 </script>
 
 <style scoped>
+a {
+    text-color: hsl(240, 50%, 70%);
+    text-decoration: none;
+}
+
 #FeatureInfo th {
     text-align: right;
 }

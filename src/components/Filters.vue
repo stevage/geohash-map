@@ -1,5 +1,5 @@
 <template lang="pug">
-#Filters(:class="{ disabled: !enabled }")
+#Filters.mt4(:class="{ disabled: !enabled }")
   h3 Filters
   label.mb2
     div Participant name

@@ -6,10 +6,10 @@
             #sidebar.br.b--light-gray.overflow-auto.pa2-ns(:class="{ collapsed: !sidebarOpen}")
                 .container.br.b--light-gray.light-gray.overflow-auto.pa2.bw2
                     .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de">fippe</a>.
-                    .tabs.mw8.center.flex
-                        .tab.mb5.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
+                    .tabs.mb2.flex
+                        .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
                             | Expeditions
-                        .tab.mb5.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
+                        .tab.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
                             | Geohash
 
                     div(v-if="tab === 'expeditions'")
