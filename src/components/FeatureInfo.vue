@@ -46,7 +46,7 @@ export default {
 
 <style scoped>
 a {
-    text-color: hsl(240, 50%, 70%);
+    color: hsl(240, 50%, 70%);
     text-decoration: none;
 }
 

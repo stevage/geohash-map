@@ -5,11 +5,13 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build": "NODE_ENV=vuvue-cli-service build",
     "deploy": "yarn run build || npm run build; ./deploy.sh",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@babel/plugin-syntax-nullish-coalescing-operator": "^7.8.3",
+    "@turf/turf": "^6.5.0",
     "map-gl-utils": "^0.42.1",
     "mapbox-expression": "^0.0.3",
     "mapbox-gl": "2.8.0-alpha.1",

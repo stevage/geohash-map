@@ -3,8 +3,8 @@
         #top.bb.b--gray.bg-washed-yellow
             //- h1 Geohash expeditions map
         #middle.flex.flex-auto
-            #sidebar.br.b--light-gray.overflow-auto.pa2-ns(:class="{ collapsed: !sidebarOpen}")
-                .container.br.b--light-gray.light-gray.overflow-auto.pa2.bw2
+            #sidebar.br.b--dark-gray.overflow-auto.pa2-ns(:class="{ collapsed: !sidebarOpen}")
+                .container.light-gray.overflow-auto.pa2.bw2
                     .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de">fippe</a>.
                     .tabs.mb2.flex
                         .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
@@ -17,8 +17,10 @@
                         Filters
                         AnimationControls
                         HashStats
+                    div(v-if="tab === 'geohash'")
+                        HashInfo
 
-            #sidebar-rim.relative.br.b--gray.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
+            #sidebar-rim.relative.br.b--gray.bg-dark.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
             #map-container.relative.flex-auto
                 Map
                 #sidebarToggle.absolute.bg-black-50.white-90.f3.br.bt.bb.br--right.br-100.b--magenta.bw1.magenta.pa1.pointer.grow.fw8(@click="sidebarOpen = !sidebarOpen")
@@ -36,6 +38,7 @@ import Legend from '@/components/Legend.vue';
 import Filters from '@/components/Filters.vue';
 import AnimationControls from '@/components/AnimationControls.vue';
 import HashStats from '@/components/HashStats.vue';
+import HashInfo from '@/components/HashInfo.vue';
 
 import { EventBus } from './EventBus';
 window.app = {};
@@ -51,6 +54,7 @@ export default {
         Filters,
         AnimationControls,
         HashStats,
+        HashInfo,
     },
     data() {
         return {
@@ -134,6 +138,8 @@ body {
 .container {
     background: #333;
     color: #ddd;
+    border-right: 1px solid #222;
+    border-bottom: 1px solid #222;
 }
 
 /* Exists to ensure whole sidebar animates together */
@@ -161,6 +167,14 @@ body {
 .credits a {
     color: #88f;
 }
+
+.bg-dark {
+    background-color: #333;
+}
+
+/* .dark {
+    color: #555;
+} */
 
 .dark-border {
 }

@@ -38,6 +38,8 @@ export default {
             // 'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja3p5cGZvOHowMmZpM21tOW40M3ZnOG5rIn0.c5qZKNfmItrPsv2UiCJxag';
             //  pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja25keW5pYTkxZGx3Mm5vb2UxdzE4cno2In0.ZjjS8eUNwE_vsBzg7hML8w
             'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja3p5cHdtOGEwMm1hM2RtdzJlYXJrajhrIn0.veC37cfBaslGu1MteavjNA';
+        // pk.eyJ1Ijoic3RldmFnZSIsImEiOiJGcW03aExzIn0.QUkUmTGIO3gGt83HiRIjQw ??
+
         const globe = window.location.hash.match(/globe/);
         const map = new mapboxgl.Map({
             container: 'map',
@@ -59,6 +61,46 @@ export default {
 
         await map.U.onLoad();
         if (globe) {
+            map.addLayer({
+                id: 'sky',
+                type: 'sky',
+                /*paint: {
+                    'sky-opacity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        0,
+                        0,
+                        5,
+                        0.3,
+                        8,
+                        1,
+                    ],
+                    // set up the sky layer for atmospheric scattering
+                    'sky-type': 'atmosphere',
+                    // explicitly set the position of the sun rather than allowing the sun to be attached to the main light source
+                    // 'sky-atmosphere-sun': getSunPosition(),
+                    // set the intensity of the sun as a light source (0-100 with higher values corresponding to brighter skies)
+                    'sky-atmosphere-sun-intensity': 5,
+                },*/
+                paint: {
+                    /*                    'sky-type': 'gradient',
+                    'sky-gradient': [
+                        'interpolate',
+                        ['linear'],
+                        ['sky-radial-progress'],
+                        0.8,
+                        'hsl(260,60%,20%)',
+                        1,
+                        'black',
+                    ],
+                    'sky-gradient-radius': 180,
+                    'sky-opacity': 1,*/
+                    'sky-atmosphere-color': 'black',
+                },
+            });
+        }
+        if (globe && !window.location.hash.match(/bug/)) {
             map.addSource('mapbox-dem', {
                 type: 'raster-dem',
                 url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
@@ -255,5 +297,10 @@ map.on('idle', renderFunc)
 }
 .mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
     border-left-color: #555;
+}
+
+.mapboxgl-ctrl-scale {
+    background: #222;
+    color: #bbb;
 }
 </style>
