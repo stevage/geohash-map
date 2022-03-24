@@ -5,7 +5,7 @@
 <script>
 // import mapboxgl from 'maplibre-gl';
 // import 'maplibre-gl/dist/maplibre-gl.css';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-dev';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import U from 'map-gl-utils';
 import { EventBus } from '../EventBus';
@@ -32,6 +32,7 @@ export default {
             outcome: 'all',
         },
         animationDay: 0,
+        globe: window.location.hash.match(/globe/),
     }),
     async mounted() {
         mapboxgl.accessToken =
@@ -40,7 +41,6 @@ export default {
             'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja3p5cHdtOGEwMm1hM2RtdzJlYXJrajhrIn0.veC37cfBaslGu1MteavjNA';
         // pk.eyJ1Ijoic3RldmFnZSIsImEiOiJGcW03aExzIn0.QUkUmTGIO3gGt83HiRIjQw ??
 
-        const globe = window.location.hash.match(/globe/);
         const map = new mapboxgl.Map({
             container: 'map',
             center: [144.96, -37.81],
@@ -48,7 +48,7 @@ export default {
             // style: 'mapbox://styles/mapbox/light-v9',
             style: 'mapbox://styles/stevage/ckzoqlsr1000115qtr5pendfa/draft', // geohash-dark
             hash: 'center',
-            projection: globe
+            projection: this.globe
                 ? { name: 'globe', center: [0, 0], parallels: [30, 30] }
                 : 'mercator',
         });
@@ -60,7 +60,7 @@ export default {
         window.app.Map = this;
 
         await map.U.onLoad();
-        if (globe) {
+        if (this.globe) {
             map.addLayer({
                 id: 'sky',
                 type: 'sky',
@@ -100,7 +100,7 @@ export default {
                 },
             });
         }
-        if (globe && !window.location.hash.match(/bug/)) {
+        if (this.globe && !window.location.hash.match(/bug/)) {
             map.addSource('mapbox-dem', {
                 type: 'raster-dem',
                 url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
@@ -126,6 +126,14 @@ export default {
             this.map.U.toggle(/^expeditions/, tab === 'expeditions');
             this.map.U.toggle(/^geohash/, tab === 'geohash');
         });
+    },
+    computed: {
+        animationMonthISO() {
+            return (
+                this.animationDay &&
+                new Date(8.64e7 * this.animationDay).toISOString().slice(0, 7)
+            );
+        },
     },
     methods: {
         findPairs(expeditions) {
@@ -244,6 +252,7 @@ export default {
 
             EventBus.$emit('animation-cycle', {
                 animationDay: this.animationDay,
+                animationMonthISO: this.animationMonthISO,
             });
             updateHashAnimation({
                 map: this.map,
@@ -253,7 +262,33 @@ export default {
                 maxx,
                 maxy,
                 animationDay: this.animationDay,
+                animationMonthISO: this.animationMonthISO,
             });
+            this.frameNo = (this.frameNo || 0) + 1;
+            if (this.globe) {
+                const round = (n, places) => {
+                    const mult = Math.pow(10, places);
+                    return Math.round(n * mult) / mult;
+                };
+                // 14092
+                const daysPerLoop = 50000;
+                // We want x in range -1 to 1
+
+                const x =
+                    (((this.animationDay - 14000) % daysPerLoop) /
+                        daysPerLoop) *
+                        2 -
+                    1;
+                if (0 && this.frameNo % 10 === 0) {
+                    this.map.setFreeCameraOptions({
+                        position: {
+                            x,
+                            y: 0.45,
+                            z: 0.5,
+                        },
+                    });
+                }
+            }
         },
     },
 };

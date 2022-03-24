@@ -4,17 +4,19 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
     "build": "NODE_ENV=vuvue-cli-service build",
     "deploy": "yarn run build || npm run build; ./deploy.sh",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@babel/plugin-proposal-optional-chaining": "^7.16.7",
     "@babel/plugin-syntax-nullish-coalescing-operator": "^7.8.3",
+    "@observablehq/plot": "^0.4.2",
     "@turf/turf": "^6.5.0",
+    "chartjs": "^0.3.24",
     "map-gl-utils": "^0.42.1",
     "mapbox-expression": "^0.0.3",
-    "mapbox-gl": "2.8.0-alpha.1",
+    "mapbox-gl": "2.8.0-alpha.4",
     "mapbox-gl-utils": "^0.39.0",
     "mapgl-expression": "^0.0.4",
     "maplibre-gl": "^1.15.2",

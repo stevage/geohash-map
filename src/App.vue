@@ -16,6 +16,7 @@
                         FeatureInfo
                         Filters
                         AnimationControls
+                        ChartControls
                         HashStats
                     div(v-if="tab === 'geohash'")
                         HashInfo
@@ -28,6 +29,8 @@
                   span(v-if="sidebarOpen") &larr;
                 #overlay.absolute.h-100.w-100
                     Legend
+                    Chart
+                    div.absolute.center.animationMonth {{animationMonthISO}}
         #bottom.bt.b--light-gray.flex-none
 </template>
 
@@ -39,6 +42,8 @@ import Filters from '@/components/Filters.vue';
 import AnimationControls from '@/components/AnimationControls.vue';
 import HashStats from '@/components/HashStats.vue';
 import HashInfo from '@/components/HashInfo.vue';
+import ChartControls from '@/components/ChartControls.vue';
+import Chart from '@/components/Chart.vue';
 
 import { EventBus } from './EventBus';
 window.app = {};
@@ -55,16 +60,25 @@ export default {
         AnimationControls,
         HashStats,
         HashInfo,
+        ChartControls,
+        Chart,
     },
     data() {
         return {
             sidebarOpen: true,
             tab: 'expeditions',
+            animationMonthISO: null,
         };
     },
     created() {
         window.app.App = this;
         EventBus.$on('select-feature', () => (this.sidebarOpen = true));
+        EventBus.$on(
+            'animation-cycle',
+            ({ animationMonthISO }) =>
+                (this.animationMonthISO = animationMonthISO)
+        );
+        EventBus.$on('animation-ended', () => (this.animationMonthISO = null));
     },
     watch: {
         sidebarOpen() {
@@ -190,6 +204,21 @@ body {
 .activeTab {
     border: 1px solid #eee;
     color: white;
+}
+
+.animationMonth {
+    background: transparent;
+    height: 300px;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 50px;
+    font-weight: 600;
+    /* text-stroke: #ccc 1px;
+    color:black; */
+    /* text-stroke: #333 5px; */
+    -webkit-text-stroke: #111 2px;
+    color: #777;
 }
 </style>
 

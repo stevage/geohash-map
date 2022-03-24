@@ -30,6 +30,8 @@
     span Color by
     select(v-model="filters.colorVis" :disabled="!enabled")
       option(value="year") Year
+      option(value="month") Month
+      option(value="weekday") Day of the week
       option(value="experienceMax") Hasher's previous expeditions
       option(value="experienceDaysMax") Hasher's years of experience
 

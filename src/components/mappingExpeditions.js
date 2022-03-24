@@ -1,6 +1,6 @@
 import { Expression } from 'mapgl-expression';
 import { EventBus } from '@/EventBus';
-import { dateToDays } from './util';
+import { dateToDays, dateToWeekday } from './util';
 
 let expeditions;
 let loadedExpeditions;
@@ -22,6 +22,8 @@ async function getExpeditions(local, map) {
         const [date, y, x] = f.properties.id.split('_');
         f.properties.year = +date.slice(0, 4);
         f.properties.days = dateToDays(f.properties.id.slice(0, 10));
+        f.properties.month = +date.slice(5, 7);
+        f.properties.weekday = dateToWeekday(f.properties.id.slice(0, 10));
         // if (x !== undefined && y !== undefined) {
         // sigh globalexpeditions
         f.properties.x = +x || 0;
@@ -91,6 +93,49 @@ function yearColorFunc() {
     ];
     return ret;
 }
+
+function monthColorFunc() {
+    const ret = [
+        'interpolate-hcl',
+        ['linear'],
+        ['get', 'month'],
+        0,
+        'hsl(0, 100%, 40%)',
+        2,
+        'hsl(60, 100%, 40%)',
+        4,
+        'hsl(120, 100%, 40%)',
+        8,
+        'hsl(240, 100%, 40%)',
+        10,
+        'hsl(310, 100%, 40%)',
+        12,
+        'hsl(0, 100%, 40%)',
+    ];
+    return ret;
+}
+function weekdayColorFunc() {
+    const ret = [
+        'interpolate-hcl',
+        ['linear'],
+        ['get', 'weekday'],
+        0,
+        'hsl(390, 80%, 40%)',
+        2,
+        'hsl(240, 80%, 40%)',
+        4,
+        'hsl(180, 80%, 40%)',
+        5,
+        'hsl(120, 80%, 40%)',
+        6,
+        // 'hsl(60, 100%, 50%)', // saturday special
+        'hsl(60, 80%, 40%)', // saturday not eye catching
+        7,
+        'hsl(30, 80%, 40%)',
+    ];
+    return ret;
+}
+
 function experienceColorFunc() {
     const ret = [
         'interpolate-hcl',
@@ -133,6 +178,8 @@ function experienceDaysColorFunc() {
 function colorFunc(filters) {
     return {
         year: yearColorFunc(),
+        month: monthColorFunc(),
+        weekday: weekdayColorFunc(),
         experienceMax: experienceColorFunc(),
         experienceDaysMax: experienceDaysColorFunc(),
     }[filters.colorVis];
@@ -161,7 +208,7 @@ function legendColors(filters) {
             });
             vals.push([experienceYearsMax, color]);
         }
-    } else {
+    } else if (filters.colorVis === 'year') {
         for (let year = 2008; year <= 2022; year++) {
             const color = Expression.parse(colorFunc(filters)).evaluate({
                 type: 'Feature',
@@ -173,6 +220,36 @@ function legendColors(filters) {
             });
             vals.push([year, color]);
         }
+    } else if (filters.colorVis === 'month') {
+        for (let month = 12; month >= 1; month--) {
+            const color = Expression.parse(colorFunc(filters)).evaluate({
+                type: 'Feature',
+                properties: {
+                    month,
+                },
+                geometry: null,
+            });
+            const monthName = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(
+                ' '
+            )[month - 1];
+            vals.push([monthName, color]);
+        }
+    } else if (filters.colorVis === 'weekday') {
+        for (let weekday = 6; weekday >= 0; weekday--) {
+            const color = Expression.parse(colorFunc(filters)).evaluate({
+                type: 'Feature',
+                properties: {
+                    weekday,
+                },
+                geometry: null,
+            });
+            const weekdayName = 'Sun Mon Tue Wed Thu Fri Sat'.split(' ')[
+                weekday
+            ];
+            vals.push([weekdayName, color]);
+        }
+    } else {
+        throw 'unknown colorVis' + filters.colorVis;
     }
     return vals;
 }
@@ -244,7 +321,8 @@ export function updateHashStyle({ map, filters }) {
     const first = !map.getLayer('expeditions-circles');
 
     if (first) {
-        map.U.addGeoJSON('expeditions'); //, 'expeditions.json');
+        map.U.addGeoJSON('expeditions'); //, 'expeditions.json'
+
         getExpeditions(true, map).then(() =>
             resetHashAnimation({ map, filters, show: true })
         );

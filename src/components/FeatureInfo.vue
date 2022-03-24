@@ -31,6 +31,7 @@ export default {
     }),
     computed: {
         p() {
+            console.log(this.feature);
             return this.feature && this.feature.properties;
         },
         imageUrl() {

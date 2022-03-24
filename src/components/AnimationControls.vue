@@ -2,7 +2,7 @@
 #AnimationControls
   h3 Animation
   .ma3.pa2.button.tc.br3.pointer(@click="toggleAnimation") {{ running ? 'Stop' : 'Start' }}
-  .tc.f2(v-if="running && animationDay") {{ (new Date(8.64e7 * animationDay)).toISOString().slice(0,7) }}
+  .tc.f2(v-if="running && animationMonthISO") {{ animationMonthISO }}
 </template>
 
 <script>
@@ -11,13 +11,14 @@ export default {
     name: 'AnimationControls',
     data: () => ({
         running: false,
-        animationDay: '',
+        animationMonthISO: '',
     }),
     created() {
         window.AnimationControls = this;
         EventBus.$on(
             'animation-cycle',
-            ({ animationDay }) => (this.animationDay = animationDay)
+            ({ animationDay, animationMonthISO }) =>
+                (this.animationMonthISO = animationMonthISO)
         );
         EventBus.$on('animation-ended', () => {
             console.log('not running');
