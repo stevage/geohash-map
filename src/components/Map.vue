@@ -117,10 +117,8 @@ export default {
             this.filters = filters;
             this.updateMapStyle();
         });
-        EventBus.$on(
-            'animation-change',
-            (running) =>
-                running ? this.startAnimation() : this.stopAnimation()
+        EventBus.$on('animation-change', (running) =>
+            running ? this.startAnimation() : this.stopAnimation()
         );
         EventBus.$on('tab-change', (tab) => {
             this.map.U.toggle(/^expeditions/, tab === 'expeditions');
@@ -265,6 +263,8 @@ export default {
                 animationMonthISO: this.animationMonthISO,
             });
             this.frameNo = (this.frameNo || 0) + 1;
+        },
+        updateGlobeAnimation() {
             if (this.globe) {
                 const round = (n, places) => {
                     const mult = Math.pow(10, places);
@@ -279,7 +279,7 @@ export default {
                         daysPerLoop) *
                         2 -
                     1;
-                if (0 && this.frameNo % 10 === 0) {
+                if (this.frameNo % 2 === 0) {
                     this.map.setFreeCameraOptions({
                         position: {
                             x,
@@ -289,6 +289,28 @@ export default {
                     });
                 }
             }
+        },
+
+        startGlobeAnimation() {
+            this.lastFrame = 0;
+
+            this.timerFunc = (now) => {
+                this.updateGlobeAnimation();
+                if (this.lastFrame) {
+                    const elapsed = now - this.lastFrame;
+                    const dayJump = Math.max(1, Math.floor(elapsed / 10));
+                    this.animationDay += dayJump;
+                }
+                this.lastFrame = now;
+                this.frameNo = (this.frameNo || 0) + 1;
+                this.updateGlobeAnimation();
+
+                if (this.timer) {
+                    requestAnimationFrame(this.timerFunc);
+                }
+            };
+            this.timer = 1;
+            requestAnimationFrame(this.timerFunc);
         },
     },
 };
@@ -310,6 +332,9 @@ map.on('idle', renderFunc)
 </script>
 
 <style>
+#map {
+    background: #222;
+}
 .mapboxgl-popup-content {
     background: hsla(0, 0%, 3%, 0.5);
     /* transparent; */

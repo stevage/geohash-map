@@ -25,7 +25,7 @@
     input.mr1(type="radio" v-model="filters.outcome" value="failure" :disabled="!enabled")
     | Failures
 
-  h4.mb1 Visualisation
+  h3.mb1 Map
   label.mb2.db
     span Color by
     select(v-model="filters.colorVis" :disabled="!enabled")
@@ -34,14 +34,15 @@
       option(value="weekday") Day of the week
       option(value="experienceMax") Hasher's previous expeditions
       option(value="experienceDaysMax") Hasher's years of experience
+      option(value="participants") Participant
 
   label.db
     input#filter-by-participants.mr1(type="checkbox" v-model="filters.scaleExpedition" :disabled="!enabled")
     span Scale by expedition size
 
-  label.db
-    input.mr1(type="checkbox" v-model="filters.showStreaks" :disabled="!enabled")
-    span Show streaks
+  //- label.db
+  //-   input.mr1(type="checkbox" v-model="filters.showStreaks" :disabled="!enabled")
+  //-   span Show streaks
 
   label.db.ml3(v-if="filters.showStreaks")
     span Minimum streak length
@@ -109,15 +110,16 @@ h4,
 h5 {
     margin-bottom: 0.25em;
 }
-
-.container select,
-.container input[type='checkbox'] {
+</style>
+<style>
+select,
+input[type='checkbox'] {
     background: #333;
     color: #ddd;
     border: 1px solid #666;
 }
-.container input[type='text'],
-.container input[type='number'] {
+input[type='text'],
+input[type='number'] {
     -webkit-appearance: none;
     -moz-appearance: none;
     background: #333;

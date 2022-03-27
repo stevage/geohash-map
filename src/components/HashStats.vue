@@ -59,6 +59,7 @@ export default {
             const hashList = Object.entries(hashers)
                 .map(([name, props]) => ({ name, ...props }))
                 .sort((a, b) => b.success - a.success);
+            window.topHashers = hashList;
             return hashList;
         },
         newestHashers() {},

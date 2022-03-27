@@ -1,9 +1,12 @@
 import { Expression } from 'mapgl-expression';
 import { EventBus } from '@/EventBus';
 import { dateToDays, dateToWeekday } from './util';
+import tableauColors from './tableauColors';
 
 let expeditions;
 let loadedExpeditions;
+
+let visibleParticipants;
 
 async function getExpeditions(local, map) {
     const url = local
@@ -24,11 +27,24 @@ async function getExpeditions(local, map) {
         f.properties.days = dateToDays(f.properties.id.slice(0, 10));
         f.properties.month = +date.slice(5, 7);
         f.properties.weekday = dateToWeekday(f.properties.id.slice(0, 10));
+        f.properties.weekDayName =
+            'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(
+                ' '
+            )[f.properties.weekday];
         // if (x !== undefined && y !== undefined) {
         // sigh globalexpeditions
         f.properties.x = +x || 0;
         f.properties.y = +y || 0;
         f.properties.global = /global/.test(f.properties.id);
+        if (f.properties.global) {
+            f.properties.graticule = 'global';
+        } else {
+            f.properties.graticule = f.properties.id
+                .slice(11)
+                .replace('_', ',');
+        }
+        f.properties.graticuleLatitude = +f.properties.graticule.split(',')[0];
+        f.properties.graticuleLongitude = +f.properties.graticule.split(',')[1];
     });
     expeditions.features.sort((a, b) => a.properties.days - b.properties.days);
     for (const f of expeditions.features) {
@@ -43,7 +59,12 @@ async function getExpeditions(local, map) {
             participants[p].expeditions++;
         }
         f.properties.participantsString = f.properties.participants.join(', ');
-        f.properties.participantsStringLower = f.properties.participantsString.toLowerCase();
+        f.properties.participantsOrMultiple =
+            f.properties.participants.length > 1
+                ? 'Multiple'
+                : f.properties.participants[0] || 'Unknown';
+        f.properties.participantsStringLower =
+            f.properties.participantsString.toLowerCase();
         f.properties.participantsCount = f.properties.participants.length;
         const expeditions = f.properties.participants.map(
             (p) => participants[p].expeditions
@@ -175,31 +196,80 @@ function experienceDaysColorFunc() {
     // console.log(ret);
     return ret;
 }
+
+function participantsColorFunc() {
+    // TODO cache this result because it's slow to compute and a few things use this result
+    // const expeditions = window.map.queryRenderedFeatures({ layers: ['expeditions-circles']});
+
+    const bounds = map.getBounds();
+    const visibleExpeditions = window.expeditions.features.filter((f) =>
+        bounds.contains(f.geometry.coordinates)
+    );
+    const participants = {};
+    for (const f of visibleExpeditions) {
+        // focus on the 1-or-multiple use case
+        if (f.properties.participantsCount === 1) {
+            for (const p of f.properties.participants) {
+                if (!participants[p]) {
+                    participants[p] = {
+                        expeditions: 0,
+                    };
+                }
+                participants[p].expeditions++;
+            }
+        }
+    }
+    const participantsList = [
+        { name: 'Multiple' },
+        ...Object.entries(participants)
+            .map(([name, props]) => ({ name, ...props }))
+            .sort((a, b) => b.expeditions - a.expeditions),
+    ];
+
+    const scheme = tableauColors[3];
+    visibleParticipants = participantsList.slice(0, scheme.length);
+    const ret = [
+        'match',
+        ['get', 'participantsOrMultiple'],
+        ...visibleParticipants.flatMap((participant, i) => [
+            participant.name,
+            `rgb(${scheme[i]})`,
+        ]),
+        'black',
+    ];
+    console.log(ret);
+    return ret;
+}
+
 function colorFunc(filters) {
     return {
-        year: yearColorFunc(),
-        month: monthColorFunc(),
-        weekday: weekdayColorFunc(),
-        experienceMax: experienceColorFunc(),
-        experienceDaysMax: experienceDaysColorFunc(),
-    }[filters.colorVis];
+        year: yearColorFunc,
+        month: monthColorFunc,
+        weekday: weekdayColorFunc,
+        experienceMax: experienceColorFunc,
+        experienceDaysMax: experienceDaysColorFunc,
+        participants: participantsColorFunc,
+    }[filters.colorVis]();
 }
-function legendColors(filters) {
+function legendColors(filters, activeColorFunc) {
     const vals = [];
+    const feature = (properties) => ({
+        type: 'Feature',
+        properties,
+        geometry: null,
+    });
     if (filters.colorVis === 'experienceMax') {
         for (let experienceMax of [1, 5, 10, 20, 50, 100, 250]) {
-            const color = Expression.parse(colorFunc(filters)).evaluate({
-                type: 'Feature',
-                properties: {
+            const color = Expression.parse(activeColorFunc).evaluate(
+                feature({
                     experienceMax,
-                },
-                geometry: null,
-            });
+                })
+            );
             vals.push([experienceMax, color]);
         }
     } else if (filters.colorVis === 'experienceDaysMax') {
         for (let experienceYearsMax of [0, 1, 2, 5, 10]) {
-            const color = Expression.parse(colorFunc(filters)).evaluate({
+            const color = Expression.parse(activeColorFunc).evaluate({
                 type: 'Feature',
                 properties: {
                     experienceDaysMax: experienceYearsMax * 365,
@@ -210,7 +280,7 @@ function legendColors(filters) {
         }
     } else if (filters.colorVis === 'year') {
         for (let year = 2008; year <= 2022; year++) {
-            const color = Expression.parse(colorFunc(filters)).evaluate({
+            const color = Expression.parse(activeColorFunc).evaluate({
                 type: 'Feature',
                 properties: {
                     year,
@@ -222,21 +292,22 @@ function legendColors(filters) {
         }
     } else if (filters.colorVis === 'month') {
         for (let month = 12; month >= 1; month--) {
-            const color = Expression.parse(colorFunc(filters)).evaluate({
+            const color = Expression.parse(activeColorFunc).evaluate({
                 type: 'Feature',
                 properties: {
                     month,
                 },
                 geometry: null,
             });
-            const monthName = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(
-                ' '
-            )[month - 1];
+            const monthName =
+                'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ')[
+                    month - 1
+                ];
             vals.push([monthName, color]);
         }
     } else if (filters.colorVis === 'weekday') {
         for (let weekday = 6; weekday >= 0; weekday--) {
-            const color = Expression.parse(colorFunc(filters)).evaluate({
+            const color = Expression.parse(activeColorFunc).evaluate({
                 type: 'Feature',
                 properties: {
                     weekday,
@@ -248,6 +319,18 @@ function legendColors(filters) {
             ];
             vals.push([weekdayName, color]);
         }
+    } else if (filters.colorVis === 'participants') {
+        for (const participant of visibleParticipants) {
+            const color = Expression.parse(activeColorFunc).evaluate(
+                feature({
+                    participantsOrMultiple: participant.name,
+                })
+            );
+            vals.push([participant.name, color]);
+        }
+        vals.push(['Other', 'black']); // TODO don't hardcode black
+
+        vals.reverse();
     } else {
         throw 'unknown colorVis' + filters.colorVis;
     }
@@ -313,7 +396,55 @@ function updateFilters({ map, filters }) {
     map.U.setCircleRadius('expeditions-circles', circleRadiusFunc({ filters }));
 }
 
-export function updateHashStyle({ map, filters }) {
+function updateCircleColors({ map, filters, activeColorFunc }) {
+    map.U.setCircleColor('expeditions-glow', [
+        'step',
+        ['zoom'],
+        activeColorFunc,
+        3,
+        ['case', ['get', 'success'], activeColorFunc, 'transparent'],
+    ]);
+
+    map.U.setCircleColor('expeditions-circle', [
+        'step',
+        ['zoom'],
+        activeColorFunc,
+        3,
+        ['case', ['get', 'success'], activeColorFunc, 'transparent'],
+    ]);
+}
+
+function glowCircleColor(activeColorFunc) {
+    return [
+        'step',
+        ['zoom'],
+        activeColorFunc,
+        3,
+        ['case', ['get', 'success'], activeColorFunc, 'transparent'],
+    ];
+}
+
+function circlesCircleColor(activeColorFunc) {
+    return [
+        'step',
+        ['zoom'],
+        activeColorFunc,
+        3,
+        ['case', ['get', 'success'], activeColorFunc, 'transparent'],
+    ];
+}
+
+function circlesStrokeColor(activeColorFunc) {
+    return [
+        'case',
+        ['get', 'success'],
+        ['case', ['get', 'global'], '#fff', 'hsla(0,0%,30%,0.5)'],
+        activeColorFunc,
+        // 'hsl(180,0%,90%)',
+    ];
+}
+
+export function updateHashStyle({ map, filters, quickUpdate = false }) {
     // const colors = window.app.yearColors;
 
     const dark = true;
@@ -331,28 +462,18 @@ export function updateHashStyle({ map, filters }) {
         );
     }
 
+    const activeColorFunc = colorFunc(filters);
     map.U.addCircle('expeditions-glow', 'expeditions', {
-        circleColor: [
-            'step',
-            ['zoom'],
-            colorFunc(filters),
-            3,
-            ['case', ['get', 'success'], colorFunc(filters), 'transparent'],
-        ],
-        // circleOpacity: ['case', ['feature-state', 'show'], 0.3, 0],
+        circleColor: glowCircleColor(activeColorFunc),
+
         circleOpacity: ['feature-state', 'opacity'],
         circleBlur: 0.5,
         circleRadius: circleRadiusFunc({ isGlow: true, filters }),
         circleSortKey: ['get', 'days'],
     });
     map.U.addCircle('expeditions-circles', 'expeditions', {
-        circleStrokeColor: [
-            'case',
-            ['get', 'success'],
-            ['case', ['get', 'global'], '#fff', 'hsla(0,0%,30%,0.5)'],
-            colorFunc(filters),
-            // 'hsl(180,0%,90%)',
-        ],
+        circleColor: circlesCircleColor(activeColorFunc),
+        circleStrokeColor: circlesStrokeColor(activeColorFunc),
         circleStrokeWidth: [
             'step',
             ['zoom'],
@@ -372,18 +493,6 @@ export function updateHashStyle({ map, filters }) {
             8,
             ['case', ['get', 'global'], 4, ['case', ['get', 'success'], 1, 2]],
         ],
-        circleColor: [
-            'step',
-            ['zoom'],
-            colorFunc(filters),
-            3,
-            [
-                'case',
-                ['get', 'success'],
-                colorFunc(filters),
-                'transparent' /*'hsl(180,0%,90%)'*/,
-            ],
-        ],
 
         circleRadius: circleRadiusFunc({ filters }),
         circleSortKey: ['get', 'days'],
@@ -392,25 +501,25 @@ export function updateHashStyle({ map, filters }) {
         circleStrokeOpacity: ['case', ['feature-state', 'show'], 1, 0],
     });
     map.U.addCircle('expeditions-flash', 'expeditions', {
-        circleStrokeColor: [
-            'case',
-            ['get', 'success'],
-            'hsla(0,0%,30%,0.5)',
-            colorFunc(filters),
-        ],
-        // circleStrokeWidth: ['step', ['zoom'], 0, 6, 0.5, 8, 1],
         circleColor: [
             'step',
             ['zoom'],
-            colorFunc(filters),
+            activeColorFunc,
             4,
             [
                 'case',
                 ['get', 'success'],
-                colorFunc(filters),
+                activeColorFunc,
                 'transparent' /*'hsl(180,0%,90%)'*/,
             ],
         ],
+        circleStrokeColor: [
+            'case',
+            ['get', 'success'],
+            'hsla(0,0%,30%,0.5)',
+            activeColorFunc,
+        ],
+        // circleStrokeWidth: ['step', ['zoom'], 0, 6, 0.5, 8, 1],
 
         circleRadius: circleRadiusFunc({ isFlash: true, filters }),
         circleSortKey: ['get', 'days'],
@@ -436,14 +545,17 @@ export function updateHashStyle({ map, filters }) {
         ],
         textSize: ['interpolate', ['linear'], ['zoom'], 10, 10, 12, 12],
         textOffset: [0, 1.5],
-        textColor: colorFunc(filters), //dark ? '#bbb' : 'black',
+        textColor: activeColorFunc, //dark ? '#bbb' : 'black',
         textHaloColor: dark ? 'hsla(0,0%,0%,0.4)' : 'hsla(0,0%,100%,0.5)',
         textHaloWidth: 1,
         textOpacity: ['feature-state', 'opacity'],
         minzoom: 9,
     });
+    // updateCircleColors({ map, filters, activeColorFunc });
 
-    updateFilters({ map, filters });
+    if (!quickUpdate) {
+        updateFilters({ map, filters });
+    }
 
     if (first) {
         map.U.hoverPointer(/expeditions-circles/);
@@ -464,11 +576,33 @@ export function updateHashStyle({ map, filters }) {
                 ).join(', ')}`,
             { closeButton: false }
         );
+
+        map.on('moveend', () => {
+            const filters = window.Filters.filters;
+            if (filters.colorVis === 'participants') {
+                // updateHashStyle({ map, filters, quickUpdate: true });
+                const acf = colorFunc(filters);
+
+                map.U.setCircleColor(
+                    'expeditions-circles',
+                    circlesCircleColor(acf)
+                );
+                map.U.setCircleStrokeColor(
+                    'expeditions-circles',
+                    circlesStrokeColor(acf)
+                );
+                map.U.setCircleColor('expeditions-glow', glowCircleColor(acf));
+                EventBus.$emit('colors-change', {
+                    colorVis: filters.colorVis,
+                    colors: legendColors(filters, acf),
+                });
+            }
+        });
     }
 
     EventBus.$emit('colors-change', {
         colorVis: filters.colorVis,
-        colors: legendColors(filters),
+        colors: legendColors(filters, activeColorFunc),
     });
 }
 

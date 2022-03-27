@@ -5,7 +5,7 @@
         #middle.flex.flex-auto
             #sidebar.br.b--dark-gray.overflow-auto.pa2-ns(:class="{ collapsed: !sidebarOpen}")
                 .container.light-gray.overflow-auto.pa2.bw2
-                    .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de">fippe</a>.
+                    .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de/all">Fippe</a>.
                     .tabs.mb2.flex
                         .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
                             | Expeditions
@@ -15,9 +15,9 @@
                     div(v-if="tab === 'expeditions'")
                         FeatureInfo
                         Filters
-                        AnimationControls
                         ChartControls
                         HashStats
+                        AnimationControls
                     div(v-if="tab === 'geohash'")
                         HashInfo
 
@@ -47,9 +47,10 @@ import Chart from '@/components/Chart.vue';
 
 import { EventBus } from './EventBus';
 window.app = {};
-window.app.yearColors = '#000 #e69f00 #56b4e9 #009e73 #f0e442 #0072b2 #d55e00 #cc79a7 #999999'.split(
-    ' '
-);
+window.app.yearColors =
+    '#000 #e69f00 #56b4e9 #009e73 #f0e442 #0072b2 #d55e00 #cc79a7 #999999'.split(
+        ' '
+    );
 export default {
     name: 'app',
     components: {
@@ -100,6 +101,11 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
+}
+html,
+body,
+#app {
+    background: #222;
 }
 
 #sidebarToggle:hover {
