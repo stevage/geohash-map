@@ -13,6 +13,7 @@ async function getExpeditions(local, map) {
         ? 'alldata.json'
         : 'https://fippe-geojson.glitch.me/alldata.json';
     const newExpeditions = await window.fetch(url).then((x) => x.json());
+    await window.graticuleNamesP;
 
     if (loadedExpeditions && local) {
         // if non-cached data loads first for some reason, abort
@@ -36,6 +37,15 @@ async function getExpeditions(local, map) {
         f.properties.x = +x || 0;
         f.properties.y = +y || 0;
         f.properties.global = /global/.test(f.properties.id);
+        const gname = window.graticuleNamesHash[`${y},${x}`];
+        f.properties.graticuleName = gname;
+        f.properties.graticuleNameShort =
+            gname && gname.match(/[a-z], [a-z]/i)
+                ? gname.split(', ')[0]
+                : gname;
+        f.properties.graticuleCountry =
+            gname && gname.match(/[a-z], [a-z]/i) ? gname.split(', ')[1] : '';
+
         if (f.properties.global) {
             f.properties.graticule = 'global';
         } else {
@@ -336,8 +346,8 @@ function legendColors(filters, activeColorFunc) {
     }
     return vals;
 }
-function circleRadiusFunc({ isGlow, isFlash, filters } = {}) {
-    const extra = isFlash ? 30 : isGlow ? 2 : 0;
+function circleRadiusFunc({ isGlow, isFlash, filters, isClickable } = {}) {
+    const extra = isFlash ? 30 : isGlow ? 2 : isClickable ? 4 : 0;
     const getRadius = (r) =>
         filters.scaleExpedition
             ? [
@@ -471,6 +481,12 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
         circleRadius: circleRadiusFunc({ isGlow: true, filters }),
         circleSortKey: ['get', 'days'],
     });
+    map.U.addCircle('expeditions-clickable', 'expeditions', {
+        circleColor: 'transparent',
+        circleRadius: circleRadiusFunc({ filters, isClickable: true }),
+        circleSortKey: ['get', 'days'],
+    });
+
     map.U.addCircle('expeditions-circles', 'expeditions', {
         circleColor: circlesCircleColor(activeColorFunc),
         circleStrokeColor: circlesStrokeColor(activeColorFunc),
@@ -558,15 +574,14 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
     }
 
     if (first) {
-        map.U.hoverPointer(/expeditions-circles/);
-        map.on('click', 'expeditions-circles', (e) => {
+        map.U.hoverPointer(/expeditions-(clickable)/);
+        const clickFunc = (e) => {
             console.log(e);
             EventBus.$emit('select-feature', e.features[0]);
-        });
-        map.on('click', 'expeditions-glow', (e) => {
-            console.log(e);
-            EventBus.$emit('select-feature', e.features[0]);
-        });
+        };
+        map.on('click', 'expeditions-clickable', clickFunc);
+        // map.on('click', 'expeditions-circles', clickFunc);
+        // map.on('click', 'expeditions-glow', clickFunc);
 
         map.U.hoverPopup(
             'expeditions-glow',

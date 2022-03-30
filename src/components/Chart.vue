@@ -30,61 +30,62 @@ export default {
     methods: {
         initChart(expeditions) {
             const colorBy = window.ChartControls.options.colorBy;
-            const scheme =
-                {
-                    participantsCount: 'turbo',
-                    graticuleLatitude: 'rdylbu',
-                    graticuleLongitude: 'rdylbu',
-                }[colorBy] || 'turbo';
+            const scheme = {
+                participantsCount: 'turbo',
+                graticuleLatitude: 'rdylbu',
+                graticuleLongitude: 'rdylbu',
+                success: 'set1',
+            }[colorBy];
             const plotEl = Plot.plot({
                 color:
-                    colorBy === 'participantsCount'
-                        ? {
-                              type: 'threshold',
-                              domain: d3.range(0, 10),
-                              scheme,
-                          }
-                        : colorBy === 'graticuleLatitude'
-                        ? {
-                              //   type: 'diverging',
-                              //   domain: d3.range(-70, 70),
-                              scheme,
-                          }
-                        : colorBy === 'graticuleLongitude'
-                        ? {
-                              //   type: 'diverging',
-                              //   domain: d3.range(-70, 70),
-                              //   scheme: 'turbo',
-                              scheme,
-                          }
-                        : undefined,
+                    {
+                        participantsCount: {
+                            type: 'threshold',
+                            domain: d3.range(0, 10),
+                            scheme,
+                        },
+                    }[colorBy] || (scheme ? { scheme } : undefined),
+
                 marks: [
                     Plot.rectY(
                         expeditions,
                         Plot.binX(
-                            { y: 'count' },
+                            {
+                                y: 'count',
+                                title: (foo) => 'asth',
+                            },
                             {
                                 x: {
                                     value: 'date',
                                     interval: d3.utcMonth,
+                                    title: (bin) => 'haoeu',
                                 },
                                 fill:
                                     {
                                         weekDay: 'weekDayName',
-                                        participantsCount: 'participantsCount',
                                         participants: 'participantsOrMultiple',
-                                    }[window.ChartControls.options.colorBy] ||
-                                    window.ChartControls.options.colorBy,
+                                        graticuleName: 'graticuleNameShort',
+                                    }[colorBy] || colorBy,
+                                inset: 0,
                             }
                         )
                     ),
                 ],
+                // strokeWidth: 0 // wish this worked - not sure where it would go
+
                 background: '#222',
                 width: document.getElementById('chart').getClientRects()[0]
                     .width,
+                height:
+                    document
+                        .getElementById('Chart-container')
+                        .getClientRects()[0].height - 50,
+
                 style: {
-                    background: 'transparent', // 'hsla(0,0%,0%,0.5)', //'#222',
+                    background: 'transparent',
                     color: 'white',
+                    // strokeWidth: 2,
+                    // stroke: 'transparent',
                 },
             });
             let legendEl;
@@ -101,11 +102,12 @@ export default {
             } else {
                 legendEl = plotEl.legend('color', {
                     style: { color: 'white', background: 'transparent' },
-                    label: {
-                        participantsCount: 'Participants',
-                        success: 'Success',
-                        weekDay: '',
-                    }[colorBy],
+                    label:
+                        'hello' ||
+                        {
+                            success: 'Success',
+                            weekDay: '',
+                        }[colorBy],
                 });
             }
 
@@ -132,9 +134,14 @@ export default {
 <style scoped>
 #Chart-container {
     /* background: #222; */
-    background: hsla(0, 0%, 0%, 0.5);
-    height: 450px;
+    background: hsla(0, 0%, 0%, 0.1);
+    height: min(min(450px, 45vh), 40vw);
     width: 100%;
-    bottom: 0;
+    bottom: 30px;
+    border: 1px solid #000;
+}
+
+#chart-legend {
+    height: 50px;
 }
 </style>

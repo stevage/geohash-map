@@ -51,7 +51,20 @@
     input.mr1(type="checkbox" v-model.number="filters.onlySuccessStreaks" :disabled="!enabled")
     span Only show 100% success treaks
     div(style="color: #888; font-size: 0.8em") Excludes success-streaks that have a fail before or after
-
+  h3.mb1 Graticules
+  label.db
+    input.mr1(type="checkbox" v-model="graticules.showGraticules" :disabled="!enabled")
+    span Show graticules
+  label.db(v-show="graticules.showGraticules")
+    input.mr1( type="checkbox" v-model="graticules.showGraticuleLabels" :disabled="!enabled")
+    span Show graticule labels
+  label.db(v-show="graticules.showGraticules")
+    .db Color by
+    select(v-model="graticules.fillStyle")
+      option(value="none") None
+      option(value="virgin") Virgin graticules
+      option(value="ratio") Success ratio
+      option(value="expeditions") Expedition count
 </template>
 
 <script>
@@ -72,6 +85,11 @@ export default {
             minStreakLength: 3,
             onlySuccessStreaks: true,
         },
+        graticules: {
+            showGraticules: true,
+            showGraticuleLabels: true,
+            fillStyle: 'virgin',
+        },
     }),
     created() {
         window.Filters = this;
@@ -88,6 +106,12 @@ export default {
                     this.filters.minYear = this.filters.maxYear;
                 }
                 EventBus.$emit('filters-change', this.filters);
+            },
+        },
+        graticules: {
+            deep: true,
+            handler() {
+                EventBus.$emit('graticule-options-change', this.graticules);
             },
         },
     },

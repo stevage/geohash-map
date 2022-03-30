@@ -4,10 +4,12 @@ div(v-if="p")
     h2.mt0.mb2 {{ p.success ? 'Successful' : 'Failed' }} expedition
 
     a.b(:href="`https://geohashing.site/geohashing/${p.id}`" target="_blank") {{ p.id }}
+    div {{ p.graticuleName }}
 
 
     h4.mb2  Participants
-    div(v-for="participant in JSON.parse(p.participants)") {{ participant }}
+    div(v-for="participant in JSON.parse(p.participants)")
+        a(:href="`https://geohashing.site/geohashing/User:${participant}`") {{ participant }}
 
     //- h4.mb2 Experience
     //- div Years (most experienced): {{(p.experienceDaysMax / 365).toFixed(2) }}

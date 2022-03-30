@@ -6,7 +6,7 @@
             #sidebar.br.b--dark-gray.overflow-auto.pa2-ns(:class="{ collapsed: !sidebarOpen}")
                 .container.light-gray.overflow-auto.pa2.bw2
                     .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de/all">Fippe</a>.
-                    .tabs.mb2.flex
+                    .tabs.mb2.mh4.flex
                         .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
                             | Expeditions
                         .tab.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
@@ -24,7 +24,7 @@
             #sidebar-rim.relative.br.b--gray.bg-dark.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
             #map-container.relative.flex-auto
                 Map
-                #sidebarToggle.absolute.bg-black-50.white-90.f3.br.bt.bb.br--right.br-100.b--magenta.bw1.magenta.pa1.pointer.grow.fw8(@click="sidebarOpen = !sidebarOpen")
+                #sidebarToggle.absolute.bg-black-5.white-90.f3.br.bt.bb.br--right.br-100.bw1.pa1.pointer.grow.fw8(@click="sidebarOpen = !sidebarOpen" style="margin-left:-25px;z-index:100; background:#222;top:10px;")
                   span(v-if="!sidebarOpen") &rarr;
                   span(v-if="sidebarOpen") &larr;
                 #overlay.absolute.h-100.w-100

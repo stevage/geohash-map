@@ -5,7 +5,7 @@
     input.mr2(type="checkbox" v-model="options.showChart")
     | Show graph
   label.db.mt2(v-if="options.showChart")
-    | Colour by
+    | Color by
     select.ml2(v-model="options.colorBy")
       option(value="weekDay") Week day
       option(value="success") Success/failure
@@ -14,6 +14,8 @@
       option(value="graticule") Graticule
       option(value="graticuleLongitude") Graticule longitude
       option(value="graticuleLatitude") Graticule latitude
+      option(value="graticuleName") Graticule name
+      option(value="graticuleCountry") Graticule country
 </template>
 
 <script>
