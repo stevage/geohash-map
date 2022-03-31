@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="p")
+#FeatureInfo.pa2(v-if="p")
     //- img.image(v-if="imageUrl" :src="imageUrl")
     h2.mt0.mb2 {{ p.success ? 'Successful' : 'Failed' }} expedition
 
@@ -48,6 +48,12 @@ export default {
 </script>
 
 <style scoped>
+#FeatureInfo {
+    /* border: 1px solid black; */
+    box-shadow: 0px 0px 4px 2px hsla(0, 0%, 0%, 0.3);
+    border: 1px solid #111;
+}
+
 a {
     color: hsl(240, 50%, 70%);
     text-decoration: none;

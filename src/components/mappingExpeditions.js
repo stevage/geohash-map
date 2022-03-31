@@ -8,6 +8,10 @@ let loadedExpeditions;
 
 let visibleParticipants;
 
+/* TODO:
+- generate all these extra properties in a different dataset that doesn't have to go onto the map
+*/
+
 async function getExpeditions(local, map) {
     const url = local
         ? 'alldata.json'
@@ -34,6 +38,8 @@ async function getExpeditions(local, map) {
             )[f.properties.weekday];
         // if (x !== undefined && y !== undefined) {
         // sigh globalexpeditions
+        f.properties.dayOfYear =
+            f.properties.days - dateToDays(f.properties.year + '');
         f.properties.x = +x || 0;
         f.properties.y = +y || 0;
         f.properties.global = /global/.test(f.properties.id);
@@ -53,6 +59,8 @@ async function getExpeditions(local, map) {
                 .slice(11)
                 .replace('_', ',');
         }
+        f.properties.latitude = f.geometry.coordinates[1];
+        f.properties.longitude = f.geometry.coordinates[0];
         f.properties.graticuleLatitude = +f.properties.graticule.split(',')[0];
         f.properties.graticuleLongitude = +f.properties.graticule.split(',')[1];
     });

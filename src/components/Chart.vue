@@ -1,5 +1,5 @@
 <template lang="pug">
-#Chart-container.absolute.w100(v-show="showing")
+#Chart-container.absolute.w100(v-show="showing" :class="{ opaque: chartStyle!=='bin'}")
   #chart-legend
   #chart
 </template>
@@ -14,6 +14,7 @@ export default {
     data: () => ({
         xAxis: 'byWeek',
         showing: !!window.location.host.match(/localhost/),
+        chartStyle: null,
     }),
     async created() {
         window.Chart = this;
@@ -28,23 +29,35 @@ export default {
     mounted() {},
 
     methods: {
-        initChart(expeditions) {
-            const colorBy = window.ChartControls.options.colorBy;
+        binChart(expeditions, { chartId, interval, fill, x }, chartOptions) {
             const scheme = {
                 participantsCount: 'turbo',
                 graticuleLatitude: 'rdylbu',
                 graticuleLongitude: 'rdylbu',
                 success: 'set1',
-            }[colorBy];
+            }[chartId];
+
+            const plotInterval = {
+                month: d3.utcMonth,
+                week: d3.utcWeek,
+                day: d3.utcDay,
+                year: d3.utcYear,
+            }[interval];
+
+            if (x === 'date') {
+                x = { value: x, interval: plotInterval };
+            }
+
+            console.log(x);
             const plotEl = Plot.plot({
                 color:
                     {
                         participantsCount: {
                             type: 'threshold',
-                            domain: d3.range(0, 10),
+                            domain: d3.range(0, 8),
                             scheme,
                         },
-                    }[colorBy] || (scheme ? { scheme } : undefined),
+                    }[chartId] || (scheme ? { scheme } : undefined),
 
                 marks: [
                     Plot.rectY(
@@ -52,27 +65,105 @@ export default {
                         Plot.binX(
                             {
                                 y: 'count',
-                                title: (foo) => 'asth',
                             },
                             {
-                                x: {
-                                    value: 'date',
-                                    interval: d3.utcMonth,
-                                    title: (bin) => 'haoeu',
-                                },
-                                fill:
-                                    {
-                                        weekDay: 'weekDayName',
-                                        participants: 'participantsOrMultiple',
-                                        graticuleName: 'graticuleNameShort',
-                                    }[colorBy] || colorBy,
+                                x,
+                                fill,
                                 inset: 0,
+                                stroke: 'transparent',
+                                strokeWidth: 0,
                             }
                         )
                     ),
                 ],
                 // strokeWidth: 0 // wish this worked - not sure where it would go
+                ...chartOptions,
+            });
+            let legendEl;
+            if (chartId === 'participantsCount') {
+                legendEl = Plot.legend({
+                    color: {
+                        type: 'threshold',
+                        domain: d3.range(0, 8),
+                        scheme,
+                    },
+                    label: 'Particpants',
+                    style: { color: 'white', background: 'transparent' },
+                });
+            } else {
+                legendEl = plotEl.legend('color', {
+                    style: { color: 'white', background: 'transparent' },
+                    label: {
+                        success: 'Success',
+                        graticuleLongitude: 'Graticule longitude',
+                        graticuleLatitude: 'Graticule latitude',
+                        weekDay: '',
+                    }[chartId],
+                });
+            }
+            this.chartStyle = 'bin';
 
+            return { legendEl, plotEl };
+        },
+        scatterChart(expeditions, { chartId, r, x, y, fill }, chartOptions) {
+            const plotEl = Plot.plot({
+                marks: [
+                    Plot.dot(expeditions, {
+                        x,
+                        y,
+                        fill: 'longitude',
+                        r:
+                            r === 'participantsCount'
+                                ? (f) => f.participantsCount ** 0.75 + 1
+                                : undefined,
+                        strokeWidth: (f) => (f.participantsCount > 3 ? 1 : 0),
+                        stroke: 'hsla(0,0%,0%,0.5)',
+                        title: (f) =>
+                            f.graticuleNameShort +
+                            ' ' +
+                            f.id.slice(0, 10) +
+                            '\n' +
+                            JSON.parse(f.participants),
+                    }),
+                ],
+                r: {
+                    type: 'identity',
+                },
+
+                ...chartOptions,
+                color: {
+                    scheme: 'rdylbu',
+                },
+                x: {
+                    grid: true,
+                },
+            });
+            const legendEl = plotEl.legend('color', {
+                style: { color: 'white', background: 'transparent' },
+            });
+            this.chartStyle = 'scatter';
+            return { plotEl, legendEl };
+        },
+        cellChart(expeditions, { chartId, x, y }, chartOptions) {
+            const plotEl = Plot.plot({
+                marks: [
+                    Plot.cell(expeditions, {
+                        x,
+                        y,
+                    }),
+                ],
+                ...chartOptions,
+                x: {
+                    grid: true,
+                },
+            });
+            this.chartStyle = 'cell';
+            return { plotEl };
+        },
+        initChart(expeditions) {
+            const options = window.ChartControls.options;
+            const settings = window.ChartControls.selectedSettings;
+            const chartOptions = {
                 background: '#222',
                 width: document.getElementById('chart').getClientRects()[0]
                     .width,
@@ -84,35 +175,20 @@ export default {
                 style: {
                     background: 'transparent',
                     color: 'white',
-                    // strokeWidth: 2,
-                    // stroke: 'transparent',
                 },
-            });
-            let legendEl;
-            if (colorBy === 'participantsCount') {
-                legendEl = Plot.legend({
-                    color: {
-                        type: 'threshold',
-                        domain: d3.range(0, 14),
-                        scheme,
-                    },
-                    label: 'Particpants',
-                    style: { color: 'white', background: 'transparent' },
-                });
-            } else {
-                legendEl = plotEl.legend('color', {
-                    style: { color: 'white', background: 'transparent' },
-                    label:
-                        'hello' ||
-                        {
-                            success: 'Success',
-                            weekDay: '',
-                        }[colorBy],
-                });
-            }
+            };
+            const chartTypeFunc = this[`${settings.type}Chart`];
+            const { legendEl, plotEl } = chartTypeFunc(
+                expeditions,
+                { ...options, ...settings },
+                chartOptions
+            );
 
             document.getElementById('chart').replaceChildren(plotEl);
-            document.getElementById('chart-legend').replaceChildren(legendEl);
+            legendEl &&
+                document
+                    .getElementById('chart-legend')
+                    .replaceChildren(legendEl);
         },
         update(map) {
             if (!this.showing) return;
@@ -133,12 +209,15 @@ export default {
 
 <style scoped>
 #Chart-container {
-    /* background: #222; */
     background: hsla(0, 0%, 0%, 0.1);
     height: min(min(450px, 45vh), 40vw);
     width: 100%;
     bottom: 30px;
     border: 1px solid #000;
+}
+
+#Chart-container.opaque {
+    background: hsla(0, 0%, 0%, 1);
 }
 
 #chart-legend {

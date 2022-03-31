@@ -3,8 +3,8 @@
         #top.bb.b--gray.bg-washed-yellow
             //- h1 Geohash expeditions map
         #middle.flex.flex-auto
-            #sidebar.br.b--dark-gray.overflow-auto.pa2-ns(:class="{ collapsed: !sidebarOpen}")
-                .container.light-gray.overflow-auto.pa2.bw2
+            #sidebar.br.b--dark-gray.overflow-auto.pv2-ns(:class="{ collapsed: !sidebarOpen}")
+                .container.overflow-auto.pa2.bw2
                     .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de/all">Fippe</a>.
                     .tabs.mb2.mh4.flex
                         .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
@@ -14,10 +14,10 @@
 
                     div(v-if="tab === 'expeditions'")
                         FeatureInfo
-                        Filters
-                        ChartControls
-                        HashStats
-                        AnimationControls
+                        Filters.ml2
+                        ChartControls.ml2
+                        HashStats.ml2
+                        AnimationControls.ml2
                     div(v-if="tab === 'geohash'")
                         HashInfo
 
@@ -29,8 +29,8 @@
                   span(v-if="sidebarOpen") &larr;
                 #overlay.absolute.h-100.w-100
                     Legend
-                    Chart
                     div.absolute.center.animationMonth {{animationMonthISO}}
+                Chart
         #bottom.bt.b--light-gray.flex-none
 </template>
 
@@ -94,7 +94,7 @@ export default {
 require('tachyons/css/tachyons.min.css');
 </script>
 
-<style scoped>
+<style>
 html,
 body {
     height: 100vh;
@@ -154,12 +154,23 @@ body,
 
 #sidebar {
     background: #333;
+    color: #777;
 }
+
+#sidebar h3 {
+    color: #fff;
+}
+
 .container {
     background: #333;
     color: #ddd;
+    color: #ccc;
     border-right: 1px solid #222;
     border-bottom: 1px solid #222;
+}
+
+.container h3 {
+    color: #fff;
 }
 
 /* Exists to ensure whole sidebar animates together */
