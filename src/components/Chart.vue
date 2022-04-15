@@ -34,7 +34,7 @@ export default {
                 participantsCount: 'turbo',
                 graticuleLatitude: 'rdylbu',
                 graticuleLongitude: 'rdylbu',
-                success: 'set1',
+                success: undefined, //'set1',
             }[chartId];
 
             const plotInterval = {

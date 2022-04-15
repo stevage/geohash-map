@@ -13,7 +13,7 @@
                             | Geohash
 
                     div(v-if="tab === 'expeditions'")
-                        FeatureInfo
+                        ExpeditionInfo
                         Filters.ml2
                         ChartControls.ml2
                         HashStats.ml2
@@ -36,7 +36,7 @@
 
 <script>
 import Map from './components/Map.vue';
-import FeatureInfo from './components/FeatureInfo.vue';
+import ExpeditionInfo from './components/ExpeditionInfo.vue';
 import Legend from '@/components/Legend.vue';
 import Filters from '@/components/Filters.vue';
 import AnimationControls from '@/components/AnimationControls.vue';
@@ -55,7 +55,7 @@ export default {
     name: 'app',
     components: {
         Map,
-        FeatureInfo,
+        ExpeditionInfo,
         Legend,
         Filters,
         AnimationControls,

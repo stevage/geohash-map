@@ -12,11 +12,41 @@ let visibleParticipants;
 - generate all these extra properties in a different dataset that doesn't have to go onto the map
 */
 
+// The data on fippe.de is actually a piece of JavaScript that needs to be parsed
+async function expeditionsToGeoJSON() {
+    const raw = await window
+        .fetch('https://fippe.de/alldata.js')
+        .then((x) => x.text());
+    const lines = raw.split('\n').slice(1, -2);
+    // remove trailing comma
+    const vals = JSON.parse('[' + lines.join(' ').slice(0, -1) + ']');
+
+    const points = {
+        type: 'FeatureCollection',
+        features: vals.map((val) => ({
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [val[2], val[1]],
+            },
+            properties: {
+                id: val[0],
+                participants: val[3],
+                success: val[4],
+            },
+        })),
+    };
+    return points;
+}
+
 async function getExpeditions(local, map) {
-    const url = local
-        ? 'alldata.json'
-        : 'https://fippe-geojson.glitch.me/alldata.json';
-    const newExpeditions = await window.fetch(url).then((x) => x.json());
+    // this was needed when fippe.de didn't have CORS setup
+    // const url = local
+    //     ? 'alldata.json'
+    //     : 'https://fippe-geojson.glitch.me/alldata.json';
+    // const newExpeditions = await window.fetch(url).then((x) => x.json());
+
+    const newExpeditions = await expeditionsToGeoJSON();
     await window.graticuleNamesP;
 
     if (loadedExpeditions && local) {
@@ -471,10 +501,10 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
 
     if (first) {
         map.U.addGeoJSON('expeditions'); //, 'expeditions.json'
-
-        getExpeditions(true, map).then(() =>
-            resetHashAnimation({ map, filters, show: true })
-        );
+        map.U.addGeoJSON('expedition-selected');
+        // getExpeditions(true, map).then(() =>
+        //     resetHashAnimation({ map, filters, show: true })
+        // );
         getExpeditions(false, map).then(() =>
             resetHashAnimation({ map, filters, show: true })
         );
@@ -523,6 +553,13 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
         // circleOpacity: ['case', ['feature-state', 'show'], 1, 0],
         circleOpacity: ['feature-state', 'opacity'],
         circleStrokeOpacity: ['case', ['feature-state', 'show'], 1, 0],
+    });
+    map.U.addCircle('expedition-selected', 'expedition-selected', {
+        circleColor: 'transparent',
+        circleStrokeColor: 'yellow',
+        circleStrokeWidth: 2,
+        circleRadius: 20,
+        circleBlur: 0.2,
     });
     map.U.addCircle('expeditions-flash', 'expeditions', {
         circleColor: [
@@ -618,6 +655,30 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
                 EventBus.$emit('colors-change', {
                     colorVis: filters.colorVis,
                     colors: legendColors(filters, acf),
+                });
+            }
+        });
+        EventBus.$on('select-feature', (feature) =>
+            map.U.setData(
+                'expedition-selected',
+                feature || { type: 'FeatureCollection', features: [] }
+            )
+        );
+        EventBus.$on('navigate-expedition', (expedition) => {
+            if (expedition) {
+                EventBus.$emit('select-feature', {
+                    ...expedition,
+                    properties: {
+                        ...expedition.properties,
+                        // select-feature is normally sending a feature that came out of the map, which stringifies complex attribute types
+                        participants: JSON.stringify(
+                            expedition.properties.participants
+                        ),
+                    },
+                });
+                map.flyTo({
+                    center: expedition.geometry.coordinates,
+                    zoom: 13,
                 });
             }
         });

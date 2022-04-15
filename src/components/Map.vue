@@ -182,19 +182,27 @@ export default {
             this.updateMapStyle();
         },
         updateMapStyle() {
-            let start = performance.now();
+            const report = (name, task) => {
+                const start = performance.now();
+                task();
+                console.log(
+                    `Updated ${name} in`,
+                    performance.now() - start,
+                    `ms`
+                );
+            };
             const map = this.map;
-            updateMeridians({ map });
-            console.log('updated meridians', performance.now() - start);
-            start = performance.now();
-            updateHashStyle({ map: this.map, filters: this.filters });
-            console.log('updated expeditions', performance.now() - start);
-            start = performance.now();
-            updateGraticuleStyle({ map: this.map, filters: this.filters });
-            console.log('updated graticules', performance.now() - start);
-            start = performance.now();
-            updateStreakStyle({ map, filters: this.filters });
-            console.log('updated streaks', performance.now() - start);
+            let start = performance.now();
+            report('meridians', () => updateMeridians({ map }));
+            report('expeditions', () =>
+                updateHashStyle({ map: this.map, filters: this.filters })
+            );
+            report('graticules', () =>
+                updateGraticuleStyle({ map: this.map, filters: this.filters })
+            );
+            report('streaks', () =>
+                updateStreakStyle({ map, filters: this.filters })
+            );
             updateGeohashes(map);
             // console.log(performance.now() - start);
         },

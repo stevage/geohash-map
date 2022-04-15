@@ -6493,29 +6493,10 @@ map-cache@^0.2.2:
   resolved "https://registry.yarnpkg.com/map-cache/-/map-cache-0.2.2.tgz#c32abd0bd6525d9b051645bb4f26ac5dc98a0dbf"
   integrity sha1-wyq9C9ZSXZsFFkW7TyasXcmKDb8=
 
-map-gl-utils@^0.42.1:
-  version "0.42.1"
-  resolved "https://registry.yarnpkg.com/map-gl-utils/-/map-gl-utils-0.42.1.tgz#533b8bf80f03768bdcbeeb3d16d5e886d8d88b48"
-  integrity sha512-7pV6D8ghDP60P2qquQcsHIqkmCcFoYsaG4IWoLIfNWSnYFFW7maOlBpBrDgErHvpnmzKonzc7LPBvLOqYGjfZA==
-
-"map-template@file:.":
-  version "0.1.0"
-  dependencies:
-    "@babel/plugin-proposal-optional-chaining" "^7.16.7"
-    "@babel/plugin-syntax-nullish-coalescing-operator" "^7.8.3"
-    "@observablehq/plot" "^0.4.2"
-    "@turf/turf" "^6.5.0"
-    cd "^0.3.3"
-    chartjs "^0.3.24"
-    core-js "^3.8.3"
-    map-gl-utils "^0.42.1"
-    map-template "file:."
-    mapbox-expression "^0.0.3"
-    mapbox-gl "2.8.0-alpha.4"
-    mapbox-gl-utils "^0.39.0"
-    mapgl-expression "^0.0.4"
-    maplibre-gl "^1.15.2"
-    vue "^2.5.21"
+map-gl-utils@0.43.0:
+  version "0.43.0"
+  resolved "https://registry.yarnpkg.com/map-gl-utils/-/map-gl-utils-0.43.0.tgz#dc640df3ace25080164776caceca39ebced5067d"
+  integrity sha512-i3N+hqZBj1mP+TsTUQ2Pp/W33NyhFEGtN6JwwGCUjP0ptyd9g/5pcSYb+JT+nwPLBrh+Qd2FLa4nSZ2D4Ofg3Q==
 
 map-visit@^1.0.0:
   version "1.0.0"
