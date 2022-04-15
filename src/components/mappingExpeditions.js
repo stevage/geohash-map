@@ -76,7 +76,7 @@ async function getExpeditions(local, map) {
         const gname = window.graticuleNamesHash[`${y},${x}`];
         f.properties.graticuleName = gname;
         f.properties.graticuleNameShort =
-            gname && gname.match(/[a-z], [a-z]/i)
+            gname && gname.match(/[a-z() ], [a-z]/i)
                 ? gname.split(', ')[0]
                 : gname;
         f.properties.graticuleCountry =
