@@ -124,7 +124,7 @@ body,
     animation-duration: 0.5s;
     animation-name: slidein;
     z-index: 1;
-    width: 310px;
+    width: calc(min(400px, 90vw));
 }
 
 @keyframes slidein {
