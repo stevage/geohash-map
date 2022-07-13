@@ -20,6 +20,7 @@
                         AnimationControls.ml2
                     div(v-if="tab === 'geohash'")
                         HashInfo
+                    GraticuleInfo
 
             #sidebar-rim.relative.br.b--gray.bg-dark.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
             #map-container.relative.flex-auto
@@ -44,6 +45,7 @@ import HashStats from '@/components/HashStats.vue';
 import HashInfo from '@/components/HashInfo.vue';
 import ChartControls from '@/components/ChartControls.vue';
 import Chart from '@/components/Chart.vue';
+import GraticuleInfo from '@/components/GraticuleInfo.vue';
 
 import { EventBus } from './EventBus';
 window.app = {};
@@ -63,6 +65,7 @@ export default {
         HashInfo,
         ChartControls,
         Chart,
+        GraticuleInfo,
     },
     data() {
         return {

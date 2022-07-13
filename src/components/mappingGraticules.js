@@ -1,5 +1,5 @@
 import { EventBus } from '@/EventBus';
-import { getGraticuleBounds } from './util';
+import { getGraticuleBounds, dateToDays } from './util';
 import * as d3 from 'd3';
 import * as turf from '@turf/turf';
 
@@ -30,6 +30,13 @@ EventBus.$on('expeditions-loaded', ({ local, ...hashes }) => {
         } else {
             graticules[x][y].failures++;
         }
+        graticules[x][y].firstExpeditionDays = Math.min(
+            graticules[x][y].firstExpeditionDays || 0,
+            hash.properties.days
+        );
+        graticules[x][y].lastExpeditionDays = hash.properties.days;
+        graticules[x][y].daysSinceExpedition =
+            dateToDays(new Date()) - hash.properties.days;
     }
     window.graticules = graticules;
     // future idea, use feature-state instead of rewriting the geoms
@@ -151,6 +158,95 @@ async function getGraticuleNames() {
     window.graticuleNamesHash = Object.fromEntries(names);
 }
 
+function getClassAreasByVectorLayer(map, bbox, vectorLayer) {
+    const flatten = (fs) => turf.flatten(turf.featureCollection(fs)).features;
+    function aggregateClasses(landuses) {
+        const classes = {};
+        for (const l of landuses) {
+            if (!classes[l.class]) {
+                classes[l.class] = {
+                    area: 0,
+                };
+            }
+            classes[l.class].area += l.area;
+        }
+        return classes;
+    }
+
+    let landUses = flatten(
+        map.querySourceFeatures('composite', {
+            sourceLayer: vectorLayer,
+        })
+    );
+
+    // console.log(landUses);
+    landUses = landUses.map((f) => turf.bboxClip(f, bbox));
+    landUses = turf.dissolve(turf.flatten(turf.featureCollection(landUses)), {
+        propertyName: 'class',
+    }).features;
+
+    // if (vectorLayer === 'water') {
+    //     console.log('water', landUses);
+    //     map.U.addGeoJSON(
+    //         'watr',
+    //         turf.featureCollection(
+    //             landUses
+    //                 .filter((f) => turf.area(f) > 0)
+    //                 .map(
+    //                     (f, i) => (
+    //                         (f.properties.color = `hsl(${i * 50}, 100%, 50%)`),
+    //                         (f.properties.thickness = (i + 1) % 10),
+    //                         f
+    //                     )
+    //                 )
+    //         )
+    //     );
+
+    //     map.U.addLine('watr-line', 'watr', {
+    //         lineColor: ['get', 'color'],
+    //         lineOpacity: 0.3,
+    //         lineDasharray: [3, 12],
+    //         lineWidth: ['get', 'thickness'],
+    //     });
+    //     map.U.addFill('watr-fill', 'watr', {
+    //         fillColor: ['get', 'color'],
+    //         fillOpacity: 0.3,
+    //     });
+    // }
+
+    landUses = landUses
+        .map((f) => ({ area: turf.area(f), ...f.properties }))
+        .filter((f) => f.area > 0);
+
+    console.log(landUses);
+    return aggregateClasses(landUses);
+}
+
+function clickGraticuleLabel(map, e) {
+    console.log(e.features[0]);
+    const graticule = window.app.graticules.features.find(
+        (f) =>
+            f.properties.x === e.features[0].properties.x &&
+            f.properties.y === e.features[0].properties.y
+    );
+    const bbox = turf.bbox(graticule);
+    // console.log(bbox);
+
+    const uses = {
+        ...getClassAreasByVectorLayer(map, bbox, 'landuse'),
+        water: getClassAreasByVectorLayer(map, bbox, 'water').undefined,
+    };
+    const total = Object.values(uses).reduce((acc, val) => acc + val.area, 0);
+
+    console.log(uses);
+    EventBus.$emit('show-graticule-info', {
+        graticule,
+        uses,
+        area: turf.area(graticule),
+        other: turf.area(graticule) - total,
+    });
+}
+
 export function updateGraticuleStyle({ map, filters }) {
     const first = !map.getSource('graticules');
     if (first) {
@@ -204,6 +300,8 @@ export function updateGraticuleStyle({ map, filters }) {
             filter: ['==', ['get', 'type'], 'graticule-label'],
             minzoom: 7,
         });
+
+        map.on('click', 'graticules-label', (e) => clickGraticuleLabel(map, e));
         window.graticuleNamesP = getGraticuleNames(); // a promise
 
         EventBus.$on('graticule-options-change', (options) => {
@@ -246,6 +344,17 @@ export function updateGraticuleStyle({ map, filters }) {
                             'hsla(240,100%,50%,0.3)',
                         ],
                         'transparent',
+                    ],
+                    daysSinceExpedition: [
+                        'interpolate-hcl',
+                        ['linear'],
+                        ['get', 'daysSinceExpedition'],
+                        0,
+                        'hsla(0,100%,50%,0.3)',
+                        1 * 365,
+                        'hsla(120,100%,50%,0.3)',
+                        5 * 365,
+                        'hsla(240,100%,50%,0.3)',
                     ],
                 }[options.fillStyle]
             );

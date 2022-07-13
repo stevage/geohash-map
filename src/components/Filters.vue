@@ -64,6 +64,7 @@
         option(value="virgin") Virgin graticules
         option(value="ratio") Success ratio
         option(value="expeditions") Expedition count
+        option(value="daysSinceExpedition") Recently active
 </template>
 
 <script>
