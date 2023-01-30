@@ -80,7 +80,7 @@ function yearColorFunc() {
         'red',
         dateToDays(2021),
         'hsl(60,100%,40%)',
-        dateToDays(2022),
+        dateToDays(new Date().getUTCFullYear()),
         'hsl(120, 100%, 70%)',
     ];
     return ret;

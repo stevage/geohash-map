@@ -26,7 +26,7 @@ export default {
     data: () => ({
         filters: {
             minYear: 2008,
-            maxYear: 2022,
+            maxYear: new Date().getUTCFullYear(),
             colorVis: 'experienceDaysMax',
             participants: '',
             outcome: 'all',

@@ -157,7 +157,7 @@ function yearColorFunc() {
         'red',
         dateToDays(2021),
         'hsl(60,100%,40%)',
-        dateToDays(2022),
+        dateToDays(new Date().getUTCFullYear()),
         'hsl(120, 100%, 70%)',
     ];
     return ret;
@@ -327,7 +327,7 @@ function legendColors(filters, activeColorFunc) {
             vals.push([experienceYearsMax, color]);
         }
     } else if (filters.colorVis === 'year') {
-        for (let year = 2008; year <= 2022; year++) {
+        for (let year = 2008; year <= new Date().getUTCFullYear(); year++) {
             const color = Expression.parse(activeColorFunc).evaluate({
                 type: 'Feature',
                 properties: {

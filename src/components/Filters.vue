@@ -78,7 +78,7 @@ export default {
             minParticipants: 0,
             scaleExpedition: false,
             minYear: 2008,
-            maxYear: 2022,
+            maxYear: new Date().getUTCFullYear(),
             outcome: 'all',
             colorVis: 'year',
             showStreaks: false,
