@@ -345,14 +345,15 @@ export function updateGraticuleStyle({ map, filters }) {
                         ],
                         'transparent',
                     ],
+                    // TODO: align these colors with the expedition colorss
                     daysSinceExpedition: [
                         'interpolate-hcl',
                         ['linear'],
                         ['get', 'daysSinceExpedition'],
                         0,
-                        'hsla(0,100%,50%,0.3)',
-                        1 * 365,
                         'hsla(120,100%,50%,0.3)',
+                        1 * 365,
+                        'hsla(0,100%,50%,0.3)',
                         5 * 365,
                         'hsla(240,100%,50%,0.3)',
                     ],

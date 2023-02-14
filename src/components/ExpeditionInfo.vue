@@ -28,6 +28,7 @@
     .story-box.h-5
         .story.loading.i(v-if="loading") ...loading expedition...
         .story(v-else v-html="story")
+        .reportKb {{ p.reportKb }} kB
         h3 More expeditions
         ExpeditionNav(v-for="nav of navs" :nav="nav" @navigate="step => navigate(nav, step)")
 

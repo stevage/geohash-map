@@ -35,8 +35,13 @@
         option(value="participants") Participant
 
     label.db
-      input#filter-by-participants.mr1(type="checkbox" v-model="filters.scaleExpedition" :disabled="!enabled")
-      span Scale by expedition size
+      span Scale by
+      select(v-model="filters.scaleExpeditionsBy" :disabled="!enabled")
+        option(value="none") Don't scale
+        option(value="participantCount") Participant count
+        option(value="reportKb") Report size
+      //- input#filter-by-participants.mr1(type="checkbox" v-model="filters.scaleExpedition" :disabled="!enabled")
+      //- span Scale by expedition size
 
     //- label.db
     //-   input.mr1(type="checkbox" v-model="filters.showStreaks" :disabled="!enabled")
@@ -76,7 +81,8 @@ export default {
         filters: {
             participants: '',
             minParticipants: 0,
-            scaleExpedition: false,
+            // scaleExpedition: false,
+            scaleExpeditionsBy: 'none',
             minYear: 2008,
             maxYear: new Date().getUTCFullYear(),
             outcome: 'all',

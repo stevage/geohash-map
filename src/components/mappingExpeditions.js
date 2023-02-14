@@ -15,7 +15,8 @@ let visibleParticipants;
 // The data on fippe.de is actually a piece of JavaScript that needs to be parsed
 async function expeditionsToGeoJSON() {
     const raw = await window
-        .fetch('https://fippe.de/alldata.js')
+        // .fetch('https://fippe.de/alldata.js')
+        .fetch('demo.js')
         .then((x) => x.text());
     const lines = raw.split('\n').slice(1, -2);
     // remove trailing comma
@@ -33,6 +34,8 @@ async function expeditionsToGeoJSON() {
                 id: val[0],
                 participants: val[3],
                 success: val[4],
+                reportKb: val[5],
+                achievements: val[6],
             },
         })),
     };
@@ -387,20 +390,35 @@ function legendColors(filters, activeColorFunc) {
 function circleRadiusFunc({ isGlow, isFlash, filters, isClickable } = {}) {
     const extra = isFlash ? 30 : isGlow ? 2 : isClickable ? 4 : 0;
     const getRadius = (r) =>
-        filters.scaleExpedition
-            ? [
-                  '+',
-                  [
-                      '*',
-                      //   ['sqrt', ['length', ['get', 'participants']]],
-                      //   ['length', ['get', 'participants']],
-                      //   ['^', ['length', ['get', 'participants']], 0.75],
-                      ['log2', ['length', ['get', 'participants']]],
-                      r,
-                  ],
-                  extra,
-              ]
-            : ['+', r, extra];
+        ({
+            none: ['+', r, extra],
+            participantCount: [
+                '+',
+                [
+                    '*',
+                    //   ['sqrt', ['length', ['get', 'participants']]],
+                    //   ['length', ['get', 'participants']],
+                    //   ['^', ['length', ['get', 'participants']], 0.75],
+                    ['log2', ['length', ['get', 'participants']]],
+                    r,
+                ],
+                extra,
+            ],
+            reportKb: [
+                '+',
+                [
+                    '*',
+                    // ['+', 1, ['sqrt', ['get', 'reportKb']]],
+                    ['*', 0.5, ['get', 'reportKb']],
+                    //   ['sqrt', ['length', ['get', 'participants']]],
+                    //   ['length', ['get', 'participants']],
+                    //   ['^', ['length', ['get', 'participants']], 0.75],
+                    // ['log2', ['length', ['get', 'participants']]],
+                    r,
+                ],
+                extra,
+            ],
+        }[filters.scaleExpeditionsBy]);
 
     return [
         'interpolate',
