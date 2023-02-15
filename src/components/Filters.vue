@@ -38,8 +38,9 @@
       span Scale by
       select(v-model="filters.scaleExpeditionsBy" :disabled="!enabled")
         option(value="none") Don't scale
-        option(value="participantCount") Participant count
+        option(value="participantCount") Number of participants
         option(value="reportKb") Report size
+        option(value="achievementCount") Number of achievements
       //- input#filter-by-participants.mr1(type="checkbox" v-model="filters.scaleExpedition" :disabled="!enabled")
       //- span Scale by expedition size
 
@@ -70,6 +71,7 @@
         option(value="ratio") Success ratio
         option(value="expeditions") Expedition count
         option(value="daysSinceExpedition") Recently active
+        option(value="totalParticipants") Total participants
 </template>
 
 <script>

@@ -15,8 +15,8 @@ let visibleParticipants;
 // The data on fippe.de is actually a piece of JavaScript that needs to be parsed
 async function expeditionsToGeoJSON() {
     const raw = await window
-        // .fetch('https://fippe.de/alldata.js')
-        .fetch('demo.js')
+        .fetch('https://fippe.de/alldata.js')
+        // .fetch('demo.js')
         .then((x) => x.text());
     const lines = raw.split('\n').slice(1, -2);
     // remove trailing comma
@@ -64,6 +64,7 @@ async function getExpeditions(local, map) {
         f.properties.year = +date.slice(0, 4);
         f.properties.days = dateToDays(f.properties.id.slice(0, 10));
         f.properties.month = +date.slice(5, 7);
+        f.properties.yearMonth = f.properties.year * 12 + f.properties.month; //+date.slice(0, 7);
         f.properties.weekday = dateToWeekday(f.properties.id.slice(0, 10));
         f.properties.weekDayName =
             'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(
@@ -416,6 +417,11 @@ function circleRadiusFunc({ isGlow, isFlash, filters, isClickable } = {}) {
                     // ['log2', ['length', ['get', 'participants']]],
                     r,
                 ],
+                extra,
+            ],
+            achievementCount: [
+                '+',
+                ['*', ['length', ['get', 'achievements']], r],
                 extra,
             ],
         }[filters.scaleExpeditionsBy]);

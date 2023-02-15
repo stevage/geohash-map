@@ -19,6 +19,9 @@
 
                 //- option(value="latitudeByMonth") Latitude by month
                 //- option(value="latitudeByDayOfYear") Latitude by day of year
+            optgroup(label="Stacked bar charts")
+                option(v-for="[chartId, settings] of Object.entries(chartSettings).filter(([id, c]) => c.type === 'bar')" :value="chartId")
+                    | {{ settings.name }}
             optgroup(label="Other")
                 option(value="countByWeekday") Count by weekday
                 option(value="graticuleByParticipant") Graticule by participant
@@ -104,6 +107,13 @@ const chartSettings = {
         type: 'bin',
         x: 'weekday',
         fill: 'participantsCount',
+    },
+    reportKb: {
+        name: 'Write-up length',
+        type: 'bar',
+        x: 'yearMonth',
+        y: 'reportKb',
+        length: 'reportKb',
     },
     graticuleByParticipant: {
         name: 'Graticule by participant',

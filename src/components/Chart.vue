@@ -105,6 +105,65 @@ export default {
 
             return { legendEl, plotEl };
         },
+        barChart(expeditions, { chartId, x, y, interval, fill }, chartOptions) {
+            // interval = 'week';
+            const plotInterval = {
+                month: d3.utcMonth,
+                week: d3.utcWeek,
+                day: d3.utcDay,
+                year: d3.utcYear,
+            }[interval];
+            console.log(interval);
+            const months =
+                'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+            const plotEl = Plot.plot({
+                x: {
+                    label: null,
+                    interval: plotInterval,
+                    tickFormat: (d) =>
+                        // `${Math.floor(d / 12)}-${('0' + (d % 12)).slice(-2)}`,
+                        `${months[d % 12]} ${Math.floor(d / 12)}`,
+                },
+                // y: {
+                //     // grid: true,
+                // },
+                marks: [
+                    Plot.barY(expeditions, {
+                        // x: {
+                        //     value: x,
+                        //     // interval: plotInterval,
+                        //     // transform: (x) => x.left(7),
+                        // },
+                        x: x,
+                        y,
+                        fill: y, //'red',
+                        inset: 0,
+                        // length: y,
+                        // inset: 0,
+                        // stroke: 'transparent',
+                        // strokeWidth: 0,
+                    }),
+                    Plot.ruleY([0]),
+                ],
+                ...chartOptions,
+                color: {
+                    scheme: 'turbo',
+                },
+            });
+            console.log(expeditions);
+            const legendEl = plotEl.legend('color', {
+                style: { color: 'white', background: 'transparent' },
+                label: {
+                    success: 'Success',
+                    graticuleLongitude: 'Graticule longitude',
+                    graticuleLatitude: 'Graticule latitude',
+                    weekDay: '',
+                }[chartId],
+            });
+            this.chartStyle = 'bar';
+
+            return { legendEl, plotEl };
+        },
         scatterChart(expeditions, { chartId, r, x, y, fill }, chartOptions) {
             const plotEl = Plot.plot({
                 marks: [
@@ -192,9 +251,16 @@ export default {
         },
         update(map) {
             if (!this.showing) return;
+            const ids = {};
             this.expeditions = map
                 .queryRenderedFeatures({
                     layers: ['expeditions-circles'],
+                })
+                .filter((f) => {
+                    // sigh, there are duplicates
+                    if (ids[f.properties.id]) return false;
+                    ids[f.properties.id] = true;
+                    return true;
                 })
                 .map((e) => ({
                     ...e.properties,

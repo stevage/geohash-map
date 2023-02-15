@@ -11,6 +11,7 @@ EventBus.$on('expeditions-loaded', ({ local, ...hashes }) => {
         // return;
     }
     graticules = {};
+    window.maxParticipants = 0;
     for (const hash of hashes.features) {
         const x = string0(hash.properties.x);
         const y = string0(hash.properties.y);
@@ -24,23 +25,44 @@ EventBus.$on('expeditions-loaded', ({ local, ...hashes }) => {
             successes: 0,
             failures: 0,
         };
-        graticules[x][y].expeditions++;
+        const g = graticules[x][y];
+        g.id = `${y},${x}`;
+        g.expeditions++;
         if (hash.properties.success) {
-            graticules[x][y].successes++;
+            g.successes++;
         } else {
-            graticules[x][y].failures++;
+            g.failures++;
         }
-        graticules[x][y].firstExpeditionDays = Math.min(
-            graticules[x][y].firstExpeditionDays || 0,
+        g.firstExpeditionDays = Math.min(
+            g.firstExpeditionDays || 0,
             hash.properties.days
         );
-        graticules[x][y].lastExpeditionDays = hash.properties.days;
-        graticules[x][y].daysSinceExpedition =
-            dateToDays(new Date()) - hash.properties.days;
+        g.lastExpeditionDays = hash.properties.days;
+        g.daysSinceExpedition = dateToDays(new Date()) - hash.properties.days;
+
+        g.participants = g.participants || {};
+        for (const p of hash.properties.participants) {
+            g.participants[p] = true;
+        }
+        g.totalParticipants = Object.keys(g.participants).length;
+        window.maxParticipants = Math.max(
+            g.totalParticipants,
+            window.maxParticipants
+        );
+        if (window.maxParticipants === g.totalParticipants) {
+            window.maxParticipantsGraticule = `${x},${y}`;
+        }
     }
     window.graticules = graticules;
     // future idea, use feature-state instead of rewriting the geoms
     recalculateGraticules(window.map);
+    for (const y of Object.keys(graticules)) {
+        for (const x of Object.keys(graticules[y])) {
+            const g = graticules[y][x];
+            window.activeGraticules = window.activeGraticules || [];
+            window.activeGraticules.push(g);
+        }
+    }
 });
 
 function getGraticule(x, y) {
@@ -100,6 +122,7 @@ async function getGraticules(map) {
                     name && name.match(/[a-z], [a-z]/i)
                         ? name.split(', ')[0]
                         : name;
+                const nameLong = name ? `${name} (${yxstr})` : yxstr;
                 const nameCountry =
                     name && name.match(/[a-z], [a-z]/i)
                         ? name.split(', ')[1]
@@ -112,6 +135,7 @@ async function getGraticules(map) {
                         nameShort: nameShort || yxstr,
                         name: name || yxstr,
                         nameCountry,
+                        nameLong,
                     })
                 );
             }
@@ -290,6 +314,8 @@ export function updateGraticuleStyle({ map, filters }) {
                 ['get', 'nameShort'],
                 9,
                 ['get', 'name'],
+                11,
+                ['get', 'nameLong'],
             ],
             textAnchor: 'top-left',
             // textColor: 'hsla(0,0%,15%,0.9)',
@@ -356,6 +382,15 @@ export function updateGraticuleStyle({ map, filters }) {
                         'hsla(0,100%,50%,0.3)',
                         5 * 365,
                         'hsla(240,100%,50%,0.3)',
+                    ],
+                    totalParticipants: [
+                        'interpolate-hcl',
+                        ['linear'],
+                        ['get', 'totalParticipants'],
+                        0,
+                        'hsla(0,100%,50%,0.3)',
+                        20,
+                        'hsla(100,100%,50%,0.3)',
                     ],
                 }[options.fillStyle]
             );

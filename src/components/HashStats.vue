@@ -39,6 +39,7 @@ export default {
     methods: {
         update(map) {
             if (this.showStats) {
+                //TODO filter for unique features
                 this.expeditions = map.queryRenderedFeatures({
                     layers: ['expeditions-circles'],
                 });

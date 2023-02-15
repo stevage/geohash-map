@@ -49,7 +49,7 @@ export default {
             style: 'mapbox://styles/stevage/ckzoqlsr1000115qtr5pendfa/draft', // geohash-dark
             hash: 'center',
             projection: this.globe
-                ? { name: 'globe', center: [0, 0], parallels: [30, 30] }
+                ? 'globe' //{ name: 'globe', center: [0, 0], parallels: [30, 30] }
                 : 'mercator',
         });
         U.init(map, mapboxgl);
