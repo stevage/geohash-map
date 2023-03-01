@@ -12,11 +12,12 @@ EventBus.$on('expeditions-loaded', ({ local, ...hashes }) => {
     }
     graticules = {};
     window.maxParticipants = 0;
-    for (const hash of hashes.features) {
-        const x = string0(hash.properties.x);
-        const y = string0(hash.properties.y);
+    window.expeditionsByGraticule = {};
+    for (const expedition of hashes.features) {
+        const x = string0(expedition.properties.x);
+        const y = string0(expedition.properties.y);
 
-        if (hash.properties.global) {
+        if (expedition.properties.global) {
             continue;
         }
         graticules[x] = graticules[x] || {};
@@ -25,26 +26,35 @@ EventBus.$on('expeditions-loaded', ({ local, ...hashes }) => {
             successes: 0,
             failures: 0,
         };
+        window.expeditionsByGraticule[`${y},${x}`] =
+            window.expeditionsByGraticule[`${y},${x}`] || [];
+        window.expeditionsByGraticule[`${y},${x}`].push(expedition);
         const g = graticules[x][y];
         g.id = `${y},${x}`;
         g.expeditions++;
-        if (hash.properties.success) {
+        if (expedition.properties.success) {
             g.successes++;
+            g.firstParticipants =
+                g.firstParticipants ||
+                expedition.properties.participants.join('\n');
+            g.lastParticipants = expedition.properties.participants.join('\n');
         } else {
             g.failures++;
         }
         g.firstExpeditionDays = Math.min(
             g.firstExpeditionDays || 0,
-            hash.properties.days
+            expedition.properties.days
         );
-        g.lastExpeditionDays = hash.properties.days;
-        g.daysSinceExpedition = dateToDays(new Date()) - hash.properties.days;
+        g.lastExpeditionDays = expedition.properties.days;
+        g.daysSinceExpedition =
+            dateToDays(new Date()) - expedition.properties.days;
 
         g.participants = g.participants || {};
-        for (const p of hash.properties.participants) {
+        for (const p of expedition.properties.participants) {
             g.participants[p] = true;
         }
         g.totalParticipants = Object.keys(g.participants).length;
+
         window.maxParticipants = Math.max(
             g.totalParticipants,
             window.maxParticipants
@@ -138,12 +148,29 @@ async function getGraticules(map) {
                         nameLong,
                     })
                 );
+                const labelCenterX = x + (signx > 0 ? 0.5 : -0.5);
+                const labelCenterY = y + (signy > 0 ? 0.5 : -0.5);
+                const g = window.graticules[x] && window.graticules[x][y];
+                graticuleCenterLabels.push(
+                    turf.point([labelCenterX, labelCenterY], {
+                        type: 'graticule-center-label',
+                        x: xstr,
+                        y: ystr,
+                        nameShort: nameShort || yxstr,
+                        name: name || yxstr,
+                        nameCountry,
+                        nameLong,
+                        firstParticipants: g && g.firstParticipants,
+                        lastParticipants: g && g.lastParticipants,
+                    })
+                );
             }
         }
     }
 
     const graticules = [];
     const graticuleLabels = [];
+    const graticuleCenterLabels = [];
     for (const signx of [-1, 1]) {
         for (const signy of [-1, 1]) {
             makeGraticules(signx, signy);
@@ -152,7 +179,7 @@ async function getGraticules(map) {
 
     const fc = {
         type: 'FeatureCollection',
-        features: [...graticules, ...graticuleLabels],
+        features: [...graticules, ...graticuleLabels, ...graticuleCenterLabels],
     };
     // console.log(fc.features.filter(length, 'graticules');
     window.app.graticules = fc;
@@ -326,8 +353,27 @@ export function updateGraticuleStyle({ map, filters }) {
             filter: ['==', ['get', 'type'], 'graticule-label'],
             minzoom: 7,
         });
+        // TODO: depend on a setting
+        map.U.addSymbol('graticules-center-label', 'graticules', {
+            textField: '',
+
+            textAnchor: 'center',
+            textColor: 'hsla(60,100%,80%,0.9)',
+            textSize: ['interpolate', ['linear'], ['zoom'], 5, 8, 8, 18],
+            textJustify: 'center',
+            textMaxWidth: 150,
+            filter: ['==', ['get', 'type'], 'graticule-center-label'],
+            minzoom: 5,
+        });
 
         map.on('click', 'graticules-label', (e) => clickGraticuleLabel(map, e));
+        map.on(
+            'click',
+            'graticules-fill',
+            (e) =>
+                window.app.App.tab === 'graticules' &&
+                clickGraticuleLabel(map, e)
+        );
         window.graticuleNamesP = getGraticuleNames(); // a promise
 
         EventBus.$on('graticule-options-change', (options) => {
@@ -339,10 +385,10 @@ export function updateGraticuleStyle({ map, filters }) {
                 'graticules-label',
                 options.showGraticules && options.showGraticuleLabels
             );
-            map.U.toggle(
-                'graticules-fill',
-                options.showGraticules && options.fillStyle !== 'none'
-            );
+            // map.U.toggle(
+            //     'graticules-fill',
+            //     options.showGraticules && options.fillStyle !== 'none'
+            // );
             map.U.setFillColor(
                 'graticules-fill',
                 {
@@ -393,6 +439,14 @@ export function updateGraticuleStyle({ map, filters }) {
                         'hsla(100,100%,50%,0.3)',
                     ],
                 }[options.fillStyle]
+            );
+            map.U.setTextField(
+                'graticules-center-label',
+                {
+                    firstParticipants: ['get', 'firstParticipants'],
+                    lastParticipants: ['get', 'lastParticipants'],
+                    none: '',
+                }[options.infoLabel]
             );
         });
     }

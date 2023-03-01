@@ -278,7 +278,7 @@ function participantsColorFunc() {
             .sort((a, b) => b.expeditions - a.expeditions),
     ];
 
-    const scheme = tableauColors[3];
+    const scheme = [[0, 255, 0], ...tableauColors[3]];
     visibleParticipants = participantsList.slice(0, scheme.length);
     const ret = [
         'match',
@@ -424,6 +424,7 @@ function circleRadiusFunc({ isGlow, isFlash, filters, isClickable } = {}) {
                 ['*', ['length', ['get', 'achievements']], r],
                 extra,
             ],
+            r,
         }[filters.scaleExpeditionsBy]);
 
     return [
@@ -461,6 +462,7 @@ function updateFilters({ map, filters }) {
               ]
             : true,
         ['>=', ['get', 'participantsCount'], filters.minParticipants],
+        ['<=', ['get', 'participantsCount'], filters.maxParticipants],
         ['>=', ['get', 'year'], filters.minYear],
         ['<=', ['get', 'year'], filters.maxYear],
         successFilter,

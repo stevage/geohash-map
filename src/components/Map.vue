@@ -41,10 +41,26 @@ export default {
             'pk.eyJ1Ijoic3RldmFnZSIsImEiOiJja3p5cHdtOGEwMm1hM2RtdzJlYXJrajhrIn0.veC37cfBaslGu1MteavjNA';
         // pk.eyJ1Ijoic3RldmFnZSIsImEiOiJGcW03aExzIn0.QUkUmTGIO3gGt83HiRIjQw ??
 
+        let center = [145, -37.8];
+        let zoom = 1;
+
+        try {
+            // console.log(window.localStorage.getItem('center').split(','));
+            let centerCookie = window.localStorage
+                .getItem('center')
+                .split(',')
+                .map(parseFloat);
+            center = centerCookie.slice(0, 2);
+            zoom = centerCookie[2];
+        } catch (e) {
+            // console.log('ohno', e);
+            //
+        }
+        console.log(center, zoom);
         const map = new mapboxgl.Map({
             container: 'map',
-            center: [144.96, -37.81],
-            zoom: 7,
+            center, //: [144.96, -37.81],
+            zoom,
             // style: 'mapbox://styles/mapbox/light-v9',
             style: 'mapbox://styles/stevage/ckzoqlsr1000115qtr5pendfa/draft', // geohash-dark
             hash: 'center',
@@ -60,7 +76,7 @@ export default {
         window.app.Map = this;
 
         await map.U.onLoad();
-        if (this.globe) {
+        if (0 && this.globe) {
             map.addLayer({
                 id: 'sky',
                 type: 'sky',
@@ -123,6 +139,20 @@ export default {
         EventBus.$on('tab-change', (tab) => {
             this.map.U.toggle(/^expeditions/, tab === 'expeditions');
             this.map.U.toggle(/^geohash/, tab === 'geohash');
+        });
+        map.on('moveend', () => {
+            try {
+                window.localStorage.setItem(
+                    'center',
+                    map.getCenter().toArray().join(',') + ',' + map.getZoom()
+                );
+            } catch (e) {
+                //
+            }
+        });
+        EventBus.$on('projection-change', (projection) => {
+            console.log(projection);
+            this.map.setProjection(projection);
         });
     },
     computed: {

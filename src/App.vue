@@ -1,7 +1,6 @@
 <template lang="pug">
     #app.flex.flex-column.vh-100.avenir
         #top.bb.b--gray.bg-washed-yellow
-            //- h1 Geohash expeditions map
         #middle.flex.flex-auto
             #sidebar.br.b--dark-gray.overflow-auto.pv2-ns(:class="{ collapsed: !sidebarOpen}")
                 .container.overflow-auto.pa2.bw2
@@ -9,6 +8,8 @@
                     .tabs.mb2.mh4.flex
                         .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
                             | Expeditions
+                        .tab.ba.pa3.flex-auto(:class="{ activeTab: tab === 'graticules'}" @click="tab='graticules'")
+                            | Graticules
                         .tab.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
                             | Geohash
 
@@ -20,6 +21,8 @@
                         AnimationControls.ml2
                     div(v-if="tab === 'geohash'")
                         HashInfo
+                    div(v-if="tab === 'graticules'")
+                        GraticuleOptions
                     GraticuleInfo
 
             #sidebar-rim.relative.br.b--gray.bg-dark.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
@@ -46,6 +49,7 @@ import HashInfo from '@/components/HashInfo.vue';
 import ChartControls from '@/components/ChartControls.vue';
 import Chart from '@/components/Chart.vue';
 import GraticuleInfo from '@/components/GraticuleInfo.vue';
+import GraticuleOptions from '@/components/GraticuleOptions.vue';
 
 import { EventBus } from './EventBus';
 window.app = {};
@@ -66,6 +70,7 @@ export default {
         ChartControls,
         Chart,
         GraticuleInfo,
+        GraticuleOptions,
     },
     data() {
         return {

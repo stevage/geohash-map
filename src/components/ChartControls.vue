@@ -128,7 +128,7 @@ export default {
     name: 'ChartControls',
     data: () => ({
         options: {
-            showChart: !!window.location.host.match(/localhost/),
+            showChart: false, //!!window.location.host.match(/localhost/),
             chartId: 'success',
             interval: 'month',
         },

@@ -4,17 +4,21 @@
   .group
     label.mb2
       div Participant name
-      input#filter-by-participants.mr1(type="text" v-model="filters.participants" :disabled="!enabled")
+      input.mr1(type="text" v-model="filters.participants" :disabled="!enabled")
     label.mv2.db
-      .dib At least
-      input#filter-by-participants.mr1.w3.dib(type="number" size="2" v-model.number="filters.minParticipants" min="0" :disabled="!enabled")
+      .dib.mr1 At least
+      input.mr1.w3.dib(type="number" size="2" v-model.number="filters.minParticipants" min="0" :disabled="!enabled")
+      .dib participants
+    label.mv2.db
+      .dib.mr1 At most
+      input.mr1.w3.dib(type="number" size="2" v-model.number="filters.maxParticipants" max="100" :disabled="!enabled")
       .dib participants
     label.mv2.dib
       div.dib Between
-      input.w3.dib#filter-by-participants.mr1.ml1(type="number" v-model.number="filters.minYear" min="2008" :max="filters.maxYear" :disabled="!enabled")
+      input.w3.dib.mr1.ml1(type="number" v-model.number="filters.minYear" min="2008" :max="filters.maxYear" :disabled="!enabled")
     label.dib
       .dib and
-      input#filter-by-participants.dib.w3.mr1.ml1(type="number" v-model.number="filters.maxYear" min="2008" max="2030" :disabled="!enabled")
+      input.dib.w3.mr1.ml1(type="number" v-model.number="filters.maxYear" min="2008" max="2030" :disabled="!enabled")
 
     label.mv2.db
     select(v-model="filters.outcome" :disabled="!enabled")
@@ -41,7 +45,19 @@
         option(value="participantCount") Number of participants
         option(value="reportKb") Report size
         option(value="achievementCount") Number of achievements
-      //- input#filter-by-participants.mr1(type="checkbox" v-model="filters.scaleExpedition" :disabled="!enabled")
+    label.mb2.db
+      span Projection
+      select(v-model="projection" :disabled="!enabled")
+        option(value="mercator") Mercator cylindrical
+        option(value="globe") Globe
+        option(value="equirectangular") Equirectangular
+        option(value="equalEarth") Equal Earth pseudocylindrical
+        option(value="naturalEarth") Natural Earth pseudocylindrical
+        option(value="albers") Albers equal-area conic
+        option(value="lambertConformalConic") Lambert Conformal Conic
+        option(value="winkelTripel") Winkel Tripel azimuthal
+
+      //- input.mr1(type="checkbox" v-model="filters.scaleExpedition" :disabled="!enabled")
       //- span Scale by expedition size
 
     //- label.db
@@ -55,23 +71,14 @@
       input.mr1(type="checkbox" v-model.number="filters.onlySuccessStreaks" :disabled="!enabled")
       span Only show 100% success treaks
       div(style="color: #888; font-size: 0.8em") Excludes success-streaks that have a fail before or after
-  h3.mb1 Graticules
-  .group
-    label.db
-      input.mr1(type="checkbox" v-model="graticules.showGraticules" :disabled="!enabled")
-      span Show graticules
-    label.db(v-show="graticules.showGraticules")
-      input.mr1( type="checkbox" v-model="graticules.showGraticuleLabels" :disabled="!enabled")
-      span Show graticule labels
-    label.db(v-show="graticules.showGraticules")
-      .db Color by
-      select(v-model="graticules.fillStyle")
-        option(value="none") None
-        option(value="virgin") Virgin graticules
-        option(value="ratio") Success ratio
-        option(value="expeditions") Expedition count
-        option(value="daysSinceExpedition") Recently active
-        option(value="totalParticipants") Total participants
+  //- h3.mb1 Graticules
+  //- .group
+  //-   label.db
+  //-     input.mr1(type="checkbox" v-model="graticules.showGraticules" :disabled="!enabled")
+  //-     span Show graticules
+  //-   label.db(v-show="graticules.showGraticules")
+  //-     input.mr1( type="checkbox" v-model="graticules.showGraticuleLabels" :disabled="!enabled")
+  //-     span Show graticule labels
 </template>
 
 <script>
@@ -83,6 +90,7 @@ export default {
         filters: {
             participants: '',
             minParticipants: 0,
+            maxParticipants: 100,
             // scaleExpedition: false,
             scaleExpeditionsBy: 'none',
             minYear: 2008,
@@ -93,11 +101,7 @@ export default {
             minStreakLength: 3,
             onlySuccessStreaks: true,
         },
-        graticules: {
-            showGraticules: true,
-            showGraticuleLabels: true,
-            fillStyle: 'virgin',
-        },
+        projection: 'mercator',
     }),
     created() {
         window.Filters = this;
@@ -116,11 +120,10 @@ export default {
                 EventBus.$emit('filters-change', this.filters);
             },
         },
-        graticules: {
-            deep: true,
-            handler() {
-                EventBus.$emit('graticule-options-change', this.graticules);
-            },
+
+        projection() {
+            console.log('projection change', this.projection);
+            EventBus.$emit('projection-change', this.projection);
         },
     },
 };

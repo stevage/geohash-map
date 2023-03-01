@@ -12,10 +12,7 @@ async function loadGeohashes(map) {
             },
         };
     }
-    const [year, month, day] = new Date()
-        .toISOString()
-        .slice(0, 10)
-        .split('-');
+    const [year, month, day] = new Date().toISOString().slice(0, 10).split('-');
     const hashes = await fetch(
         `https://data.geohashing.info/hash/wk/${year}/${month}/${day}.json`
     ).then((res) => res.json());
@@ -209,7 +206,11 @@ export function updateGeohashes(map) {
             makeHashRing(map);
             map.addControl(scale);
         } else {
-            map.removeControl(scale);
+            try {
+                map.removeControl(scale);
+            } catch (e) {
+                //
+            }
         }
     });
 }
