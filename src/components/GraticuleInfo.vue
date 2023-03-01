@@ -1,6 +1,7 @@
 <template lang="pug">
 #GraticuleInfo.bt.b--gray(v-if="info")
-  h3 {{ info.graticule.properties.name }} ({{ info.graticule.properties.y }}, {{ info.graticule.properties.x }})
+  a(target="_blank" :href="`https://geohashing.site/geohashing/${info.graticule.properties.y },${info.graticule.properties.x}`")
+    h3 {{ info.graticule.properties.name }} ({{ info.graticule.properties.y }}, {{ info.graticule.properties.x }})
   //- p Total area: {{ Math.round(info.area /1e6).toLocaleString() }} km<sup>2</sup>
   table
     tr
@@ -21,18 +22,20 @@
 
   div.h5.overflow-y-scroll
     h3 Expeditions
-    table(v-if="expeditions.length")
-      //- tr.left
-        th.tl
-        th.tl Date
-        //- th.tl Pax
-        th.tl Who
-      tr(v-for="expedition in [...expeditions].reverse()")
-        td.f7.pr2 {{ expedition.properties.success ? '✔' : '✖' }}
+    div(v-if="expeditions.length")
+      table
+        //- tr.left
+          th.tl
+          th.tl Date
+          //- th.tl Pax
+          th.tl Who
+        tr(v-for="expedition in [...expeditions].reverse()")
+          td.f7.pr2 {{ expedition.properties.success ? '✔' : '✖' }}
 
-        td.f7.pr2 {{ expedition.properties.id.slice(0,10) }}
-        //- td {{ expedition.properties.participants.length }}
-        td.f7 {{ expedition.properties.participantsString }}
+          td.f7.pr2 {{ expedition.properties.id.slice(0,10) }}
+          //- td {{ expedition.properties.participants.length }}
+          td.f7 {{ expedition.properties.participantsString }}
+      .dib.ma2.mt4.pa2.ba.b--grey.f6.grey(@click="copyExpeditions") Copy table for wiki
     div(v-else) Virgin graticule!
 </template>
 
@@ -59,6 +62,45 @@ export default {
                     this.info.graticule.properties.id
                 ] || []
             );
+        },
+    },
+
+    methods: {
+        async copyExpeditions() {
+            const es = [...this.expeditions].reverse();
+            const text = es
+                .map((expedition, i) => {
+                    const p = expedition.properties;
+                    const date = p.id.slice(0, 10);
+                    const weekday = new Date(date).toLocaleString('default', {
+                        weekday: 'long',
+                    });
+                    const month = new Date(date)
+                        .toLocaleString('default', { month: 'long' })
+                        .slice(0, 3);
+                    const joinWithAnd = (arr) => {
+                        if (arr.length === 1) return arr[0];
+                        return `${arr.slice(0, -1).join(', ')} and ${
+                            arr[arr.length - 1]
+                        }`;
+                    };
+                    const participants = joinWithAnd(
+                        p.participants.map((p) => `[[User:${p}|${p}]]`)
+                    );
+                    const arrow = p.success ? 'Arrow2.png' : 'Arrow4.png';
+                    let text = `[[Image:${arrow}|12px]] ${month} [[${p.id}]] ${weekday} – ${participants}.<br/>`;
+                    if (i === 0 || p.year !== es[i - 1].properties.year) {
+                        text = `=== ${p.year} ===\n${text}`;
+                    }
+                    return text;
+                })
+                .join('\n');
+            try {
+                await navigator.clipboard.writeText(text);
+                console.log('Content copied to clipboard');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+            }
         },
     },
 };
