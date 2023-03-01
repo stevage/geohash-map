@@ -23,7 +23,7 @@
                         HashInfo
                     div(v-if="tab === 'graticules'")
                         GraticuleOptions
-                    GraticuleInfo
+                        GraticuleInfo
 
             #sidebar-rim.relative.br.b--gray.bg-dark.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
             #map-container.relative.flex-auto

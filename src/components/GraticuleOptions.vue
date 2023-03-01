@@ -9,6 +9,8 @@
         option(value="expeditions") Expedition count
         option(value="daysSinceExpedition") Recently active
         option(value="totalParticipants") Total participants
+        option(value="firstParticipants") First hasher
+        option(value="lastParticipants") Recent hasher
   .db.mv3
     .dib(style="width:3rem") Text:
     select(v-model="graticules.infoLabel")

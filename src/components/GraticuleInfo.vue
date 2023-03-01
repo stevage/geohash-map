@@ -35,7 +35,7 @@
           td.f7.pr2 {{ expedition.properties.id.slice(0,10) }}
           //- td {{ expedition.properties.participants.length }}
           td.f7 {{ expedition.properties.participantsString }}
-      .dib.ma2.mt4.pa2.ba.b--grey.f6.grey(@click="copyExpeditions") Copy table for wiki
+      .dib.ma2.mt4.pa2.ba.b--grey.f6.grey.pointer(@click="copyExpeditions") Copy table for wiki
     div(v-else) Virgin graticule!
 </template>
 
