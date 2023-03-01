@@ -2,6 +2,7 @@ import { EventBus } from '@/EventBus';
 import { getGraticuleBounds, dateToDays } from './util';
 import * as d3 from 'd3';
 import * as turf from '@turf/turf';
+import tableauColors from './tableauColors';
 
 let graticules = {};
 const string0 = (n) => (Object.is(n, -0) ? '-0' : String(n));
@@ -34,10 +35,19 @@ EventBus.$on('expeditions-loaded', ({ local, ...hashes }) => {
         g.expeditions++;
         if (expedition.properties.success) {
             g.successes++;
-            g.firstParticipants =
-                g.firstParticipants ||
-                expedition.properties.participants.join('\n');
+            if (!g.firstParticipants) {
+                g.firstParticipants =
+                    expedition.properties.participants.join('\n');
+                g.firstParticipantsOrMultiple =
+                    expedition.properties.participants.length > 1
+                        ? 'multiple'
+                        : g.firstParticipants;
+            }
             g.lastParticipants = expedition.properties.participants.join('\n');
+            g.lastParticipantsOrMultiple =
+                expedition.properties.participants.length > 1
+                    ? 'multiple'
+                    : g.lastParticipants;
         } else {
             g.failures++;
         }
@@ -298,6 +308,68 @@ function clickGraticuleLabel(map, e) {
     });
 }
 
+function graticuleColorByParticipantsFunc(type) {
+    // const bounds = map.getBounds();
+    // TODO filter out dupes
+    // const visibleGraticules = window.app.graticules.features.filter(
+    //     (f) =>
+    //         // probably a faster, more direct way to get this, but then we need to deal with signs etc
+    //         bounds.contains(f.geometry.coordinates[0][0]) ||
+    //         bounds.contains(f.geometry.coordinates[0][2])
+    // );
+    // TODO filter out dupes
+    const visibleGraticules = map.queryRenderedFeatures({
+        layers: ['graticules-fill'],
+    });
+    const firstParticipants = {};
+    const lastParticipants = {};
+    for (const f of visibleGraticules) {
+        const g =
+            window.graticules[f.properties.x] &&
+            window.graticules[f.properties.x][f.properties.y];
+        if (!g) {
+            continue;
+        }
+        // const firstName = g.firstParticipants.match(/\\n/) ? 'multiple': g.firstParticipants;
+        // const lastName = g.lastParticipants.match(/\\n/) ? 'multiple': g.lastParticipants;
+        // for (const p of g.firstParticipants.split('\n')) {
+        //     firstParticipants[p] = (firstParticipants[p] || 0) + 1;
+        // }
+        // for (const p of g.lastParticipants.split('\n')) {
+        //     lastParticipants[p] = (lastParticipants[p] || 0) + 1;
+        // }
+
+        firstParticipants[g.firstParticipantsOrMultiple] =
+            (firstParticipants[g.firstParticipantsOrMultiple] || 0) + 1;
+        lastParticipants[g.lastParticipantsOrMultiple] =
+            (lastParticipants[g.lastParticipantsOrMultiple] || 0) + 1;
+    }
+    const scheme = [[0, 255, 0], ...tableauColors[3]];
+    const participantList = Object.entries(
+        type === 'firstParticipants' ? firstParticipants : lastParticipants
+    )
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, scheme.length);
+    console.log(participantList);
+
+    const ret = [
+        'match',
+        [
+            'get',
+            type === 'firstParticipants'
+                ? 'firstParticipantsOrMultiple'
+                : 'lastParticipantsOrMultiple',
+        ],
+        ...participantList.flatMap(([participant, expeditionCount], i) => [
+            participant,
+            `rgb(${scheme[i]})`,
+        ]),
+        'black',
+    ];
+    console.log(ret);
+    return ret;
+}
+
 export function updateGraticuleStyle({ map, filters }) {
     const first = !map.getSource('graticules');
     if (first) {
@@ -389,57 +461,60 @@ export function updateGraticuleStyle({ map, filters }) {
             //     'graticules-fill',
             //     options.showGraticules && options.fillStyle !== 'none'
             // );
-            map.U.setFillColor(
-                'graticules-fill',
-                {
-                    virgin: virginFillColor,
-                    none: 'transparent',
-                    expeditions: [
+            const colorFunc = {
+                virgin: () => virginFillColor,
+                none: () => 'transparent',
+                expeditions: () => [
+                    'interpolate-hcl',
+                    ['linear'],
+                    ['get', 'expeditions'],
+                    0,
+                    'hsla(0,0%,100%,0.3)',
+                    100,
+                    'hsla(0,0%,100%,0)',
+                ],
+                ratio: () => [
+                    'case',
+                    ['>', ['get', 'expeditions'], 0],
+                    [
                         'interpolate-hcl',
                         ['linear'],
-                        ['get', 'expeditions'],
+                        ['/', ['get', 'successes'], ['get', 'expeditions']],
                         0,
-                        'hsla(0,0%,100%,0.3)',
-                        100,
-                        'hsla(0,0%,100%,0)',
-                    ],
-                    ratio: [
-                        'case',
-                        ['>', ['get', 'expeditions'], 0],
-                        [
-                            'interpolate-hcl',
-                            ['linear'],
-                            ['/', ['get', 'successes'], ['get', 'expeditions']],
-                            0,
-                            'hsla(0,100%,50%,0.3)',
-                            1,
-                            'hsla(240,100%,50%,0.3)',
-                        ],
-                        'transparent',
-                    ],
-                    // TODO: align these colors with the expedition colorss
-                    daysSinceExpedition: [
-                        'interpolate-hcl',
-                        ['linear'],
-                        ['get', 'daysSinceExpedition'],
-                        0,
-                        'hsla(120,100%,50%,0.3)',
-                        1 * 365,
                         'hsla(0,100%,50%,0.3)',
-                        5 * 365,
+                        1,
                         'hsla(240,100%,50%,0.3)',
                     ],
-                    totalParticipants: [
-                        'interpolate-hcl',
-                        ['linear'],
-                        ['get', 'totalParticipants'],
-                        0,
-                        'hsla(0,100%,50%,0.3)',
-                        20,
-                        'hsla(100,100%,50%,0.3)',
-                    ],
-                }[options.fillStyle]
-            );
+                    'transparent',
+                ],
+                // TODO:  align these colors with the expedition colorss
+                daysSinceExpedition: () => [
+                    'interpolate-hcl',
+                    ['linear'],
+                    ['get', 'daysSinceExpedition'],
+                    0,
+                    'hsla(120,100%,50%,0.3)',
+                    1 * 365,
+                    'hsla(0,100%,50%,0.3)',
+                    5 * 365,
+                    'hsla(240,100%,50%,0.3)',
+                ],
+                totalParticipants: () => [
+                    'interpolate-hcl',
+                    ['linear'],
+                    ['get', 'totalParticipants'],
+                    0,
+                    'hsla(0,100%,50%,0.3)',
+                    20,
+                    'hsla(100,100%,50%,0.3)',
+                ],
+                firstParticipants: () =>
+                    graticuleColorByParticipantsFunc('firstParticipants'),
+                lastParticipants: () =>
+                    graticuleColorByParticipantsFunc('lastParticipants'),
+            }[options.fillStyle];
+            console.log('colorFunc', colorFunc);
+            map.U.setFillColor('graticules-fill', colorFunc());
             map.U.setTextField(
                 'graticules-center-label',
                 {

@@ -138,7 +138,6 @@ export default {
         );
         EventBus.$on('tab-change', (tab) => {
             this.map.U.toggle(/^expeditions/, tab === 'expeditions');
-            this.map.U.toggle(/^geohash/, tab === 'geohash');
         });
         map.on('moveend', () => {
             try {

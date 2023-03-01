@@ -2,10 +2,14 @@ import { EventBus } from '@/EventBus';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
 async function loadGeohashes(map) {
-    function makeHash(coordinates, [graticuleX, graticuleY]) {
+    function makeHash(coordinates, [graticuleX, graticuleY], date, weekday) {
         return {
             type: 'Feature',
-            properties: { graticuleX, graticuleY },
+            properties: {
+                graticuleX,
+                graticuleY,
+                weekday,
+            },
             geometry: {
                 type: 'Point',
                 coordinates,
@@ -18,29 +22,36 @@ async function loadGeohashes(map) {
     ).then((res) => res.json());
 
     console.log(hashes);
-    const hash = hashes[0];
     const features = [];
 
-    for (const lngSign of [-1, 1]) {
-        for (const latSign of [-1, 1]) {
-            for (let lng = 0; lng <= 180; lng++) {
-                for (let lat = 0; lat <= 85; lat++) {
-                    features.push(
-                        makeHash(
-                            [
-                                lngSign * (lng + hash.east.lng),
-                                latSign * (lat + hash.east.lat),
-                            ],
-                            [lngSign * lng, latSign * lat]
-                        )
-                    );
+    for (const hash of hashes) {
+        const date = new Date(hash.date);
+        const weekday = date.toLocaleString(navigator.language, {
+            weekday: 'long',
+        });
+        for (const lngSign of [-1, 1]) {
+            for (const latSign of [-1, 1]) {
+                for (let lng = 0; lng <= 180; lng++) {
+                    for (let lat = 0; lat <= 85; lat++) {
+                        features.push(
+                            makeHash(
+                                [
+                                    lngSign * (lng + hash.east.lng),
+                                    latSign * (lat + hash.east.lat),
+                                ],
+                                [lngSign * lng, latSign * lat],
+                                date,
+                                weekday
+                            )
+                        );
+                    }
                 }
             }
         }
     }
     map.U.setData('geohashes', { type: 'FeatureCollection', features });
     EventBus.$emit('geohash-loaded', {
-        hash,
+        hash: hashes.slice(-1)[0],
         date: `${year}-${month}-${day}`,
     });
 }
@@ -53,9 +64,9 @@ async function makeHashRing(map) {
             layers: ['geohashes-circle'],
         });
         if (hashes.length !== 1) {
-            return;
+            // return;
         }
-        const hash = hashes[0];
+        const hash = hashes.slice(-1)[0];
         const rings = [];
         for (const distance of [100, 200, 500, 1000, 2000, 5000, 10000]) {
             const ring = turf.circle(hash.geometry.coordinates, distance, {
@@ -86,7 +97,7 @@ async function makeBushBash(map) {
             layers: ['geohashes-circle'],
         });
         if (hashes.length !== 1) {
-            return reset();
+            // return reset();
         }
         if (
             lastHash &&
@@ -97,8 +108,9 @@ async function makeBushBash(map) {
         ) {
             return;
         }
-        lastHash = hashes[0];
-        const hash = hashes[0];
+        lastHash = hashes.slice(-1)[0];
+
+        const hash = hashes.slice(-1)[0];
 
         const roadIds = map
             .getStyle()
@@ -166,11 +178,22 @@ export function updateGeohashes(map) {
                 1,
             ],
         });
+        map.U.addSymbol('geohashes-label', 'geohashes', {
+            minzoom: 8,
+            visibility: 'none',
+            textField: ['get', 'weekday'],
+            textAnchor: 'left',
+            textOffset: [0.75, 0],
+            textColor: 'hsl(50, 90%, 80%)',
+        });
 
         map.U.addGeoJSON('hashRing');
+        map.U.addLine('hashRing-underline', 'hashRing', {
+            lineColor: 'hsl(50,30%,18%)',
+        });
         map.U.addLine('hashRing-line', 'hashRing', {
             lineColor: 'hsl(50,50%,70%)',
-            lineDasharray: [2, 16],
+            lineDasharray: [4, 50],
         });
         map.U.addSymbol('hashRing-label', 'hashRing', {
             textField: ['get', 'name'],
@@ -197,10 +220,12 @@ export function updateGeohashes(map) {
         map.on('moveend', () => makeHashRing(map));
         EventBus.$on('geohash-loaded', () => makeHashRing(map));
     }
+    map.U.toggle(/hashRing|geohashes/, window.app.App.tab === 'geohash');
+
     const scale = new mapboxgl.ScaleControl();
     console.log(scale);
     EventBus.$on('tab-change', (tab) => {
-        map.U.toggle(/hashRing/, tab === 'geohash');
+        map.U.toggle(/hashRing|geohashes/, tab === 'geohash');
         if (tab === 'geohash') {
             console.log(scale, map);
             makeHashRing(map);

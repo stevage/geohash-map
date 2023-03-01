@@ -13,7 +13,7 @@ export default {
     name: 'Chart',
     data: () => ({
         xAxis: 'byWeek',
-        showing: !!window.location.host.match(/localhost/),
+        showing: false, //!!window.location.host.match(/localhost/),
         chartStyle: null,
     }),
     async created() {
