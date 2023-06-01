@@ -63,8 +63,8 @@ async function makeHashRing(map) {
         const hashes = map.queryRenderedFeatures({
             layers: ['geohashes-circle'],
         });
-        if (hashes.length !== 1) {
-            // return;
+        if (hashes.length < 1) {
+            return;
         }
         const hash = hashes.slice(-1)[0];
         const rings = [];
@@ -96,8 +96,8 @@ async function makeBushBash(map) {
         const hashes = map.queryRenderedFeatures({
             layers: ['geohashes-circle'],
         });
-        if (hashes.length !== 1) {
-            // return reset();
+        if (hashes.length < 1) {
+            return reset();
         }
         if (
             lastHash &&

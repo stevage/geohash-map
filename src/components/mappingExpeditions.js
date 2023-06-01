@@ -17,7 +17,10 @@ async function expeditionsToGeoJSON() {
     const raw = await window
         .fetch('https://fippe.de/alldata.js')
         // .fetch('demo.js')
-        .then((x) => x.text());
+        .then((x) => x.text())
+        .catch((e) => {
+            console.error(e);
+        });
     const lines = raw.split('\n').slice(1, -2);
     // remove trailing comma
     const vals = JSON.parse('[' + lines.join(' ').slice(0, -1) + ']');
