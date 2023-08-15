@@ -30,6 +30,7 @@ const brewer6 = [
     '#ffff33',
 ];
 const transportModes = [
+    'Boat/swim',
     'Walk',
     'Bicycle',
     'Public transport',
@@ -131,8 +132,10 @@ async function getExpeditions(local, map) {
         f.properties.graticuleLongitude = +f.properties.graticule.split(',')[1];
         const achievements = f.properties.achievements || [];
         f.properties.transportMode = achievements.includes(
-            'Walk_geohash_achievement'
+            'Water_geohash_achievement'
         )
+            ? 'Boat/swim'
+            : achievements.includes('Walk_geohash_achievement')
             ? 'Walk'
             : achievements.includes('Bicycle_geohash_achievement')
             ? 'Bicycle'
@@ -349,7 +352,7 @@ function transportModeColorFunc() {
     //     tableauColors[0][5],
     //     tableauColors[0][6],
     // ];
-    const cols = [...brewer6.slice(0, 5), 'grey'];
+    const cols = [...brewer6, 'grey'];
 
     const ret = [
         'match',
