@@ -37,6 +37,7 @@
         option(value="experienceMax") Hasher's previous expeditions
         option(value="experienceDaysMax") Hasher's years of experience
         option(value="participants") Participant
+        option(value="transportMode") Transport mode
 
     label.db
       span Scale by

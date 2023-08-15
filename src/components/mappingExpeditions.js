@@ -7,7 +7,36 @@ let expeditions;
 let loadedExpeditions;
 
 let visibleParticipants;
-
+const brewer12 = [
+    '#a6cee3',
+    '#1f78b4',
+    '#b2df8a',
+    '#33a02c',
+    '#fb9a99',
+    '#e31a1c',
+    '#fdbf6f',
+    '#ff7f00',
+    '#cab2d6',
+    '#6a3d9a',
+    '#ffff99',
+    '#b15928',
+];
+const brewer6 = [
+    '#e41a1c',
+    '#377eb8',
+    '#4daf4a',
+    '#984ea3',
+    '#ff7f00',
+    '#ffff33',
+];
+const transportModes = [
+    'Walk',
+    'Bicycle',
+    'Public transport',
+    'Beast of burden',
+    'Hitch-hiking',
+    'Other',
+];
 /* TODO:
 - generate all these extra properties in a different dataset that doesn't have to go onto the map
 */
@@ -100,6 +129,20 @@ async function getExpeditions(local, map) {
         f.properties.longitude = f.geometry.coordinates[0];
         f.properties.graticuleLatitude = +f.properties.graticule.split(',')[0];
         f.properties.graticuleLongitude = +f.properties.graticule.split(',')[1];
+        const achievements = f.properties.achievements || [];
+        f.properties.transportMode = achievements.includes(
+            'Walk_geohash_achievement'
+        )
+            ? 'Walk'
+            : achievements.includes('Bicycle_geohash_achievement')
+            ? 'Bicycle'
+            : achievements.includes('Public_transport_geohash_achievement')
+            ? 'Public transport'
+            : achievements.includes('Beast_of_burden_geohash_achievement')
+            ? 'Beast of burden'
+            : achievements.includes('Thumbs_up_geohash_achievement')
+            ? 'Hitch-hiking'
+            : 'Other';
     });
     expeditions.features.sort((a, b) => a.properties.days - b.properties.days);
     for (const f of expeditions.features) {
@@ -296,6 +339,27 @@ function participantsColorFunc() {
     return ret;
 }
 
+function transportModeColorFunc() {
+    console.log(tableauColors);
+    // const cols = [
+    //     tableauColors[0][0],
+    //     tableauColors[0][1],
+    //     tableauColors[0][2],
+    //     tableauColors[0][4],
+    //     tableauColors[0][5],
+    //     tableauColors[0][6],
+    // ];
+    const cols = [...brewer6.slice(0, 5), 'grey'];
+
+    const ret = [
+        'match',
+        ['get', 'transportMode'],
+        ...transportModes.flatMap((mode, i) => [mode, cols[i]]),
+        'black',
+    ];
+    return ret;
+}
+
 function colorFunc(filters) {
     return {
         year: yearColorFunc,
@@ -304,6 +368,7 @@ function colorFunc(filters) {
         experienceMax: experienceColorFunc,
         experienceDaysMax: experienceDaysColorFunc,
         participants: participantsColorFunc,
+        transportMode: transportModeColorFunc,
     }[filters.colorVis]();
 }
 function legendColors(filters, activeColorFunc) {
@@ -384,6 +449,17 @@ function legendColors(filters, activeColorFunc) {
             vals.push([participant.name, color]);
         }
         vals.push(['Other', 'black']); // TODO don't hardcode black
+
+        vals.reverse();
+    } else if (filters.colorVis === 'transportMode') {
+        for (const transportMode of transportModes) {
+            const color = Expression.parse(activeColorFunc).evaluate(
+                feature({
+                    transportMode,
+                })
+            );
+            vals.push([transportMode, color]);
+        }
 
         vals.reverse();
     } else {
@@ -712,7 +788,6 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
             }
         });
     }
-
     EventBus.$emit('colors-change', {
         colorVis: filters.colorVis,
         colors: legendColors(filters, activeColorFunc),
