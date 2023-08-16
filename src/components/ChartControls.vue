@@ -115,6 +115,13 @@ const chartSettings = {
         y: 'reportKb',
         length: 'reportKb',
     },
+    participantCountStacked: {
+        name: 'Number of participants',
+        type: 'bar',
+        x: 'yearMonth',
+        y: 'participantsCount',
+        length: 'participantsCount',
+    },
     graticuleByParticipant: {
         name: 'Graticule by participant',
         type: 'cell',
