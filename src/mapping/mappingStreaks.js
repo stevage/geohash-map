@@ -1,4 +1,4 @@
-import { dateToDays } from './util';
+import { dateToDays } from '@/mapping/util';
 import { EventBus } from '@/EventBus';
 function makeStreaks(hashesFC) {
     const hashes = hashesFC.features;

@@ -1,5 +1,5 @@
-import { dateToDays, dateToWeekday } from './util';
-import tableauColors from './tableauColors';
+import { dateToDays, dateToWeekday } from '@/mapping/util';
+import tableauColors from '@/mapping/tableauColors';
 import { Expression } from 'mapgl-expression';
 let visibleParticipants;
 

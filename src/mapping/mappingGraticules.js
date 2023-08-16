@@ -2,7 +2,7 @@ import { EventBus } from '@/EventBus';
 import { getGraticuleBounds, dateToDays } from './util';
 import * as d3 from 'd3';
 import * as turf from '@turf/turf';
-import tableauColors from './tableauColors';
+import tableauColors from '@/mapping/tableauColors';
 
 let graticules = {};
 const string0 = (n) => (Object.is(n, -0) ? '-0' : String(n));

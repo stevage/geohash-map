@@ -1,7 +1,7 @@
 import { EventBus } from '@/EventBus';
-import { dateToDays, dateToWeekday } from './util';
-import { colorFunc, legendColors } from './colorFuncs';
-import { circleRadiusFunc } from './radiusFunc';
+import { dateToDays, dateToWeekday } from '@/mapping/util';
+import { colorFunc, legendColors } from './expeditions/colorFuncs';
+import { circleRadiusFunc } from './expeditions/radiusFunc';
 let expeditions;
 let loadedExpeditions;
 

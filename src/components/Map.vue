@@ -14,14 +14,14 @@ import {
     updateHashStyle,
     updateHashAnimation,
     resetHashAnimation,
-} from './mappingExpeditions';
-import { updateMeridians } from './mappingMeridians';
-import { updateGeohashes } from './mappingGeohashes';
+} from '@/mapping/mappingExpeditions';
+import { updateMeridians } from '@/mapping/mappingMeridians';
+import { updateGeohashes } from '@/mapping/mappingGeohashes';
 
-import { updateGraticuleStyle } from './mappingGraticules';
+import { updateGraticuleStyle } from '@/mapping/mappingGraticules';
 
-import { dateToDays, getGraticuleBounds } from './util';
-import { updateStreakStyle } from './mappingStreaks';
+import { dateToDays, getGraticuleBounds } from '@/mapping/util';
+import { updateStreakStyle } from '@/mapping/mappingStreaks';
 export default {
     data: () => ({
         filters: {
