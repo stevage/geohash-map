@@ -112,6 +112,24 @@ export async function getExpeditions(local, map) {
             : achievements.includes('Thumbs_up_geohash_achievement')
             ? 'Hitch-hiking'
             : 'Other';
+
+        f.properties.hardship = achievements.includes(
+            'MNIMB_geohash_achievement'
+        )
+            ? 'MNIMB'
+            : achievements.includes('Velociraptor_geohash_achievement')
+            ? 'Raptor attack'
+            : achievements.includes('Drowned_rat_geohash_achievement')
+            ? 'Drowned rat'
+            : achievements.includes('Trail_of_blood_consolation_prize')
+            ? 'Trail of blood'
+            : achievements.includes('MNB_geohash_consolation_prize')
+            ? 'MNB'
+            : achievements.includes('Train_wreck_geohash_consolation_prize')
+            ? 'Trainwreck'
+            : achievements.includes('Frozen_geohash_achievement')
+            ? 'Frozen'
+            : 'Other';
     });
     expeditions.features.sort((a, b) => a.properties.days - b.properties.days);
     for (const f of expeditions.features) {

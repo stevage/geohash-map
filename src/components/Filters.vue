@@ -38,6 +38,7 @@
         option(value="experienceDaysMax") Hasher's years of experience
         option(value="participants") Participant
         option(value="transportMode") Transport mode
+        option(value="hardship") Hardship
 
     label.db
       span Scale by

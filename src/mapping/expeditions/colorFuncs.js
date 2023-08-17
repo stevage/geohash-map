@@ -17,13 +17,16 @@ const brewer12 = [
     '#ffff99',
     '#b15928',
 ];
-const brewer6 = [
+const brewer9 = [
     '#e41a1c',
     '#377eb8',
     '#4daf4a',
     '#984ea3',
     '#ff7f00',
     '#ffff33',
+    '#a65628',
+    '#f781bf',
+    '#999999',
 ];
 const transportModes = [
     'Boat/swim',
@@ -35,7 +38,20 @@ const transportModes = [
     'Other',
 ];
 
-function yearColorFunc() {
+const hardships = [
+    'MNIMB',
+    'Raptor attack',
+    'Drowned rat',
+    'Trail of blood',
+    'Frozen',
+    'MNB',
+    'Trainwreck',
+    'Other',
+];
+
+const colorFuncs = {};
+
+colorFuncs.year = () => {
     const ret = [
         'interpolate-hcl',
         ['linear'],
@@ -51,9 +67,9 @@ function yearColorFunc() {
         'hsl(120, 100%, 70%)',
     ];
     return ret;
-}
+};
 
-function monthColorFunc() {
+colorFuncs.month = () => {
     const ret = [
         'interpolate-hcl',
         ['linear'],
@@ -72,8 +88,8 @@ function monthColorFunc() {
         'hsl(0, 100%, 40%)',
     ];
     return ret;
-}
-function weekdayColorFunc() {
+};
+colorFuncs.weekday = () => {
     const ret = [
         'interpolate-hcl',
         ['linear'],
@@ -93,9 +109,8 @@ function weekdayColorFunc() {
         'hsl(30, 80%, 40%)',
     ];
     return ret;
-}
-
-function experienceColorFunc() {
+};
+colorFuncs.experience = () => {
     const ret = [
         'interpolate-hcl',
         ['linear'],
@@ -112,8 +127,8 @@ function experienceColorFunc() {
         'hsl(120, 100%, 70%)',
     ];
     return ret;
-}
-function experienceDaysColorFunc() {
+};
+colorFuncs.experienceDays = () => {
     const ret = [
         'interpolate-hcl',
         ['linear'],
@@ -133,9 +148,8 @@ function experienceDaysColorFunc() {
     ];
     // console.log(ret);
     return ret;
-}
-
-function participantsColorFunc() {
+};
+colorFuncs.participants = () => {
     // TODO cache this result because it's slow to compute and a few things use this result
     // const expeditions = window.map.queryRenderedFeatures({ layers: ['expeditions-circles']});
 
@@ -177,9 +191,8 @@ function participantsColorFunc() {
     ];
     console.log(ret);
     return ret;
-}
-
-function transportModeColorFunc() {
+};
+colorFuncs.transportMode = () => {
     console.log(tableauColors);
     // const cols = [
     //     tableauColors[0][0],
@@ -189,7 +202,7 @@ function transportModeColorFunc() {
     //     tableauColors[0][5],
     //     tableauColors[0][6],
     // ];
-    const cols = [...brewer6, 'grey'];
+    const cols = [...brewer9, 'grey'];
 
     const ret = [
         'match',
@@ -198,18 +211,24 @@ function transportModeColorFunc() {
         'black',
     ];
     return ret;
-}
+};
+colorFuncs.hardship = () => {
+    const cols = [
+        ...brewer9.slice(0, hardships.length - 1),
+        'hsla(0,0%,50%,0.3)',
+    ];
 
-export function colorFunc(filters) {
-    return {
-        year: yearColorFunc,
-        month: monthColorFunc,
-        weekday: weekdayColorFunc,
-        experienceMax: experienceColorFunc,
-        experienceDaysMax: experienceDaysColorFunc,
-        participants: participantsColorFunc,
-        transportMode: transportModeColorFunc,
-    }[filters.colorVis]();
+    const ret = [
+        'match',
+        ['get', 'hardship'],
+        ...hardships.flatMap((mode, i) => [mode, cols[i]]),
+        'black',
+    ];
+    return ret;
+};
+
+export function colorFunc({ colorVis }) {
+    return colorFuncs[colorVis]();
 }
 
 export function legendColors(filters, activeColorFunc) {
@@ -300,6 +319,17 @@ export function legendColors(filters, activeColorFunc) {
                 })
             );
             vals.push([transportMode, color]);
+        }
+
+        vals.reverse();
+    } else if (filters.colorVis === 'hardship') {
+        for (const hardship of hardships) {
+            const color = Expression.parse(activeColorFunc).evaluate(
+                feature({
+                    hardship,
+                })
+            );
+            vals.push([hardship, color]);
         }
 
         vals.reverse();
