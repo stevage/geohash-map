@@ -1,3 +1,4 @@
+import U from 'map-gl-utils/noflow/index';
 export function updateMeridians({ map }) {
     const first = !map.getSource('meridians');
     if (first) {
@@ -10,7 +11,10 @@ export function updateMeridians({ map }) {
                     properties: {},
                     geometry: {
                         type: 'LineString',
-                        coordinates: [[-180, 0], [180, 0]],
+                        coordinates: [
+                            [-180, 0],
+                            [180, 0],
+                        ],
                     },
                 },
                 {
@@ -18,7 +22,10 @@ export function updateMeridians({ map }) {
                     properties: {},
                     geometry: {
                         type: 'LineString',
-                        coordinates: [[0, 90], [0, -90]],
+                        coordinates: [
+                            [0, 90],
+                            [0, -90],
+                        ],
                     },
                 },
                 {
@@ -26,21 +33,19 @@ export function updateMeridians({ map }) {
                     properties: {},
                     geometry: {
                         type: 'LineString',
-                        coordinates: [[180, 90], [180, -90]],
+                        coordinates: [
+                            [180, 90],
+                            [180, -90],
+                        ],
                     },
                 },
             ],
         });
         map.U.addLine('meridians-line', 'meridians', {
-            lineColor: [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                3,
-                '#333',
-                7,
-                '#777',
-            ],
+            lineColor: U.interpolateZoom({
+                3: '#333',
+                7: '#777',
+            }),
             lineDasharray: [4, 8],
         });
     }

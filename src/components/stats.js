@@ -1,4 +1,4 @@
-import { dateToDays, daysToDate } from '@/mapping/util';
+import { dateToDays, daysToDate } from '@//util';
 
 function computeDryStreaks({ filter } = { filter: () => true }) {
     // calculate each participant's longest dry streak: the time between expeditions

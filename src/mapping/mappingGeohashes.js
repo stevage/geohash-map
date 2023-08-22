@@ -1,4 +1,5 @@
 import { EventBus } from '@/EventBus';
+import U from 'map-gl-utils/noflow/index';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
 async function loadGeohashes(map) {
@@ -157,26 +158,14 @@ export function updateGeohashes(map) {
             visibility: 'none',
             circleColor: 'black',
             circleStrokeColor: 'hsl(50, 90%, 80%)',
-            circleStrokeWidth: [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                7,
-                1,
-                14,
-                5,
-            ],
-            circleRadius: ['interpolate', ['linear'], ['zoom'], 7, 2, 14, 5],
-            circleOpacity: ['interpolate', ['linear'], ['zoom'], 5, 0, 7, 1],
-            circleStrokeOpacity: [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                5,
-                0,
-                7,
-                1,
-            ],
+
+            circleStrokeWidth: U.interpolateZoom({ 7: 1, 14: 5 }),
+            circleRadius: U.interpolateZoom({ 7: 2, 14: 5 }),
+            circleOpacity: U.interpolateZoom({ 5: 0, 7: 1 }),
+            circleStrokeOpacity: U.interpolateZoom({
+                5: 0,
+                7: 1,
+            }),
         });
         map.U.addSymbol('geohashes-label', 'geohashes', {
             minzoom: 8,

@@ -18,9 +18,9 @@ import {
 import { updateMeridians } from '@/mapping/mappingMeridians';
 import { updateGeohashes } from '@/mapping/mappingGeohashes';
 
-import { updateGraticuleStyle } from '@/mapping/mappingGraticules';
+import { setGraticuleStyle } from '@/mapping/mappingGraticules';
 
-import { dateToDays, getGraticuleBounds } from '@/mapping/util';
+import { dateToDays, getGraticuleBounds } from '@//util';
 import { updateStreakStyle } from '@/mapping/mappingStreaks';
 export default {
     data: () => ({
@@ -227,7 +227,7 @@ export default {
                 updateHashStyle({ map: this.map, filters: this.filters })
             );
             report('graticules', () =>
-                updateGraticuleStyle({ map: this.map, filters: this.filters })
+                setGraticuleStyle({ map: this.map, filters: this.filters })
             );
             report('streaks', () =>
                 updateStreakStyle({ map, filters: this.filters })

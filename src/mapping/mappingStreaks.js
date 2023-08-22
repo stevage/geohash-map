@@ -1,4 +1,5 @@
-import { dateToDays } from '@/mapping/util';
+import U from 'map-gl-utils/noflow/index';
+import { dateToDays } from '@//util';
 import { EventBus } from '@/EventBus';
 function makeStreaks(hashesFC) {
     const hashes = hashesFC.features;
@@ -108,14 +109,14 @@ export function updateStreakStyle({ map, filters }) {
             lineColor: '#333',
             // lineDasharray: [2, 2],
             lineOpacity: 0.9,
-            lineWidth: ['interpolate', ['linear'], ['zoom'], 5, 3, 10, 6],
+            lineWidth: U.interpolateZoom({ 5: 3, 10: 6 }),
             filter,
         });
         map.U.addLine('streaks-line', 'streaks', {
             lineColor: yearColorFunc(),
             lineDasharray: [2, 2],
             lineOpacity: 0.5,
-            lineWidth: ['interpolate', ['linear'], ['zoom'], 5, 1, 10, 3],
+            lineWidth: U.interpolateZoom({ 5: 1, 10: 3 }),
             filter,
         });
     } else {

@@ -17,6 +17,7 @@
       option(value="none")
       option(value="firstParticipants") First successful participants
       option(value="lastParticipants") Last successful participants
+      option(value="history") History
 </template>
 
 <script>

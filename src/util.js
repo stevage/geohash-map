@@ -21,3 +21,5 @@ export function getGraticuleBounds(map) {
     const [maxx, maxy] = map.getBounds().toArray()[1].map(Math.ceil);
     return [minx, miny, maxx, maxy];
 }
+
+export const string0 = (n) => (Object.is(n, -0) ? '-0' : String(n));

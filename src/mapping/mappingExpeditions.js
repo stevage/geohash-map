@@ -1,3 +1,4 @@
+import U from 'map-gl-utils/noflow/index';
 import { EventBus } from '@/EventBus';
 import { colorFunc, legendColors } from './expeditions/colorFuncs';
 import { circleRadiusFunc } from './expeditions/radiusFunc';
@@ -27,41 +28,34 @@ function updateFilters({ map, filters }) {
 }
 
 function updateCircleColors({ map, filters, activeColorFunc }) {
-    map.U.setCircleColor('expeditions-glow', [
-        'step',
-        ['zoom'],
-        activeColorFunc,
-        3,
-        ['case', ['get', 'success'], activeColorFunc, 'transparent'],
-    ]);
+    map.U.setCircleColor(
+        'expeditions-glow',
+        U.stepZoom(activeColorFunc, {
+            3: ['case', ['get', 'success'], activeColorFunc, 'transparent'],
+        })
+    );
 
-    map.U.setCircleColor('expeditions-circle', [
-        'step',
-        ['zoom'],
-        activeColorFunc,
-        3,
-        ['case', ['get', 'success'], activeColorFunc, 'transparent'],
-    ]);
+    map.U.setCircleColor(
+        'expeditions-circle',
+        U.stepZoom(activeColorFunc, {
+            3: ['case', ['get', 'success'], activeColorFunc, 'transparent'],
+        })
+    );
 }
 
 function glowCircleColor(activeColorFunc) {
-    return [
-        'step',
-        ['zoom'],
+    return U.stepZoom(activeColorFunc, 3, [
+        'case',
+        ['get', 'success'],
         activeColorFunc,
-        3,
-        ['case', ['get', 'success'], activeColorFunc, 'transparent'],
-    ];
+        'transparent',
+    ]);
 }
 
 function circlesCircleColor(activeColorFunc) {
-    return [
-        'step',
-        ['zoom'],
-        activeColorFunc,
-        3,
-        ['case', ['get', 'success'], activeColorFunc, 'transparent'],
-    ];
+    return U.stepZoom(activeColorFunc, {
+        3: ['case', ['get', 'success'], activeColorFunc, 'transparent'],
+    });
 }
 
 function circlesStrokeColor(activeColorFunc) {
@@ -118,26 +112,28 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
     map.U.addCircle('expeditions-circles', 'expeditions', {
         circleColor: circlesCircleColor(activeColorFunc),
         circleStrokeColor: circlesStrokeColor(activeColorFunc),
-        circleStrokeWidth: [
-            'step',
-            ['zoom'],
-            ['case', ['get', 'global'], 0, 0],
-            1,
-            ['case', ['get', 'global'], 1, 0],
-            3,
-            ['case', ['get', 'global'], 2, ['case', ['get', 'success'], 0, 2]],
-            6,
-            [
+        circleStrokeWidth: U.stepZoom(['case', ['get', 'global'], 0, 0], {
+            1: ['case', ['get', 'global'], 1, 0],
+            3: [
+                'case',
+                ['get', 'global'],
+                2,
+                ['case', ['get', 'success'], 0, 2],
+            ],
+            6: [
                 'case',
                 ['get', 'global'],
                 2,
                 ['case', ['get', 'success'], 0.5, 2],
             ],
 
-            8,
-            ['case', ['get', 'global'], 4, ['case', ['get', 'success'], 1, 2]],
-        ],
-
+            8: [
+                'case',
+                ['get', 'global'],
+                4,
+                ['case', ['get', 'success'], 1, 2],
+            ],
+        }),
         circleRadius: circleRadiusFunc({ filters }),
         circleSortKey: ['get', 'days'],
         // circleOpacity: ['case', ['feature-state', 'show'], 1, 0],
@@ -152,26 +148,20 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
         circleBlur: 0.2,
     });
     map.U.addCircle('expeditions-flash', 'expeditions', {
-        circleColor: [
-            'step',
-            ['zoom'],
-            activeColorFunc,
-            4,
-            [
+        circleColor: U.stepZoom(activeColorFunc, {
+            4: [
                 'case',
                 ['get', 'success'],
                 activeColorFunc,
                 'transparent' /*'hsl(180,0%,90%)'*/,
             ],
-        ],
+        }),
         circleStrokeColor: [
             'case',
             ['get', 'success'],
             'hsla(0,0%,30%,0.5)',
             activeColorFunc,
         ],
-        // circleStrokeWidth: ['step', ['zoom'], 0, 6, 0.5, 8, 1],
-
         circleRadius: circleRadiusFunc({ isFlash: true, filters }),
         circleSortKey: ['get', 'days'],
         // circleOpacity: ['case', ['feature-state', 'show'], 1, 0],
@@ -180,21 +170,17 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
         circleBlur: 1.5,
     });
     map.U.addSymbol('expeditions-label', 'expeditions', {
-        textField: [
-            'step',
-            ['zoom'],
-            ['slice', ['get', 'id'], 0, 4],
-            11,
-            ['slice', ['get', 'id'], 0, 10],
-            12,
-            [
+        textField: U.stepZoom(['slice', ['get', 'id'], 0, 4], {
+            11: ['slice', ['get', 'id'], 0, 10],
+            12: [
                 'concat',
                 ['slice', ['get', 'id'], 0, 10],
                 '\n',
                 ['get', 'participantsString'],
             ],
-        ],
-        textSize: ['interpolate', ['linear'], ['zoom'], 10, 10, 12, 12],
+        }),
+        textSize: U.interpolateZoom({ 10: 10, 12: 12 }),
+        // textSize: ['interpolate', ['linear'], ['zoom'], 10, 10, 12, 12],
         textOffset: [0, 1.5],
         textColor: activeColorFunc, //dark ? '#bbb' : 'black',
         textHaloColor: dark ? 'hsla(0,0%,0%,0.4)' : 'hsla(0,0%,100%,0.5)',

@@ -1,3 +1,4 @@
+import U from 'map-gl-utils/noflow/index';
 export function circleRadiusFunc({
     isGlow,
     isFlash,
@@ -42,22 +43,13 @@ export function circleRadiusFunc({
             r,
         }[filters.scaleExpeditionsBy]);
 
-    return [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        1,
-        isFlash ? 5 : isGlow ? 0 : getRadius(1),
-        3,
-        isFlash ? 10 : isGlow ? getRadius(1) : getRadius(1),
-        5,
-        isFlash ? 15 : getRadius(2),
-        8,
-        getRadius(3),
-
-        10,
-        getRadius(4),
-        12,
-        isGlow ? getRadius(16) : getRadius(10),
-    ];
+    // new way
+    return U.interpolateZoom({
+        1: isFlash ? 5 : isGlow ? 0 : getRadius(1),
+        3: isFlash ? 10 : isGlow ? getRadius(1) : getRadius(1),
+        5: isFlash ? 15 : getRadius(2),
+        8: getRadius(3),
+        10: getRadius(4),
+        12: isGlow ? getRadius(16) : getRadius(10),
+    });
 }

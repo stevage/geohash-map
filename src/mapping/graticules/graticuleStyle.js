@@ -1,0 +1,206 @@
+import tableauColors from '@/mapping/tableauColors';
+import U from 'map-gl-utils/noflow/index';
+const virginFillColor = [
+    'case',
+    ['>', ['get', 'successes'], 0],
+    'transparent',
+    'hsla(0,0%,30%,0.2)',
+];
+
+export function addGraticuleLayers(map) {
+    map.U.addGeoJSON('graticules');
+
+    map.U.addLine('graticules-line', 'graticules', {
+        // lineOffset: 0.5,
+        lineColor: [
+            'case',
+            ['>', ['get', 'successes'], 0],
+            // '#ccc',
+            // 'hsla(0,0%,30%,0.2)',
+            'hsla(0,0%,30%,0.15)',
+            'hsla(0,0%,30%,0.15)',
+            // '#ffc',
+        ],
+        lineOpacity: U.interpolateZoom({ 5: 0, 6: 1 }),
+
+        minzoom: 4,
+        filter: ['==', ['get', 'type'], 'graticule'],
+    });
+
+    map.U.addFill('graticules-fill', 'graticules', {
+        fillColor: virginFillColor,
+        fillOutlineColor: 'transparent',
+        fillOpacity: U.interpolateZoom({ 3: 0, 4: 1 }),
+        minzoom: 3,
+
+        // lineColor: 'red',
+        filter: ['==', ['get', 'type'], 'graticule'],
+    });
+    map.U.addSymbol('graticules-label', 'graticules', {
+        textField: U.stepZoom(['get', 'nameShort'], {
+            9: ['get', 'name'],
+            11: ['get', 'nameLong'],
+        }),
+        textAnchor: 'top-left',
+        // textColor: 'hsla(0,0%,15%,0.9)',
+        textColor: 'hsla(0,0%,50%,0.9)',
+        textSize: 12,
+        textJustify: 'left',
+        textMaxWidth: 150,
+        filter: ['==', ['get', 'type'], 'graticule-label'],
+        minzoom: 7,
+    });
+    // TODO: depend on a setting
+    map.U.addSymbol('graticules-center-label', 'graticules', {
+        textField: '',
+
+        textAnchor: 'center',
+        textColor: 'hsla(60,100%,80%,0.9)',
+        textSize: U.interpolateZoom({ 5: 8, 8: 18 }),
+        textJustify: 'center',
+        textMaxWidth: 150,
+        filter: ['==', ['get', 'type'], 'graticule-center-label'],
+        minzoom: 5,
+    });
+}
+
+function graticuleColorByParticipantsFunc(type) {
+    // const bounds = map.getBounds();
+    // TODO filter out dupes
+    // const visibleGraticules = window.app.graticules.features.filter(
+    //     (f) =>
+    //         // probably a faster, more direct way to get this, but then we need to deal with signs etc
+    //         bounds.contains(f.geometry.coordinates[0][0]) ||
+    //         bounds.contains(f.geometry.coordinates[0][2])
+    // );
+    // TODO filter out dupes
+    const visibleGraticules = map.queryRenderedFeatures({
+        layers: ['graticules-fill'],
+    });
+    const firstParticipants = {};
+    const lastParticipants = {};
+    for (const f of visibleGraticules) {
+        const g =
+            window.graticules[f.properties.x] &&
+            window.graticules[f.properties.x][f.properties.y];
+        if (!g) {
+            continue;
+        }
+        // const firstName = g.firstParticipants.match(/\\n/) ? 'multiple': g.firstParticipants;
+        // const lastName = g.lastParticipants.match(/\\n/) ? 'multiple': g.lastParticipants;
+        // for (const p of g.firstParticipants.split('\n')) {
+        //     firstParticipants[p] = (firstParticipants[p] || 0) + 1;
+        // }
+        // for (const p of g.lastParticipants.split('\n')) {
+        //     lastParticipants[p] = (lastParticipants[p] || 0) + 1;
+        // }
+
+        firstParticipants[g.firstParticipantsOrMultiple] =
+            (firstParticipants[g.firstParticipantsOrMultiple] || 0) + 1;
+        lastParticipants[g.lastParticipantsOrMultiple] =
+            (lastParticipants[g.lastParticipantsOrMultiple] || 0) + 1;
+    }
+    const scheme = [[0, 255, 0], ...tableauColors[3]];
+    const participantList = Object.entries(
+        type === 'firstParticipants' ? firstParticipants : lastParticipants
+    )
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, scheme.length);
+    console.log(participantList);
+
+    const ret = [
+        'match',
+        [
+            'get',
+            type === 'firstParticipants'
+                ? 'firstParticipantsOrMultiple'
+                : 'lastParticipantsOrMultiple',
+        ],
+        ...participantList.flatMap(([participant, expeditionCount], i) => [
+            participant,
+            `rgb(${scheme[i]})`,
+        ]),
+        'black',
+    ];
+    console.log(ret);
+    return ret;
+}
+
+const colorFunc = {
+    virgin: () => virginFillColor,
+    none: () => 'transparent',
+    expeditions: () => [
+        'interpolate-hcl',
+        ['linear'],
+        ['get', 'expeditions'],
+        0,
+        'hsla(0,0%,100%,0.3)',
+        100,
+        'hsla(0,0%,100%,0)',
+    ],
+    ratio: () => [
+        'case',
+        ['>', ['get', 'expeditions'], 0],
+        [
+            'interpolate-hcl',
+            ['linear'],
+            ['/', ['get', 'successes'], ['get', 'expeditions']],
+            0,
+            'hsla(0,100%,50%,0.3)',
+            1,
+            'hsla(240,100%,50%,0.3)',
+        ],
+        'transparent',
+    ],
+    // TODO:  align these colors with the expedition colorss
+    daysSinceExpedition: () => [
+        'interpolate-hcl',
+        ['linear'],
+        ['get', 'daysSinceExpedition'],
+        0,
+        'hsla(120,100%,50%,0.3)',
+        1 * 365,
+        'hsla(0,100%,50%,0.3)',
+        5 * 365,
+        'hsla(240,100%,50%,0.3)',
+    ],
+    totalParticipants: () => [
+        'interpolate-hcl',
+        ['linear'],
+        ['get', 'totalParticipants'],
+        0,
+        'hsla(0,100%,50%,0.3)',
+        20,
+        'hsla(100,100%,50%,0.3)',
+    ],
+    firstParticipants: () =>
+        graticuleColorByParticipantsFunc('firstParticipants'),
+    lastParticipants: () =>
+        graticuleColorByParticipantsFunc('lastParticipants'),
+};
+
+export function updateGraticuleStyle(map, options) {
+    map.U.toggle(
+        ['graticules-line', 'graticules-fill'],
+        options.showGraticules
+    );
+    map.U.toggle(
+        'graticules-label',
+        options.showGraticules && options.showGraticuleLabels
+    );
+    // map.U.toggle(
+    //     'graticules-fill',
+    //     options.showGraticules && options.fillStyle !== 'none'
+    // );
+    // console.log('colorFunc', colorFunc);
+    map.U.setFillColor('graticules-fill', colorFunc[options.fillStyle]());
+    map.U.setTextField(
+        'graticules-center-label',
+        {
+            firstParticipants: ['get', 'firstParticipants'],
+            lastParticipants: ['get', 'lastParticipants'],
+            history: ['get', 'history'],
+            none: '',
+        }[options.infoLabel]
+    );
+}

@@ -1,4 +1,4 @@
-import { dateToDays, dateToWeekday } from '@/mapping/util';
+import { dateToDays, dateToWeekday } from '@//util';
 import tableauColors from '@/mapping/tableauColors';
 import { Expression } from 'mapgl-expression';
 let visibleParticipants;

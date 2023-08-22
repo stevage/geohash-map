@@ -1,4 +1,4 @@
-import { dateToDays, dateToWeekday } from '@/mapping/util';
+import { dateToDays, dateToWeekday } from '@//util';
 import { EventBus } from '@/EventBus';
 
 /* TODO:
