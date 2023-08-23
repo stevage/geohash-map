@@ -14,10 +14,14 @@
   .db.mv3
     .dib(style="width:3rem") Text:
     select(v-model="graticules.infoLabel")
-      option(value="none")
-      option(value="firstParticipants") First successful participants
-      option(value="lastParticipants") Last successful participants
-      option(value="history") History
+        option(value="none")
+        option(value="ratio") Success ratio
+        option(value="expeditions") Expedition count
+        option(value="daysSinceExpedition") Recently active
+        option(value="totalParticipants") Total participants
+        option(value="firstParticipants") First successful participants
+        option(value="lastParticipants") Recent successful participants
+        option(value="history") History
 </template>
 
 <script>
@@ -34,7 +38,20 @@ export default {
     created() {
         window.GraticuleOptions = this;
     },
+    computed: {
+        graticuleFillStyle() {
+            return this.graticules.fillStyle;
+        },
+    },
     watch: {
+        graticuleFillStyle() {
+            if (
+                this.graticules.fillStyle !== 'none' &&
+                this.graticules.fillStyle !== 'virgin'
+            ) {
+                this.graticules.infoLabel = this.graticules.fillStyle;
+            }
+        },
         graticules: {
             deep: true,
             handler() {

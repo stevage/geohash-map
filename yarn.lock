@@ -5726,6 +5726,11 @@ human-signals@^2.1.0:
   resolved "https://registry.yarnpkg.com/human-signals/-/human-signals-2.1.0.tgz#dc91fcba42e4d06e4abaed33b3e7a3c02f514ea0"
   integrity sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==
 
+humanize-duration@^3.29.0:
+  version "3.29.0"
+  resolved "https://registry.yarnpkg.com/humanize-duration/-/humanize-duration-3.29.0.tgz#beffaf7938388cd0f38c494f8970d6faebecf3c0"
+  integrity sha512-G5wZGwYTLaQAmYqhfK91aw3xt6wNbJW1RnWDh4qP1PvF4T/jnkjx2RVhG5kzB2PGsYGTn+oSDBQp+dMdILLxcg==
+
 iconv-lite@0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.24.tgz#2022b4b25fbddc21d2f524974a474aafe733908b"
@@ -6527,11 +6532,6 @@ mapbox-expression@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/mapbox-expression/-/mapbox-expression-0.0.3.tgz#a77ebda376879d85391cbe5e7855e1625eb9dc67"
   integrity sha512-P2hiPXPxXzmOTZUP2zLa+kjN42QbvAM125tH/akt+hdOOu4QgxAvXGcffiKMLVxOFE28vceD8Qc11gWUbnkc/A==
-
-mapbox-gl-utils@^0.39.0:
-  version "0.39.0"
-  resolved "https://registry.yarnpkg.com/mapbox-gl-utils/-/mapbox-gl-utils-0.39.0.tgz#05413a5f4e34c2b8b544bcfbff27db319830e018"
-  integrity sha512-ECgcZVfJRZzBgls2Wjz0LjEm9V/96wIsBSOOrMxwByknLfuRScrfqtBTFVB9FK0LHOTB67+WXAi3ogeIASdZ6A==
 
 mapbox-gl@^2.12.1:
   version "2.12.1"

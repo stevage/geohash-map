@@ -197,10 +197,14 @@ export function updateGraticuleStyle(map, options) {
     map.U.setTextField(
         'graticules-center-label',
         {
-            firstParticipants: ['get', 'firstParticipants'],
-            lastParticipants: ['get', 'lastParticipants'],
-            history: ['get', 'history'],
             none: '',
-        }[options.infoLabel]
+
+            // daysSinceExpedition: [
+            //     'case',
+            //     ['has', 'daysSinceExpedition'],
+            //     ['get', 'daysSinceExpedition'],
+            //     '',
+            // ],
+        }[options.infoLabel] || ['get', options.infoLabel]
     );
 }

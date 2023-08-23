@@ -1,5 +1,6 @@
 import { string0 } from '@/util';
 import * as turf from '@turf/turf';
+import humanizeDuration from 'humanize-duration';
 export function makeGraticuleFeatures({ graticuleNames, graticuleStats, map }) {
     function getGraticuleStats(x, y) {
         return (
@@ -76,6 +77,7 @@ export function makeGraticuleFeatures({ graticuleNames, graticuleStats, map }) {
                 const g = window.graticules[x] && window.graticules[x][y];
                 const splitBy10 = (string) =>
                     string.match(/.{1,10}/g).join('\n');
+                const gstats = getGraticuleStats(x, y);
                 graticuleCenterLabels.push(
                     turf.point([labelCenterX, labelCenterY], {
                         type: 'graticule-center-label',
@@ -88,6 +90,22 @@ export function makeGraticuleFeatures({ graticuleNames, graticuleStats, map }) {
                         firstParticipants: g && g.firstParticipants,
                         lastParticipants: g && g.lastParticipants,
                         history: g && splitBy10(g.history),
+                        ...gstats,
+                        daysSinceExpedition:
+                            gstats.daysSinceExpedition !== undefined
+                                ? humanizeDuration(
+                                      gstats.daysSinceExpedition * 86400000,
+                                      {
+                                          largest: 2,
+                                          round: true,
+                                      }
+                                  )
+                                : '',
+                        ratio: gstats.expeditions
+                            ? Math.round(
+                                  (gstats.successes / gstats.expeditions) * 100
+                              ) + '%'
+                            : '',
                     })
                 );
             }
