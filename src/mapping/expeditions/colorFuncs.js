@@ -1,6 +1,8 @@
 import { dateToDays, dateToWeekday } from '@//util';
 import tableauColors from '@/mapping/tableauColors';
 import { Expression } from 'mapgl-expression';
+import md5 from '@/md5';
+import dominanceColors from './dominanceColors';
 let visibleParticipants;
 
 const brewer12 = [
@@ -149,6 +151,35 @@ colorFuncs.experienceDays = () => {
     // console.log(ret);
     return ret;
 };
+
+// this is supposed to match https://github.com/keisentraut/geohashing-dominance/blob/main/colors.py
+// but apparently doesn't. very hard to debug. so we use https://nr47.hohenpoelz.de/geohashing/colors.txt
+function participantDominanceColor(participant) {
+    const HARD_COLORS = {
+        Multiple: (0, 255, 0), // my thing
+        Klaus: (255, 0, 0),
+        Fippe: (0, 255, 0),
+        GeorgDerReisende: (0, 0, 255),
+    };
+    if (HARD_COLORS[participant]) return `rgb(${HARD_COLORS[participant]})`;
+    let r = 0,
+        g = 0,
+        b = 0;
+    let digest = md5(participant);
+    let color = '';
+    while (!color) {
+        // original uses md5.digest (array of bytes), hopefully it's the same if take pairs of hex digits
+        r = parseInt(digest.slice(0, 2), 16);
+        g = parseInt(digest.slice(2, 4), 16);
+        b = parseInt(digest.slice(4, 6), 16);
+        if (r + g + b < 256 && r + g + b < 512) {
+            return `rgb(${r},${g},${b})`;
+        }
+        digest = md5(digest);
+    }
+    return color;
+}
+
 colorFuncs.participants = () => {
     // TODO cache this result because it's slow to compute and a few things use this result
     // const expeditions = window.map.queryRenderedFeatures({ layers: ['expeditions-circles']});
@@ -185,7 +216,13 @@ colorFuncs.participants = () => {
         ['get', 'participantsOrMultiple'],
         ...visibleParticipants.flatMap((participant, i) => [
             participant.name,
-            `rgb(${scheme[i]})`,
+            // `rgb(${scheme[i]})`,
+            // participantDominanceColor(participant.name),
+            participant.name === 'Multiple'
+                ? 'hsl(120,100%,30%)'
+                : dominanceColors[participant.name]
+                ? `${dominanceColors[participant.name]}`
+                : `black`,
         ]),
         'black',
     ];

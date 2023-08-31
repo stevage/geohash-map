@@ -7,7 +7,7 @@
 // import 'maplibre-gl/dist/maplibre-gl.css';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-dev';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import U from 'map-gl-utils';
+import U from 'map-gl-utils/noflow/index';
 import { EventBus } from '../EventBus';
 
 import {
@@ -22,6 +22,7 @@ import { setGraticuleStyle } from '@/mapping/mappingGraticules';
 
 import { dateToDays, getGraticuleBounds } from '@//util';
 import { updateStreakStyle } from '@/mapping/mappingStreaks';
+import { initMappingRegions } from '@/mapping/mappingRegions';
 export default {
     data: () => ({
         filters: {
@@ -76,46 +77,23 @@ export default {
         window.app.Map = this;
 
         await map.U.onLoad();
-        if (0 && this.globe) {
-            map.addLayer({
-                id: 'sky',
-                type: 'sky',
-                /*paint: {
-                    'sky-opacity': [
-                        'interpolate',
-                        ['linear'],
-                        ['zoom'],
-                        0,
-                        0,
-                        5,
-                        0.3,
-                        8,
-                        1,
-                    ],
-                    // set up the sky layer for atmospheric scattering
-                    'sky-type': 'atmosphere',
-                    // explicitly set the position of the sun rather than allowing the sun to be attached to the main light source
-                    // 'sky-atmosphere-sun': getSunPosition(),
-                    // set the intensity of the sun as a light source (0-100 with higher values corresponding to brighter skies)
-                    'sky-atmosphere-sun-intensity': 5,
-                },*/
-                paint: {
-                    /*                    'sky-type': 'gradient',
-                    'sky-gradient': [
-                        'interpolate',
-                        ['linear'],
-                        ['sky-radial-progress'],
-                        0.8,
-                        'hsl(260,60%,20%)',
-                        1,
-                        'black',
-                    ],
-                    'sky-gradient-radius': 180,
-                    'sky-opacity': 1,*/
-                    'sky-atmosphere-color': 'black',
-                },
-            });
-        }
+        map.U.addRasterSource('dominance', {
+            tiles: [
+                // 'https://nr47.hohenpoelz.de/geohashing/output/{z}/{x}/{y}.png',
+                `https://fippe-geojson.glitch.me/dominance/geohashing/output/{z}/{x}/{y}.png`,
+            ],
+            tileSize: 256,
+            type: 'raster',
+            minzoom: 0,
+            maxzoom: 9,
+        });
+        map.U.addRasterLayer('dominance', 'dominance', {
+            rasterOpacity: U.interpolateZoom({ 5: 0.25, 12: 0.1 }),
+
+            visibility: 'none',
+        });
+        // initMappingRegions(map);
+
         if (this.globe && !window.location.hash.match(/bug/)) {
             map.addSource('mapbox-dem', {
                 type: 'raster-dem',
@@ -141,6 +119,7 @@ export default {
         });
         map.on('moveend', () => {
             try {
+                EventBus.$emit('moveend');
                 window.localStorage.setItem(
                     'center',
                     map.getCenter().toArray().join(',') + ',' + map.getZoom()

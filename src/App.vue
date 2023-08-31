@@ -19,6 +19,8 @@
                         ChartControls.ml2
                         HashStats.ml2
                         AnimationControls.ml2
+                        DominanceControls.ml2
+                        //- RegionControls.ml2
                     div(v-if="tab === 'geohash'")
                         HashInfo
                     div(v-if="tab === 'graticules'")
@@ -39,6 +41,7 @@
 </template>
 
 <script>
+import { EventBus } from './EventBus';
 import Map from './components/Map.vue';
 import ExpeditionInfo from './components/ExpeditionInfo.vue';
 import Legend from '@/components/Legend.vue';
@@ -50,8 +53,9 @@ import ChartControls from '@/components/ChartControls.vue';
 import Chart from '@/components/Chart.vue';
 import GraticuleInfo from '@/components/GraticuleInfo.vue';
 import GraticuleOptions from '@/components/GraticuleOptions.vue';
+import RegionControls from '@/components/RegionControls.vue';
+import DominanceControls from '@/components/DominanceControls.vue';
 
-import { EventBus } from './EventBus';
 import './components/stats';
 window.app = {
     yearColors:
@@ -74,6 +78,8 @@ export default {
         Chart,
         GraticuleInfo,
         GraticuleOptions,
+        RegionControls,
+        DominanceControls,
     },
     data() {
         return {
@@ -260,5 +266,15 @@ body,
     .not-mobile {
         display: none;
     }
+}
+
+a,
+a:visited {
+    text-decoration: none;
+    color: hsl(230, 40%, 70%);
+}
+a:hover {
+    color: hsl(230, 40%, 80%);
+    text-decoration: underline;
 }
 </style>

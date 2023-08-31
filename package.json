@@ -24,6 +24,9 @@
     "mapbox-gl": "^2.12.1",
     "mapgl-expression": "^0.0.4",
     "maplibre-gl": "^1.15.2",
+    "md5": "^2.3.0",
+    "polygon-splitter": "^0.0.11",
+    "polygonize": "^1.0.4",
     "vue": "^2.5.21"
   },
   "devDependencies": {
@@ -56,7 +59,8 @@
       "no-undef": 1,
       "no-unused-vars": 1,
       "no-constant-condition": 1,
-      "vue/return-in-computed-property": 1
+      "vue/return-in-computed-property": 1,
+      "no-unreachable": 1
     },
     "parserOptions": {
       "parser": "@babel/eslint-parser"
