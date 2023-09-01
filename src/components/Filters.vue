@@ -1,30 +1,34 @@
 <template lang="pug">
 #Filters.mt4(:class="{ disabled: !enabled }")
-  h3.mb2 Filter expeditions
+  h3.mb2 Expeditions
   .group
-    label.mb2
-      div Participant name
-      input.mr1(type="text" v-model="filters.participants" :disabled="!enabled")
-    label.mv2.db
-      .dib.mr1 At least
-      input.mr1.w3.dib(type="number" size="2" v-model.number="filters.minParticipants" min="0" :disabled="!enabled")
-      .dib participants
-    label.mv2.db
-      .dib.mr1 At most
-      input.mr1.w3.dib(type="number" size="2" v-model.number="filters.maxParticipants" max="100" :disabled="!enabled")
-      .dib participants
-    label.mv2.dib
-      div.dib Between
-      input.w3.dib.mr1.ml1(type="number" v-model.number="filters.minYear" min="2008" :max="filters.maxYear" :disabled="!enabled")
-    label.dib
-      .dib and
-      input.dib.w3.mr1.ml1(type="number" v-model.number="filters.maxYear" min="2008" max="2030" :disabled="!enabled")
+    label.pointer.mb2.db(for="showfilters")
+      input#showfilters(type="checkbox" v-model="showFilters" :disabled="!enabled")
+      span  Filter
+    div(v-if="showFilters")
+      label.mb2
+        span.mr2 Participant
+        input.mr1(type="text" v-model="filters.participants" :disabled="!enabled")
+      div.mt3.mb3
+      label.mv2
+        .dib.mr1 From
+        input.mr1.w3.dib(type="number" size="2" v-model.number="filters.minParticipants" min="0" :disabled="!enabled")
+      label.mv2
+        .dib.mr1 to
+        input.mr1.w3.dib(type="number" size="2" v-model.number="filters.maxParticipants" max="100" :disabled="!enabled")
+        .dib participants
+      label.mv2.dib
+        div.dib Between
+        input.w3.dib.mr1.ml1(type="number" v-model.number="filters.minYear" min="2008" :max="filters.maxYear" :disabled="!enabled")
+      label.dib
+        .dib and
+        input.dib.w3.mr1.ml1(type="number" v-model.number="filters.maxYear" min="2008" max="2030" :disabled="!enabled")
 
-    label.mv2.db
-    select(v-model="filters.outcome" :disabled="!enabled")
-      option(value="all") All expeditions
-      option(value="success") Successful expeditions
-      option(value="failure") Failed expeditions
+      label.mv2.db
+      select(v-model="filters.outcome" :disabled="!enabled")
+        option(value="all") All expeditions
+        option(value="success") Successful expeditions
+        option(value="failure") Failed expeditions
 
   h3.mb1 Map
   .group
@@ -89,6 +93,7 @@ export default {
     name: 'Filters',
     data: () => ({
         enabled: true,
+        showFilters: true,
         filters: {
             participants: '',
             minParticipants: 0,

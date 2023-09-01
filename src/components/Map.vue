@@ -87,11 +87,16 @@ export default {
             minzoom: 0,
             maxzoom: 9,
         });
-        map.U.addRasterLayer('dominance', 'dominance', {
-            rasterOpacity: U.interpolateZoom({ 5: 0.25, 12: 0.1 }),
+        map.U.addRasterLayer(
+            'dominance',
+            'dominance',
+            {
+                rasterOpacity: U.interpolateZoom({ 5: 0.25, 12: 0.1 }),
 
-            visibility: 'none',
-        });
+                visibility: 'none',
+            },
+            'building'
+        );
         // initMappingRegions(map);
 
         if (this.globe && !window.location.hash.match(/bug/)) {

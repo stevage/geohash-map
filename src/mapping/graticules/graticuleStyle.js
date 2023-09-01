@@ -77,8 +77,12 @@ function graticuleColorByParticipantsFunc(type) {
     const visibleGraticules = map.queryRenderedFeatures({
         layers: ['graticules-fill'],
     });
-    const firstParticipants = {};
-    const lastParticipants = {};
+    const counts = {};
+    // const firstParticipants = {};
+    // const lastParticipants = {};
+    // const mostSuccessfulParticipants = {};
+    const field = `${type}OrMultiple`;
+
     for (const f of visibleGraticules) {
         const g =
             window.graticules[f.properties.x] &&
@@ -94,33 +98,39 @@ function graticuleColorByParticipantsFunc(type) {
         // for (const p of g.lastParticipants.split('\n')) {
         //     lastParticipants[p] = (lastParticipants[p] || 0) + 1;
         // }
-
-        firstParticipants[g.firstParticipantsOrMultiple] =
-            (firstParticipants[g.firstParticipantsOrMultiple] || 0) + 1;
-        lastParticipants[g.lastParticipantsOrMultiple] =
-            (lastParticipants[g.lastParticipantsOrMultiple] || 0) + 1;
+        counts[g[field]] = (counts[g[field]] || 0) + 1;
     }
-    const scheme = [[0, 255, 0], ...tableauColors[3]];
-    const participantList = Object.entries(
-        type === 'firstParticipants' ? firstParticipants : lastParticipants
-    )
+    const scheme = tableauColors[3].map((rgb) => `rgb(${rgb})`);
+    const participantList = Object.entries(counts)
+        .filter(
+            ([participant]) =>
+                participant !== 'multiple' && participant !== 'none'
+        )
+
         .sort((a, b) => b[1] - a[1])
         .slice(0, scheme.length);
     console.log(participantList);
 
+    const noneColor = 'hsla(0,0%,0%,0.3)';
+
     const ret = [
-        'match',
+        'case',
+        ['has', field],
         [
-            'get',
-            type === 'firstParticipants'
-                ? 'firstParticipantsOrMultiple'
-                : 'lastParticipantsOrMultiple',
+            'match',
+            ['get', field],
+            ...participantList.flatMap(([participant, expeditionCount], i) => [
+                participant,
+                scheme[i],
+            ]),
+            'multiple',
+            'hsl(100, 0%,30%)',
+
+            'none',
+            noneColor,
+            'hsl(100, 30%,30%)',
         ],
-        ...participantList.flatMap(([participant, expeditionCount], i) => [
-            participant,
-            `rgb(${scheme[i]})`,
-        ]),
-        'black',
+        noneColor,
     ];
     console.log(ret);
     return ret;
@@ -177,9 +187,12 @@ const colorFunc = {
         graticuleColorByParticipantsFunc('firstParticipants'),
     lastParticipants: () =>
         graticuleColorByParticipantsFunc('lastParticipants'),
+    mostSuccessfulParticipants: () =>
+        graticuleColorByParticipantsFunc('mostSuccessfulParticipants'),
 };
 
 export function updateGraticuleStyle(map, options) {
+    console.log(options.fillStyle);
     map.U.toggle(
         ['graticules-line', 'graticules-fill'],
         options.showGraticules

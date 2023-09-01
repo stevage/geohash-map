@@ -29,8 +29,8 @@ export function makeGraticuleStats({ local, ...hashes }) {
         window.expeditionsByGraticule[`${y},${x}`] =
             window.expeditionsByGraticule[`${y},${x}`] || [];
         window.expeditionsByGraticule[`${y},${x}`].push(expedition);
-        window.graticulesById[`${y},${x}`] = graticules[x][y];
         const g = graticules[x][y];
+        window.graticulesById[`${y},${x}`] = g;
         g.id = `${y},${x}`;
         g.expeditions++;
         if (expedition.properties.success) {
@@ -65,8 +65,13 @@ export function makeGraticuleStats({ local, ...hashes }) {
             dateToDays(new Date()) - expedition.properties.days;
 
         g.participants = g.participants || {};
+        g.participantsSuccesses = g.participantsSuccesses || {};
         for (const p of expedition.properties.participants) {
-            g.participants[p] = true;
+            g.participants[p] = (g.participants[p] || 0) + 1;
+            if (expedition.properties.success) {
+                g.participantsSuccesses[p] =
+                    (g.participantsSuccesses[p] || 0) + 1;
+            }
         }
         g.totalParticipants = Object.keys(g.participants).length;
 
@@ -78,5 +83,31 @@ export function makeGraticuleStats({ local, ...hashes }) {
             window.maxParticipantsGraticule = `${x},${y}`;
         }
     }
+    // TODO calculate most successful participant per graticule
+    for (const [id, g] of Object.entries(window.graticulesById)) {
+        const successes = Object.entries(g.participantsSuccesses);
+        if (successes.length === 0) {
+            // g.mostSuccessfulParticipant = 'none';
+            g.mostSuccessfulParticipantCount = 0;
+            g.mostSuccessfulParticipantsOrMultiple = 'none';
+            continue;
+        }
+        g.mostSuccessfulParticipantCount = successes.sort(
+            (a, b) => b[1] - a[1]
+        )[0][1];
+        g.mostSuccessfulParticipants = successes
+            .filter(([p, count]) => count === g.mostSuccessfulParticipantCount)
+            .map(([id, count]) => id)
+            .join('\n');
+        g.mostSuccessfulParticipantsOrMultiple =
+            successes.filter(
+                ([p, count]) => count === g.mostSuccessfulParticipantCount
+            ).length > 1
+                ? 'multiple'
+                : successes.filter(
+                      ([p, count]) => count === g.mostSuccessfulParticipantCount
+                  )[0][0];
+    }
+
     return graticules;
 }
