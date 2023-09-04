@@ -5,6 +5,7 @@
   p Total area: {{ Math.round(info.area /1e6).toLocaleString() }} km<sup>2</sup>. {{ percentWater }} % water.
 
 
+  GraticuleRecords(v-if="info" :info="info.graticule.properties")
 
   div.h5.overflow-y-scroll
     h3 {{ expeditions.length }} expeditions
@@ -30,11 +31,13 @@
 
 <script>
 import { EventBus } from '@/EventBus';
+import GraticuleRecords from '@/components/GraticuleRecords.vue';
 export default {
     name: 'GraticuleInfo',
     data: () => ({
         info: undefined,
     }),
+    components: { GraticuleRecords },
     created() {
         window.GraticuleInfo = this;
         EventBus.$on('show-graticule-info', (info) => (this.info = info));
