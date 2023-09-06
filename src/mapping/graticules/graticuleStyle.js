@@ -62,6 +62,10 @@ export function addGraticuleLayers(map) {
         filter: ['==', ['get', 'type'], 'graticule-center-label'],
         minzoom: 5,
     });
+    map.U.addGeoJSON('selected-graticule');
+    map.U.addLine('selected-graticule-line', 'selected-graticule', {
+        lineColor: 'hsla(60,100%,50%,0.5)',
+    });
 }
 
 function graticuleColorByParticipantsFunc(type) {
@@ -192,9 +196,10 @@ const colorFunc = {
 };
 
 export function updateGraticuleStyle(map, options) {
+    console.log(options);
     console.log(options.fillStyle);
     map.U.toggle(
-        ['graticules-line', 'graticules-fill'],
+        ['graticules-line', 'graticules-fill', 'selected-graticule-line'],
         options.showGraticules
     );
     map.U.toggle(

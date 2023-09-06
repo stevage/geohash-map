@@ -210,7 +210,8 @@ colorFuncs.participants = () => {
     ];
 
     const scheme = [[0, 255, 0], ...tableauColors[3]];
-    visibleParticipants = participantsList.slice(0, scheme.length);
+    // visibleParticipants = participantsList.slice(0, scheme.length);
+    visibleParticipants = participantsList.slice(0, 80);
     const ret = [
         'match',
         ['get', 'participantsOrMultiple'],

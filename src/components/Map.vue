@@ -109,6 +109,17 @@ export default {
             // add the DEM source as a terrain layer with exaggerated height
             map.setTerrain({ source: 'mapbox-dem', exaggeration: 0 });
         }
+        map.U.addGeoJSON('voronoi');
+        map.U.addFill(
+            'voronoi-fill',
+            'voronoi',
+            {
+                fillOpacity: 0.5,
+                fillAntiAlias: false,
+                fillOutlineColor: 'transparent',
+            },
+            'natural-point-label'
+        );
         EventBus.$emit('map-loaded', map);
         this.filters = window.Filters.filters;
         this.initMapContent(map);

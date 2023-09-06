@@ -64,7 +64,6 @@ export default {
             window.topHashers = hashList;
             return hashList;
         },
-        newestHashers() {},
     },
     watch: {
         showStats() {

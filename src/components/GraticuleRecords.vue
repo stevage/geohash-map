@@ -1,14 +1,12 @@
 <template lang="pug">
-#GraticuleRecords.h4.overflow-y-scroll(style="margin-bottom:1em")
+#GraticuleRecords.h4.overflow-y-scroll(style="margin-bottom:1em" v-if="info.participants")
   table
     tr
-      th.tl Top participants
+      th.tl(style="min-width:150px") Participant
       th Successes
-      th Total
     tr(v-for="p of topParticipants")
       td {{ p[0] }}
-      td {{ p[1] }}
-      td {{ p[2] }}
+      td {{ p[1] || 0}}  of {{ p[2] }}
 
 </template>
 
@@ -18,6 +16,7 @@ export default {
     data: () => ({}),
     computed: {
         topParticipants() {
+            if (!this.info.participants) return [];
             return Object.entries(this.info.participants)
                 .sort(
                     ([participant1, count1], [participant2, count2]) =>

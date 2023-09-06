@@ -20,6 +20,7 @@
                         HashStats.ml2
                         AnimationControls.ml2
                         DominanceControls.ml2
+                        VoronoiControls.ml2
                         //- RegionControls.ml2
                     div(v-if="tab === 'geohash'")
                         HashInfo
@@ -55,6 +56,7 @@ import GraticuleInfo from '@/components/GraticuleInfo.vue';
 import GraticuleOptions from '@/components/GraticuleOptions.vue';
 import RegionControls from '@/components/RegionControls.vue';
 import DominanceControls from '@/components/DominanceControls.vue';
+import VoronoiControls from '@/components/VoronoiControls.vue';
 
 import './components/stats';
 window.app = {
@@ -80,6 +82,7 @@ export default {
         GraticuleOptions,
         RegionControls,
         DominanceControls,
+        VoronoiControls,
     },
     data() {
         return {

@@ -2,7 +2,10 @@ import U from 'map-gl-utils/noflow/index';
 import { EventBus } from '@/EventBus';
 import * as turf from '@turf/turf';
 import { makeGraticuleStats } from '@/mapping/graticules/graticuleStats';
-import { makeGraticuleFeatures } from '@/mapping/graticules/graticuleFeatures';
+import {
+    makeGraticuleFeatures,
+    makeGraticuleFeature,
+} from '@/mapping/graticules/graticuleFeatures';
 import { getGraticuleNames } from './graticules/graticuleNames';
 import { getClassAreasByVectorLayer } from './graticules/graticuleLandClasses';
 import {
@@ -43,13 +46,23 @@ function clickGraticuleLabel(map, e) {
         ...getClassAreasByVectorLayer(map, bbox, 'landuse'),
         water: getClassAreasByVectorLayer(map, bbox, 'water').undefined,
     };
-    const total = Object.values(uses).reduce((acc, val) => acc + val.area, 0);
+    const total = Object.values(uses).reduce(
+        (acc, val) => acc + (val?.area || 0),
+        0
+    );
     EventBus.$emit('show-graticule-info', {
         graticule,
         uses,
         area: turf.area(graticule),
         other: turf.area(graticule) - total,
     });
+    map.U.setData(
+        'selected-graticule',
+        makeGraticuleFeature(
+            e.features[0].properties.x,
+            e.features[0].properties.y
+        )
+    );
 }
 
 export function setGraticuleStyle({ map, filters }) {
@@ -62,12 +75,16 @@ export function setGraticuleStyle({ map, filters }) {
             updateGraticuleStyle(map, options)
         );
         map.on('click', 'graticules-label', (e) => clickGraticuleLabel(map, e));
-        map.on(
-            'click',
-            'graticules-fill',
-            (e) =>
-                window.app.App.tab === 'graticules' &&
-                clickGraticuleLabel(map, e)
-        );
+        map.on('click', 'graticules-fill', (e) => {
+            if (window.app.App.tab === 'graticules') {
+                clickGraticuleLabel(map, e);
+            }
+        });
+        EventBus.$on('tab-change', (tab) => {
+            if (tab !== 'graticules') {
+                map.U.setData('selected-graticule');
+            }
+            // map.U.toggle(/selected-graticule/, tab === 'graticules');
+        });
     }
 }
