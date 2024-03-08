@@ -13,8 +13,7 @@ export function makeGraticuleStats({ local, ...hashes }) {
     window.expeditionsByGraticule = {};
     window.graticulesById = {};
     for (const expedition of hashes.features) {
-        const x = string0(expedition.properties.x);
-        const y = string0(expedition.properties.y);
+        const [y, x] = expedition.properties.graticule.split(',');
 
         if (expedition.properties.global) {
             continue;

@@ -33,12 +33,15 @@ async function recalculateGraticules({ graticuleStats, map }) {
 }
 
 function clickGraticuleLabel(map, e) {
+    const p = e.features[0].properties;
     console.log(e.features[0]);
+    // const graticule = window.graticulesById[`${p.y},${p.x}`];
     const graticule = window.app.graticules.features.find(
         (f) =>
             f.properties.x === e.features[0].properties.x &&
             f.properties.y === e.features[0].properties.y
     );
+
     const bbox = turf.bbox(graticule);
     // console.log(bbox);
 

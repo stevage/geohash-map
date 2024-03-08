@@ -27,7 +27,7 @@ const splitBy10 = (string) => string.match(/.{1,10}/g).join('\n');
 export function makeGraticuleFeatures({ graticuleNames, graticuleStats, map }) {
     function getGraticuleStats(x, y) {
         return (
-            (graticuleStats[x] && graticuleStats[x][y]) || {
+            graticuleStats[x]?.[y] || {
                 expeditions: 0,
                 successes: 0,
                 failures: 0,
@@ -43,8 +43,8 @@ export function makeGraticuleFeatures({ graticuleNames, graticuleStats, map }) {
         const x = +xstr,
             y = +ystr;
 
-        const gstats = getGraticuleStats(x, y);
-        const g = window.graticules[x] && window.graticules[x][y];
+        const gstats = getGraticuleStats(xstr, ystr);
+        const g = window.graticules[xstr] && window.graticules[xstr][ystr];
 
         return {
             type: 'graticule-center-label',
@@ -92,7 +92,7 @@ export function makeGraticuleFeatures({ graticuleNames, graticuleStats, map }) {
                     x: xstr,
                     y: ystr,
                     name,
-                    ...getGraticuleStats(x, y),
+                    ...getGraticuleStats(xstr, ystr),
                 };
 
                 graticules.push(makeGraticuleFeature(xstr, ystr, gratProps));
