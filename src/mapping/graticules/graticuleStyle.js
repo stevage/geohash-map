@@ -1,6 +1,6 @@
 import tableauColors from '@/mapping/tableauColors';
 import U from 'map-gl-utils/noflow/index';
-const virginFillColor = [
+const uninitiatedFillColor = [
     'case',
     ['>', ['get', 'successes'], 0],
     'transparent',
@@ -28,7 +28,7 @@ export function addGraticuleLayers(map) {
     });
 
     map.U.addFill('graticules-fill', 'graticules', {
-        fillColor: virginFillColor,
+        fillColor: uninitiatedFillColor,
         fillOutlineColor: 'transparent',
         fillOpacity: U.interpolateZoom({ 3: 0, 4: 1 }),
         minzoom: 3,
@@ -141,7 +141,7 @@ function graticuleColorByParticipantsFunc(type) {
 }
 
 const colorFunc = {
-    virgin: () => virginFillColor,
+    uninitiated: () => uninitiatedFillColor,
     none: () => 'transparent',
     expeditions: () => [
         'interpolate-hcl',
@@ -216,6 +216,13 @@ export function updateGraticuleStyle(map, options) {
         'graticules-center-label',
         {
             none: '',
+            firstSuccessDate: [
+                'step',
+                ['zoom'],
+                ['slice', ['get', 'firstSuccessDate'], 0, 4],
+                8,
+                ['get', 'firstSuccessDate'],
+            ],
 
             // daysSinceExpedition: [
             //     'case',

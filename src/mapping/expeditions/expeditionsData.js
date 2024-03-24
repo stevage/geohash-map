@@ -59,47 +59,43 @@ export async function getExpeditions(local, map) {
     const participants = {};
     expeditions.features.forEach((f, i) => {
         f.id = i;
+        const exp = f.properties;
         const [date, y, x] = f.properties.id.split('_');
-        f.properties.year = +date.slice(0, 4);
-        f.properties.days = dateToDays(f.properties.id.slice(0, 10));
-        f.properties.month = +date.slice(5, 7);
-        f.properties.yearMonth = f.properties.year * 12 + f.properties.month; //+date.slice(0, 7);
-        f.properties.weekday = dateToWeekday(f.properties.id.slice(0, 10));
-        f.properties.weekDayName =
+        exp.year = +date.slice(0, 4);
+        exp.days = dateToDays(exp.id.slice(0, 10));
+        exp.month = +date.slice(5, 7);
+        exp.yearMonth = exp.year * 12 + exp.month; //+date.slice(0, 7);
+        exp.weekday = dateToWeekday(exp.id.slice(0, 10));
+        exp.weekDayName =
             'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(
                 ' '
-            )[f.properties.weekday];
+            )[exp.weekday];
         // if (x !== undefined && y !== undefined) {
         // sigh globalexpeditions
-        f.properties.dayOfYear =
-            f.properties.days - dateToDays(f.properties.year + '');
-        f.properties.x = +x || 0;
-        f.properties.y = +y || 0;
-        f.properties.global = /global/.test(f.properties.id);
+        exp.dayOfYear = exp.days - dateToDays(exp.year + '');
+        exp.x = +x || 0;
+        exp.y = +y || 0;
+        exp.global = /global/.test(exp.id);
         const gname = window.graticuleNamesHash[`${y},${x}`];
-        f.properties.graticuleName = gname;
-        f.properties.graticuleNameShort =
+        exp.graticuleName = gname;
+        exp.graticuleNameShort =
             gname && gname.match(/[a-z() ], [a-z]/i)
                 ? gname.split(', ')[0]
                 : gname;
-        f.properties.graticuleCountry =
+        exp.graticuleCountry =
             gname && gname.match(/[a-z], [a-z]/i) ? gname.split(', ')[1] : '';
 
-        if (f.properties.global) {
-            f.properties.graticule = 'global';
+        if (exp.global) {
+            exp.graticule = 'global';
         } else {
-            f.properties.graticule = f.properties.id
-                .slice(11)
-                .replace('_', ',');
+            exp.graticule = exp.id.slice(11).replace('_', ',');
         }
-        f.properties.latitude = f.geometry.coordinates[1];
-        f.properties.longitude = f.geometry.coordinates[0];
-        f.properties.graticuleLatitude = +f.properties.graticule.split(',')[0];
-        f.properties.graticuleLongitude = +f.properties.graticule.split(',')[1];
-        const achievements = f.properties.achievements || [];
-        f.properties.transportMode = achievements.includes(
-            'Water_geohash_achievement'
-        )
+        exp.latitude = f.geometry.coordinates[1];
+        exp.longitude = f.geometry.coordinates[0];
+        exp.graticuleLatitude = +exp.graticule.split(',')[0];
+        exp.graticuleLongitude = +exp.graticule.split(',')[1];
+        const achievements = exp.achievements || [];
+        exp.transportMode = achievements.includes('Water_geohash_achievement')
             ? 'Boat/swim'
             : achievements.includes('Walk_geohash_achievement')
             ? 'Walk'
@@ -113,9 +109,7 @@ export async function getExpeditions(local, map) {
             ? 'Hitch-hiking'
             : 'Other';
 
-        f.properties.hardship = achievements.includes(
-            'MNIMB_geohash_achievement'
-        )
+        exp.hardship = achievements.includes('MNIMB_geohash_achievement')
             ? 'MNIMB'
             : achievements.includes('Velociraptor_geohash_achievement')
             ? 'Raptor attack'
@@ -132,46 +126,41 @@ export async function getExpeditions(local, map) {
             : 'Other';
     });
     expeditions.features.sort((a, b) => a.properties.days - b.properties.days);
-    for (const f of expeditions.features) {
-        // }
-        for (const p of f.properties.participants) {
+    expeditions.features.forEach((f) => {
+        const exp = f.properties;
+        for (const p of exp.participants) {
             if (!participants[p]) {
                 participants[p] = {
                     expeditions: 0,
-                    firstExpeditionDays: f.properties.days,
+                    firstExpeditionDays: exp.days,
                 };
             }
             participants[p].expeditions++;
         }
-        f.properties.participantsString = f.properties.participants.join(', ');
-        f.properties.participantsOrMultiple =
-            f.properties.participants.length > 1
+        exp.participantsString = exp.participants.join(', ');
+        exp.participantsOrMultiple =
+            exp.participants.length > 1
                 ? 'Multiple'
-                : f.properties.participants[0] || 'Unknown';
-        f.properties.participantsStringLower =
-            f.properties.participantsString.toLowerCase();
-        f.properties.participantsCount = f.properties.participants.length;
-        const expeditions = f.properties.participants.map(
+                : exp.participants[0] || 'Unknown';
+        exp.participantsStringLower = exp.participantsString.toLowerCase();
+        exp.participantsCount = exp.participants.length;
+        const expeditions = exp.participants.map(
             (p) => participants[p].expeditions
         );
-        f.properties.experienceMax = expeditions.length
-            ? Math.max(...expeditions)
-            : 0;
-        f.properties.experienceMin = expeditions.length
-            ? Math.min(...expeditions)
-            : 0;
-        f.properties.experienceTotal = expeditions.length
+        exp.experienceMax = expeditions.length ? Math.max(...expeditions) : 0;
+        exp.experienceMin = expeditions.length ? Math.min(...expeditions) : 0;
+        exp.experienceTotal = expeditions.length
             ? expeditions.reduce((a, b) => a + b, 0)
             : 0;
-        const days = f.properties.participants.map(
-            (p) => f.properties.days - participants[p].firstExpeditionDays
+        const days = exp.participants.map(
+            (p) => exp.days - participants[p].firstExpeditionDays
         );
-        f.properties.experienceDaysMax = days.length ? Math.max(...days) : 0;
-        f.properties.experienceDaysMin = days.length ? Math.min(...days) : 0;
-        f.properties.experienceDaysTotal = days.length
+        exp.experienceDaysMax = days.length ? Math.max(...days) : 0;
+        exp.experienceDaysMin = days.length ? Math.min(...days) : 0;
+        exp.experienceDaysTotal = days.length
             ? days.reduce((a, b) => a + b, 0)
             : 0;
-    }
+    });
     loadedExpeditions = true;
     window.setTimeout(() => makeIndex(expeditions.features), 1000);
     return expeditions;

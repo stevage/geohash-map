@@ -42,6 +42,9 @@ export function makeGraticuleStats({ local, ...hashes }) {
                         ? 'multiple'
                         : g.firstParticipants;
             }
+            if (!g.firstSuccessDate) {
+                g.firstSuccessDate = expedition.properties.id.slice(0, 10);
+            }
             g.lastParticipants = expedition.properties.participants.join('\n');
             g.lastParticipantsOrMultiple =
                 expedition.properties.participants.length > 1

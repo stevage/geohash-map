@@ -26,8 +26,8 @@
     //-             td.f6 {{ value }}
 
     .story-box.h-5
-        .story.loading.i(v-if="loading") ...loading expedition...
-        .story(v-else v-html="story")
+        WikiPage.story(:pageId="p?.id")
+
         .reportKb {{ p.reportKb }} kB
         h3 More expeditions
         ExpeditionNav(v-for="nav of navs" :nav="nav" @navigate="step => navigate(nav, step)")
@@ -37,14 +37,13 @@
 <script>
 import { EventBus } from '../EventBus';
 import ExpeditionNav from '@/components/ExpeditionNav.vue';
+import WikiPage from '@/components/WikiPage.vue';
 export default {
     name: 'ExpeditionInfo',
-    components: { ExpeditionNav },
+    components: { ExpeditionNav, WikiPage },
     data: () => ({
         feature: undefined,
         ignoreProps: ['id', 'Longitude', 'Latitude', 'image_url'],
-        story: null,
-        loading: null,
     }),
     computed: {
         p() {
@@ -115,44 +114,6 @@ export default {
             EventBus.$emit('select-feature');
         },
     },
-    watch: {
-        p() {
-            this.story = null;
-            this.loading = true;
-            if (this.p?.id) {
-                fetch(
-                    // `https://geohashing.site/api.php?action=parse&page=${this.p.id}&format=json`
-                    `https://fippe-geojson.glitch.me/wiki/?action=parse&page=${this.p.id}&format=json`
-                )
-                    .then((res) => {
-                        return res.json();
-                    })
-                    .then((res) => {
-                        this.story = res.parse.text['*']
-                            .replace(
-                                /\/geohashing\/File/g,
-                                'https://geohashing.site/geohashing/File'
-                            )
-                            .replace(
-                                /\/geohashing\/Image/g,
-                                'https://geohashing.site/geohashing/Image'
-                            )
-                            .replace(
-                                /"\/images\//g,
-                                '"https://geohashing.site/images/'
-                            )
-                            .replace(/<a /g, '<a target="_blank" ')
-                            .replace(
-                                /href="\//g,
-                                'href="https://geohashing.site/'
-                            )
-                            .replace(/<p><br \/>\n<\/p>/gm, '');
-
-                        this.loading = false;
-                    });
-            }
-        },
-    },
 };
 </script>
 
@@ -194,71 +155,5 @@ li {
 #ExpeditionInfo a {
     color: hsl(220, 80%, 65%);
     text-decoration: none;
-}
-
-.story .mw-parser-output table.infobox {
-    display: none;
-}
-
-.story h2 {
-    font-size: 14px;
-    margin: 0;
-}
-.story h3,
-.story h4 {
-    font-size: 14px;
-    margin: 0;
-}
-
-.story .mw-editsection {
-    display: none;
-}
-
-.story p,
-.story li,
-.story {
-    font-size: 12px;
-}
-.story {
-    font-family: Cambria;
-}
-.story p {
-    margin-top: 0;
-    font-family: Cambria, serif;
-    line-height: 1.5;
-}
-
-.story #toc {
-    display: none;
-}
-
-.story {
-    background: hsl(0, 0%, 18%);
-    padding: 10px;
-}
-
-.story ul {
-    list-style: none;
-    padding: 0;
-}
-
-.story ul.gallery {
-    list-style: none;
-    padding: 0;
-}
-
-.story .gallerybox .thumb div {
-    margin: 0 !important;
-}
-
-.story .gallerybox,
-.story .gallerybox div {
-    width: unset !important;
-}
-
-.story img {
-    max-width: 100% !important;
-    max-height: 170px !important;
-    object-fit: cover;
 }
 </style>

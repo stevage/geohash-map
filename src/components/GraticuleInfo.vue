@@ -26,18 +26,22 @@
           td.f7
             a(target="_blank" :href="expLink(expedition)") {{ expedition.properties.participantsString }}
       .dib.ma2.mt4.pa2.ba.b--grey.f6.grey.pointer(@click="copyExpeditions") Copy table for wiki
-    div(v-else) Virgin graticule!
+    div(v-else) Locked graticule!
+  div.mt4.overflow-y-scroll.h5
+    WikiPage(:pageId="`${info.graticule.properties.name}`")
 </template>
 
 <script>
 import { EventBus } from '@/EventBus';
 import GraticuleRecords from '@/components/GraticuleRecords.vue';
+import WikiPage from '@/components/WikiPage.vue';
+
 export default {
     name: 'GraticuleInfo',
     data: () => ({
         info: undefined,
     }),
-    components: { GraticuleRecords },
+    components: { GraticuleRecords, WikiPage },
     created() {
         window.GraticuleInfo = this;
         EventBus.$on('show-graticule-info', (info) => (this.info = info));
