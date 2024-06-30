@@ -89,13 +89,14 @@
 
 <script>
 import { EventBus } from '@/EventBus';
+import { getUrlParam, setUrlParam } from '@/util';
 export default {
     name: 'Filters',
     data: () => ({
         enabled: true,
         showFilters: true,
         filters: {
-            participants: '',
+            participants: getUrlParam('participants') || '',
             minParticipants: 0,
             maxParticipants: 100,
             // scaleExpedition: false,
@@ -125,6 +126,7 @@ export default {
                     this.filters.minYear = this.filters.maxYear;
                 }
                 EventBus.$emit('filters-change', this.filters);
+                setUrlParam('participants', this.filters.participants || null);
             },
         },
 

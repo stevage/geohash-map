@@ -23,3 +23,17 @@ export function getGraticuleBounds(map) {
 }
 
 export const string0 = (n) => (Object.is(n, -0) ? '-0' : String(n));
+
+export function setUrlParam(key, value) {
+    const url = new URL(window.location);
+    if (value) {
+        url.searchParams.set(key, value);
+    } else {
+        url.searchParams.delete(key);
+    }
+    window.history.replaceState({}, '', url);
+}
+
+export function getUrlParam(key) {
+    return new URL(window.location).searchParams.get(key);
+}

@@ -3,6 +3,7 @@ import { EventBus } from '@/EventBus';
 import { colorFunc, legendColors } from './expeditions/colorFuncs';
 import { circleRadiusFunc } from './expeditions/radiusFunc';
 import { getExpeditions } from './expeditions/expeditionsData';
+import { setUrlParam } from '@/util';
 
 function updateFilters({ map, filters }) {
     const successFilter =
@@ -258,13 +259,7 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
                 feature || { type: 'FeatureCollection', features: [] }
             );
 
-            const url = new URL(window.location);
-            if (feature?.properties?.id) {
-                url.searchParams.set('expedition', feature.properties.id);
-            } else {
-                url.searchParams.delete('expedition');
-            }
-            window.history.replaceState({}, '', url);
+            setUrlParam('expedition', feature ? feature.properties.id : null);
         });
         EventBus.$on('navigate-expedition', (expedition) => {
             if (expedition) {
