@@ -1,5 +1,5 @@
 <template lang="pug">
-#Chart-container.absolute.w100(v-show="showing" :class="{ opaque: chartStyle!=='bin'}")
+#Chart-container.absolute.w100(v-show="showing" :class="{ opaque: translucentBackground || chartStyle!=='bin'}" @click="translucentBackground =!translucentBackground")
   #chart-legend
   #chart
 </template>
@@ -15,6 +15,7 @@ export default {
         xAxis: 'byWeek',
         showing: false, //!!window.location.host.match(/localhost/),
         chartStyle: null,
+        translucentBackground: true,
     }),
     async created() {
         window.Chart = this;
@@ -23,6 +24,7 @@ export default {
         );
         EventBus.$on('chart-options-change', async (options) => {
             this.showing = options.showChart;
+            await this.$nextTick();
             this.update(window.map);
         });
     },
@@ -90,6 +92,22 @@ export default {
                     label: 'Particpants',
                     style: { color: 'white', background: 'transparent' },
                 });
+                // } else if (chartId === 'success') {
+                //     legendEl = Plot.legend({
+                //         color: {
+                //             scheme,
+                //             type: 'ordinal',
+                //             domain: [0, 1],
+                //         },
+                //         style: { color: 'white', background: 'transparent' },
+                //         label: {
+                //             success: 'Success',
+                //             graticuleLongitude: 'Graticule longitude',
+                //             graticuleLatitude: 'Graticule latitude',
+                //             weekDay: '',
+                //         }[chartId],
+                //     });
+                //
             } else {
                 legendEl = plotEl.legend('color', {
                     style: { color: 'white', background: 'transparent' },
@@ -267,7 +285,11 @@ export default {
                     week: Math.round(e.properties.days / 7),
                     date: new Date(e.properties.id.slice(0, 10)),
                 }));
-            this.initChart(this.expeditions);
+            try {
+                this.initChart(this.expeditions);
+            } catch (e) {
+                console.error(e);
+            }
         },
     },
 };

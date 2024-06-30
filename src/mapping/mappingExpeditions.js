@@ -68,6 +68,23 @@ function circlesStrokeColor(activeColorFunc) {
     ];
 }
 
+function loadSelectedExpedition(expeditions) {
+    const url = new URL(window.location);
+    const expeditionId = url.searchParams.get('expedition');
+    if (expeditionId) {
+        const expedition = expeditions.features.find(
+            (f) => f.properties.id === expeditionId
+        );
+        if (expedition) {
+            EventBus.$emit('select-feature', expedition);
+            window.map.jumpTo({
+                center: expedition.geometry.coordinates,
+                zoom: 9,
+            });
+        }
+    }
+}
+
 export function updateHashStyle({ map, filters, quickUpdate = false }) {
     // const colors = window.app.yearColors;
 
@@ -87,6 +104,7 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
                 local: false,
                 ...expeditions,
             });
+            loadSelectedExpedition(expeditions);
             window.expeditions = expeditions;
             resetHashAnimation({ map });
 
@@ -234,12 +252,20 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
                 });
             }
         });
-        EventBus.$on('select-feature', (feature) =>
+        EventBus.$on('select-feature', (feature) => {
             map.U.setData(
                 'expedition-selected',
                 feature || { type: 'FeatureCollection', features: [] }
-            )
-        );
+            );
+
+            const url = new URL(window.location);
+            if (feature?.properties?.id) {
+                url.searchParams.set('expedition', feature.properties.id);
+            } else {
+                url.searchParams.delete('expedition');
+            }
+            window.history.replaceState({}, '', url);
+        });
         EventBus.$on('navigate-expedition', (expedition) => {
             if (expedition) {
                 EventBus.$emit('select-feature', {

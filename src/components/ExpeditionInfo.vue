@@ -51,9 +51,13 @@ export default {
             return (
                 this.feature && {
                     ...this.feature.properties,
-                    participants: JSON.parse(
-                        this.feature.properties.participants
-                    ),
+                    participants:
+                        typeof this.feature.properties.participants === 'string'
+                            ? JSON.parse(this.feature.properties.participants)
+                            : this.feature.properties.participants,
+                    // JSON.parse(
+                    //     this.feature.properties.participants
+                    // ),
                 }
             );
         },
