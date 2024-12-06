@@ -112,7 +112,7 @@ colorFuncs.weekday = () => {
     ];
     return ret;
 };
-colorFuncs.experience = () => {
+colorFuncs.experienceMax = () => {
     const ret = [
         'interpolate-hcl',
         ['linear'],
@@ -130,7 +130,7 @@ colorFuncs.experience = () => {
     ];
     return ret;
 };
-colorFuncs.experienceDays = () => {
+colorFuncs.experienceDaysMax = () => {
     const ret = [
         'interpolate-hcl',
         ['linear'],
@@ -268,6 +268,7 @@ colorFuncs.hardship = () => {
 };
 
 export function colorFunc({ colorVis }) {
+    console.log('colorVis', colorVis, colorFuncs[colorVis]);
     return colorFuncs[colorVis]();
 }
 

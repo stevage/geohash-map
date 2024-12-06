@@ -65,14 +65,6 @@ async function loadGeohashes(map) {
                     const daysAtHash = dateToDays(hash.date);
                     if (daysAtHash < daysAtLng) continue;
                     for (let lat = 0; lat <= 85; lat++) {
-                        if (lngSign * lng == 145 && latSign * lat == -37) {
-                            console.log(
-                                'daysAtHash',
-                                daysAtHash,
-                                'daysAtLng',
-                                daysAtLng
-                            );
-                        }
                         features.push(
                             makeHash(
                                 [
