@@ -5,20 +5,30 @@ import { circleRadiusFunc } from './expeditions/radiusFunc';
 import { getExpeditions } from './expeditions/expeditionsData';
 import { setUrlParam } from '@/util';
 
+import debounce from 'debounce';
+
 function updateFilters({ map, filters }) {
     const successFilter =
         filters.outcome === 'all'
             ? true
             : ['==', ['get', 'success'], filters.outcome === 'success'];
+    let participantsFilter = true;
+    if (filters.participants) {
+        participantsFilter = [
+            'any',
+            ...filters.participants
+                .split(/,\s*/)
+                .map((p) => [
+                    'in',
+                    p.replace(/ /g, '_').toLowerCase(),
+                    ['get', 'participantsStringLower'],
+                ]),
+        ];
+    }
+    console.log('filter', participantsFilter);
     map.U.setFilter(/expeditions-/, [
         'all',
-        filters.participants || ''
-            ? [
-                  'in',
-                  (filters.participants || '').replace(/ /g, '_').toLowerCase(),
-                  ['get', 'participantsStringLower'],
-              ]
-            : true,
+        participantsFilter,
         ['>=', ['get', 'participantsCount'], filters.minParticipants],
         ['<=', ['get', 'participantsCount'], filters.maxParticipants],
         ['>=', ['get', 'year'], filters.minYear],
@@ -27,6 +37,8 @@ function updateFilters({ map, filters }) {
     ]);
     map.U.setCircleRadius('expeditions-circles', circleRadiusFunc({ filters }));
 }
+
+const updateFiltersDebounced = debounce(updateFilters, 1500);
 
 function updateCircleColors({ map, filters, activeColorFunc }) {
     map.U.setCircleColor(

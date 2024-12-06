@@ -2,7 +2,7 @@
 
 <template lang="pug">
 #WikiPage
-  .loading.i(v-if="loading") ...loading graticule description...
+  .loading.i(v-if="loading") ...loading text...
   .wiki(v-else v-html="pageContent")
 </template>
 

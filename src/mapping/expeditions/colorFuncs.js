@@ -41,12 +41,12 @@ const transportModes = [
 ];
 
 const hardships = [
-    'MNIMB',
+    'One with nature',
     'Raptor attack',
     'Drowned rat',
     'Trail of blood',
     'Frozen',
-    'MNB',
+    'Done with nature',
     'Trainwreck',
     'Other',
 ];
@@ -154,7 +154,13 @@ colorFuncs.experienceDays = () => {
 
 // this is supposed to match https://github.com/keisentraut/geohashing-dominance/blob/main/colors.py
 // but apparently doesn't. very hard to debug. so we use https://nr47.hohenpoelz.de/geohashing/colors.txt
-function participantDominanceColor(participant) {
+function participantDominanceColor(participantName) {
+    return participantName === 'Multiple'
+        ? 'hsl(120,100%,30%)'
+        : dominanceColors[participantName]
+        ? `${dominanceColors[participantName]}`
+        : `black`;
+    /*
     const HARD_COLORS = {
         Multiple: (0, 255, 0), // my thing
         Klaus: (255, 0, 0),
@@ -178,6 +184,7 @@ function participantDominanceColor(participant) {
         digest = md5(digest);
     }
     return color;
+    */
 }
 
 colorFuncs.participants = () => {
@@ -210,20 +217,15 @@ colorFuncs.participants = () => {
     ];
 
     const scheme = [[0, 255, 0], ...tableauColors[3]];
-    // visibleParticipants = participantsList.slice(0, scheme.length);
-    visibleParticipants = participantsList.slice(0, 80);
+    visibleParticipants = participantsList.slice(0, scheme.length);
+    // visibleParticipants = participantsList.slice(0, 80);
     const ret = [
         'match',
         ['get', 'participantsOrMultiple'],
         ...visibleParticipants.flatMap((participant, i) => [
             participant.name,
-            // `rgb(${scheme[i]})`,
+            `rgb(${scheme[i]})`,
             // participantDominanceColor(participant.name),
-            participant.name === 'Multiple'
-                ? 'hsl(120,100%,30%)'
-                : dominanceColors[participant.name]
-                ? `${dominanceColors[participant.name]}`
-                : `black`,
         ]),
         'black',
     ];

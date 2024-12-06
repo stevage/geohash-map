@@ -32,18 +32,12 @@ async function recalculateGraticules({ graticuleStats, map }) {
     map.U.setData('graticules', makeGraticuleFeatures({ graticuleStats, map }));
 }
 
-function clickGraticuleLabel(map, e) {
-    const p = e.features[0].properties;
-    console.log(e.features[0]);
-    // const graticule = window.graticulesById[`${p.y},${p.x}`];
+function selectGraticuleByXY(map, x, y) {
     const graticule = window.app.graticules.features.find(
-        (f) =>
-            f.properties.x === e.features[0].properties.x &&
-            f.properties.y === e.features[0].properties.y
+        (f) => f.properties.x === x && f.properties.y === y
     );
 
     const bbox = turf.bbox(graticule);
-    // console.log(bbox);
 
     const uses = {
         ...getClassAreasByVectorLayer(map, bbox, 'landuse'),
@@ -59,14 +53,19 @@ function clickGraticuleLabel(map, e) {
         area: turf.area(graticule),
         other: turf.area(graticule) - total,
     });
-    map.U.setData(
-        'selected-graticule',
-        makeGraticuleFeature(
-            e.features[0].properties.x,
-            e.features[0].properties.y
-        )
-    );
+    map.U.setData('selected-graticule', makeGraticuleFeature(x, y));
 }
+
+function clickGraticuleLabel(map, e) {
+    const p = e.features[0].properties;
+    console.log(e.features[0]);
+
+    selectGraticuleByXY(map, p.x, p.y);
+}
+
+EventBus.$on('select-graticule-by-id', (id) => {
+    selectGraticuleByXY(window.map, ...id.split(','));
+});
 
 export function setGraticuleStyle({ map, filters }) {
     const first = !map.getSource('graticules');

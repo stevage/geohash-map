@@ -23,6 +23,7 @@ import { setGraticuleStyle } from '@/mapping/mappingGraticules';
 import { dateToDays, getGraticuleBounds } from '@//util';
 import { updateStreakStyle } from '@/mapping/mappingStreaks';
 import { initMappingRegions } from '@/mapping/mappingRegions';
+import debounce from 'debounce';
 export default {
     data: () => ({
         filters: {
@@ -121,15 +122,18 @@ export default {
             'natural-point-label'
         );
         EventBus.$emit('map-loaded', map);
-        this.filters = window.Filters.filters;
+        this.filters = window.Filters?.filters ?? true;
         this.initMapContent(map);
         EventBus.$on('filters-change', (filters) => {
+            console.log('filters-change');
             this.filters = filters;
-            this.updateMapStyle();
+            this.updateMapStyleDebounced();
         });
         EventBus.$on('animation-change', (running) =>
             running ? this.startAnimation() : this.stopAnimation()
         );
+        // this.map.U.toggle(/^expeditions/, window.app.App.tab === 'expeditions');
+
         EventBus.$on('tab-change', (tab) => {
             this.map.U.toggle(/^expeditions/, tab === 'expeditions');
         });
@@ -148,6 +152,11 @@ export default {
             console.log(projection);
             this.map.setProjection(projection);
         });
+    },
+    created() {
+        this.updateMapStyleDebounced = debounce(() => {
+            this.updateMapStyle();
+        }, 500);
     },
     computed: {
         animationMonthISO() {

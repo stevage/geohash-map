@@ -35,6 +35,7 @@
 import { EventBus } from '@/EventBus';
 import GraticuleRecords from '@/components/GraticuleRecords.vue';
 import WikiPage from '@/components/WikiPage.vue';
+import { setUrlParam } from '@/util';
 
 export default {
     name: 'GraticuleInfo',
@@ -106,6 +107,12 @@ export default {
         },
         expLink(exp) {
             return `https://geohashing.site/geohashing/${exp.properties.id}`;
+        },
+    },
+    watch: {
+        info() {
+            const id = this?.info?.graticule?.properties?.id;
+            setUrlParam('graticule', id);
         },
     },
 };

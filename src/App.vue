@@ -19,7 +19,7 @@
                         ChartControls.ml2
                         HashStats.ml2
                         AnimationControls.ml2
-                        DominanceControls.ml2
+                        //- DominanceControls.ml2
                         VoronoiControls.ml2
                         //- RegionControls.ml2
                     div(v-if="tab === 'geohash'")
@@ -57,6 +57,7 @@ import GraticuleOptions from '@/components/GraticuleOptions.vue';
 import RegionControls from '@/components/RegionControls.vue';
 import DominanceControls from '@/components/DominanceControls.vue';
 import VoronoiControls from '@/components/VoronoiControls.vue';
+import { getUrlParam, setUrlParam } from './util';
 
 import './components/stats';
 window.app = {
@@ -100,6 +101,23 @@ export default {
                 (this.animationMonthISO = animationMonthISO)
         );
         EventBus.$on('animation-ended', () => (this.animationMonthISO = null));
+        EventBus.$on('map-loaded', () => {
+            if (getUrlParam('tab')) {
+                this.tab = getUrlParam('tab');
+            }
+            if (this.tab === 'graticules') {
+                const graticuleId = getUrlParam('graticule');
+                if (graticuleId) {
+                    EventBus.$emit('select-graticule-by-id', graticuleId);
+                }
+            }
+        });
+    },
+    mounted() {
+        window.setTimeout(() => {
+            // this.tab = getUrlParam('tab') || 'expeditions';
+            // EventBus.$emit('tab-change', this.tab);
+        }, 500);
     },
     watch: {
         sidebarOpen() {
@@ -107,6 +125,7 @@ export default {
         },
         tab() {
             EventBus.$emit('tab-change', this.tab);
+            setUrlParam('tab', this.tab === 'expeditions' ? null : this.tab);
         },
     },
 };

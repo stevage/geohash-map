@@ -109,16 +109,18 @@ export async function getExpeditions(local, map) {
             ? 'Hitch-hiking'
             : 'Other';
 
-        exp.hardship = achievements.includes('MNIMB_geohash_achievement')
-            ? 'MNIMB'
+        exp.hardship = achievements.includes(
+            'One_with_Nature_geohash_achievement'
+        )
+            ? 'One with nature'
             : achievements.includes('Velociraptor_geohash_achievement')
             ? 'Raptor attack'
             : achievements.includes('Drowned_rat_geohash_achievement')
             ? 'Drowned rat'
             : achievements.includes('Trail_of_blood_consolation_prize')
             ? 'Trail of blood'
-            : achievements.includes('MNB_geohash_consolation_prize')
-            ? 'MNB'
+            : achievements.includes('Done_with_Nature_consolation_prize')
+            ? 'Done with nature'
             : achievements.includes('Train_wreck_geohash_consolation_prize')
             ? 'Trainwreck'
             : achievements.includes('Frozen_geohash_achievement')
