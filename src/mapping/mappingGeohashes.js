@@ -2,6 +2,26 @@ import { EventBus } from '@/EventBus';
 import U from 'map-gl-utils/noflow/index';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
+
+// return a number from 0 to 24, using current time UTC to work out the hour, ignoring actual timezones, daylight savings etc
+function timeAtLongitude(longitude) {
+    const date = new Date();
+    const hours = date.getUTCHours() + (longitude / 360) * 24;
+    return hours < 0 ? hours + 24 : hours;
+}
+
+function dateToDays(date) {
+    return Math.floor(new Date(date).getTime() / 1000 / 60 / 60 / 24);
+}
+
+function daysAtLongitude(longitude) {
+    const date = new Date();
+    const hours = (longitude / 360) * 24;
+
+    date.setTime(date.getTime() + hours * 60 * 60 * 1000);
+    return dateToDays(date);
+}
+
 async function loadGeohashes(map) {
     function makeHash(coordinates, [graticuleX, graticuleY], date, weekday) {
         return {
@@ -17,12 +37,16 @@ async function loadGeohashes(map) {
             },
         };
     }
-    const [year, month, day] = new Date().toISOString().slice(0, 10).split('-');
+    // startDate is todays' date, minus one day
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 1);
+
+    const [year, month, day] = startDate.toISOString().slice(0, 10).split('-');
     const hashes = await fetch(
         `https://data.geohashing.info/hash/wk/${year}/${month}/${day}.json`
     ).then((res) => res.json());
 
-    console.log(hashes);
+    console.log('hashes', hashes);
     const features = [];
 
     for (const hash of hashes) {
@@ -32,13 +56,28 @@ async function loadGeohashes(map) {
         });
         for (const lngSign of [-1, 1]) {
             for (const latSign of [-1, 1]) {
-                for (let lng = 0; lng <= 180; lng++) {
+                for (let lng = 0; lng <= 179; lng++) {
+                    const whichHash =
+                        lng < 30 || lngSign === 1 ? hash['east'] : hash['west'];
+                    if (!whichHash) continue;
+
+                    const daysAtLng = daysAtLongitude(lng * lngSign);
+                    const daysAtHash = dateToDays(hash.date);
+                    if (daysAtHash < daysAtLng) continue;
                     for (let lat = 0; lat <= 85; lat++) {
+                        if (lngSign * lng == 145 && latSign * lat == -37) {
+                            console.log(
+                                'daysAtHash',
+                                daysAtHash,
+                                'daysAtLng',
+                                daysAtLng
+                            );
+                        }
                         features.push(
                             makeHash(
                                 [
-                                    lngSign * (lng + hash.east.lng),
-                                    latSign * (lat + hash.east.lat),
+                                    lngSign * (lng + whichHash?.lng),
+                                    latSign * (lat + whichHash?.lat),
                                 ],
                                 [lngSign * lng, latSign * lat],
                                 date,
