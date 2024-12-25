@@ -20,8 +20,9 @@ import { updateGeohashes } from '@/mapping/mappingGeohashes';
 
 import { setGraticuleStyle } from '@/mapping/mappingGraticules';
 
-import { dateToDays, getGraticuleBounds } from '@//util';
+import { dateToDays, getGraticuleBounds, report } from '@//util';
 import { updateStreakStyle } from '@/mapping/mappingStreaks';
+import { updateInfluenceStyle } from '@/mapping/mappingInfluence';
 import { initMappingRegions } from '@/mapping/mappingRegions';
 import debounce from 'debounce';
 export default {
@@ -139,13 +140,24 @@ export default {
         });
         map.on('moveend', () => {
             try {
+                // map.setBearing(0);
+                // map.setPitch(0);
                 EventBus.$emit('moveend');
                 window.localStorage.setItem(
                     'center',
                     map.getCenter().toArray().join(',') + ',' + map.getZoom()
                 );
+                updateInfluenceStyle({ map, filters: this.filters });
             } catch (e) {
                 //
+            }
+        });
+        map.on('move', () => {
+            if (map.getPitch() !== 0) {
+                map.setPitch(0);
+            }
+            if (map.getBearing() !== 0) {
+                map.setBearing(0);
             }
         });
         EventBus.$on('projection-change', (projection) => {
@@ -215,26 +227,20 @@ export default {
             this.updateMapStyle();
         },
         updateMapStyle() {
-            const report = (name, task) => {
-                const start = performance.now();
-                task();
-                console.log(
-                    `Updated ${name} in`,
-                    performance.now() - start,
-                    `ms`
-                );
-            };
             const map = this.map;
             let start = performance.now();
-            report('meridians', () => updateMeridians({ map }));
-            report('expeditions', () =>
+            report('Update meridians', () => updateMeridians({ map }));
+            report('Update expeditions', () =>
                 updateHashStyle({ map: this.map, filters: this.filters })
             );
-            report('graticules', () =>
+            report('Update graticules', () =>
                 setGraticuleStyle({ map: this.map, filters: this.filters })
             );
-            report('streaks', () =>
+            report('Update streaks', () =>
                 updateStreakStyle({ map, filters: this.filters })
+            );
+            report('Update influence', () =>
+                updateInfluenceStyle({ map, filters: this.filters })
             );
             updateGeohashes(map);
             // console.log(performance.now() - start);

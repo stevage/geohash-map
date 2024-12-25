@@ -1,6 +1,6 @@
 import { dateToDays, dateToWeekday } from '@//util';
 import { EventBus } from '@/EventBus';
-import { makeIndex } from './expeditionIndex';
+import { initIndex } from './expeditionIndex';
 /* TODO:
 - generate all these extra properties in a different dataset that doesn't have to go onto the map
 */
@@ -164,6 +164,6 @@ export async function getExpeditions(local, map) {
             : 0;
     });
     loadedExpeditions = true;
-    window.setTimeout(() => makeIndex(expeditions.features), 1000);
+    window.setTimeout(() => initIndex(expeditions.features), 1000);
     return expeditions;
 }

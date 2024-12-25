@@ -37,3 +37,9 @@ export function setUrlParam(key, value) {
 export function getUrlParam(key) {
     return new URL(window.location).searchParams.get(key);
 }
+
+export const report = (name, task) => {
+    const start = performance.now();
+    task();
+    console.log(`${name} in`, performance.now() - start, `ms`);
+};

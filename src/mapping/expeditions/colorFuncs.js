@@ -187,6 +187,46 @@ function participantDominanceColor(participantName) {
     */
 }
 
+let participantLookup = {};
+export function participantToColor(participant) {
+    function stringToHSL(str = '') {
+        // Generate a hash code from the string
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            // hash = hash & hash; // Convert to 32bit integer
+        }
+
+        // Map hash to HSL values
+        const hue = Math.abs(hash) % 360; // Hue: 0-359
+        const saturation = 50; // Saturation: 70%
+        const lightness = 70; // Lightness: 50%
+
+        return `hsla(${hue}, ${saturation}%, ${lightness}%, 0.5)`;
+    }
+
+    function useMd5(str = '') {
+        if (str === 'Multiple') {
+            return 'hsla(120, 0%, 100%, 0.1)';
+        }
+        const hash = md5(str);
+        // const h = ((parseInt(hash.slice(0, 2), 16) / 256) * 280 + 120) % 360;
+        // const s = (parseInt(hash.slice(2, 4), 16) / 256) * 25 + 50;
+        // const l = (parseInt(hash.slice(4, 6), 16) / 256) * 50 + 25;
+        const h = ((parseInt(hash.slice(0, 2), 16) / 256) * 300 + 120) % 360;
+        const s = (parseInt(hash.slice(2, 4), 16) / 256) * 5 + 40;
+        const l = (parseInt(hash.slice(4, 6), 16) / 256) * 10 + 50;
+
+        return `hsla(${h}, ${s}%, ${l}%, 1)`;
+    }
+
+    if (!participantLookup[participant]) {
+        participantLookup[participant] = useMd5(participant);
+    }
+    return participantLookup[participant];
+    // return stringToHSL(participant);
+}
+
 colorFuncs.participants = () => {
     // TODO cache this result because it's slow to compute and a few things use this result
     // const expeditions = window.map.queryRenderedFeatures({ layers: ['expeditions-circles']});
@@ -224,14 +264,24 @@ colorFuncs.participants = () => {
         ['get', 'participantsOrMultiple'],
         ...visibleParticipants.flatMap((participant, i) => [
             participant.name,
-            `rgb(${scheme[i]})`,
+            // `rgb(${scheme[i]})`,
             // participantDominanceColor(participant.name),
+            participantToColor(participant.name),
         ]),
         'black',
     ];
-    console.log(ret);
+    // console.log(ret);
     return ret;
 };
+
+// colorFuncs.participants2 = () => {
+//     const bounds = map.getBounds();
+//     const visibleExpeditions = window.expeditions.features.filter((f) =>
+//         bounds.contains(f.geometry.coordinates)
+//     );
+//     const participants = {};
+//     for (const f of visibleExpeditions) {
+
 colorFuncs.transportMode = () => {
     console.log(tableauColors);
     // const cols = [
@@ -268,7 +318,7 @@ colorFuncs.hardship = () => {
 };
 
 export function colorFunc({ colorVis }) {
-    console.log('colorVis', colorVis, colorFuncs[colorVis]);
+    // console.log('colorVis', colorVis, colorFuncs[colorVis]);
     return colorFuncs[colorVis]();
 }
 
