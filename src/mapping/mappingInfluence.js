@@ -138,7 +138,7 @@ export function updateInfluenceStyle({ map, filters, show, ...options }) {
         }
     }
 
-    if (map.getZoom() < 5 || !show) {
+    if (map.getZoom() < 3 || !show) {
         if (map.getSource('influence')) {
             map.U.removeLayer('influence-fill');
             map.U.removeSource('influence');

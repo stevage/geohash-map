@@ -12,12 +12,13 @@
         //- label.db(v-show="showInfluence")
         //-   input.mr1(type="checkbox" v-model="showFade")
         //-   span Show influence strength
-        label.db(v-show="showFade && showInfluence")
-          input.mr1.dib(type="range" v-model.number="fadeStrength" min="0" max="10000" alt="How quickly influence fades from a point")
-          div.dib Fade distance
+        label.db(v-show="showFade && showInfluence" title="How quickly influence fades from a geohash")
+          input.mr1.dib(type="range" v-model.number="fadeStrength" min="0" max="12" step="0.1" )
+          div.dib() Fade distance
+        //- div {{fadeStrength}} &rarr; {{ usedFadeStrength }}
 
-        label.db.mt3(v-show="showInfluence")
-          input.mr1.dib(type="range" v-model.number="rangeCutoff" min="0.1" max="5" step="0.1" alt="Higher is slower, but reduces artefacts")
+        label.db.mt3(v-show="showInfluence" title="Maximum distance influence extends from a a geohash. Higher is slower, but reduces artefacts")
+          input.mr1.dib(type="range" v-model.number="rangeCutoff" min="0.1" max="5" step="0.1" )
           div.dib Distance cut-off
 
 
@@ -48,6 +49,10 @@ export default {
         params() {
             return `${this.showInfluence} ${this.showFade} ${this.rangeCutoff} ${this.fadeStrength}`;
         },
+        usedFadeStrength() {
+            // 12 maximum, 0 minimum
+            return Math.exp(12 - this.fadeStrength) - 1;
+        },
     },
     watch: {
         params() {
@@ -58,6 +63,7 @@ export default {
             window.map.U.toggle(/influence-/, this.showInfluence);
         },
     },
+
     methods: {
         update() {
             updateInfluenceStyle({
@@ -66,7 +72,7 @@ export default {
                 show: this.showInfluence,
                 showFade: this.showFade,
                 rangeCutoff: this.rangeCutoff,
-                fadeStrength: 10000 - this.fadeStrength, //* this.fadeStrength,
+                fadeStrength: this.usedFadeStrength, //* this.fadeStrength,
             });
         },
     },
