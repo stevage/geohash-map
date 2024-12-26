@@ -11,6 +11,12 @@ window.md5 = md5;
 const workerCount = 8;
 const influenceWorkers = new Array(workerCount).fill(null);
 let startTime;
+function wrap(deg) {
+    while (deg < -180) deg += 360;
+    while (deg > 180) deg -= 360;
+    return deg;
+}
+
 async function computeInfluence({ map, filters, ...options }) {
     startTime = performance.now();
     const points = getExpeditionsNearViewport(map);
@@ -74,7 +80,7 @@ function initWorker(map) {
     influenceWorker.onmessage = (message) => {
         if (message?.data?.type === 'update-canvas') {
             const id = message.data.workerId;
-            // console.log('update influence got canvas', id);
+            console.log('update influence got canvas', message.data.bounds);
             const canvas = document.createElement('canvas');
             canvas.width = message.data.clientRect.width;
             canvas.height = message.data.clientRect.height;
@@ -87,31 +93,35 @@ function initWorker(map) {
             message.data.imageBitmap.close();
 
             map.U.removeSource(`influence-canvas-${id}`);
-            map.addSource(`influence-canvas-${id}`, {
-                type: 'canvas',
-                canvas: canvas,
-                animate: false,
-                // 4 corners of the bounds, clockwise from NW
-                coordinates: [
-                    // [message.data.bounds[0], message.data.bounds[3]],
-                    // [message.data.bounds[2], message.data.bounds[3]],
-                    // [message.data.bounds[2], message.data.bounds[1]],
-                    // [message.data.bounds[0], message.data.bounds[1]],
-                    [message.data.bounds[0], message.data.bounds[1]],
-                    [message.data.bounds[2], message.data.bounds[1]],
-                    [message.data.bounds[2], message.data.bounds[3]],
-                    [message.data.bounds[0], message.data.bounds[3]],
-                ],
-            });
-            map.U.addRasterLayer(
-                `influence-canvas-${id}`,
-                `influence-canvas-${id}`,
-                {
-                    rasterFadeDuration: 0,
-                    rasterOpacity: 0.75,
-                },
-                'expeditions-circles'
-            );
+            const coordinates = [
+                [message.data.bounds[0], message.data.bounds[1]],
+                [message.data.bounds[2], message.data.bounds[1]],
+                [message.data.bounds[2], message.data.bounds[3]],
+                [message.data.bounds[0], message.data.bounds[3]],
+            ];
+            // console.log('adding influence canvas', id, coordinates);
+            try {
+                map.addSource(`influence-canvas-${id}`, {
+                    type: 'canvas',
+                    canvas: canvas,
+                    animate: false,
+
+                    coordinates,
+                });
+                map.U.addRasterLayer(
+                    `influence-canvas-${id}`,
+                    `influence-canvas-${id}`,
+                    {
+                        rasterFadeDuration: 0,
+                        rasterOpacity: 0.75,
+                    },
+                    'expeditions-circles'
+                );
+            } catch (e) {
+                // Mapbox doesn't seem to like rasters that cross the antimeridian
+                // possibly a contributing factor is that our image is actually upside down and we're flipping it
+                // console.error(e);
+            }
         } else if (message?.data?.type === 'finish-canvas') {
             // console.log('finish canvas', message.data.workerId);
             influenceWorkers[message.data.workerId].terminate();
