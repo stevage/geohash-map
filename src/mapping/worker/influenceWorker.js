@@ -3,28 +3,23 @@ import * as turf from '@turf/turf';
 import { report } from '@/util';
 import md5 from '@/md5';
 import { participantToColor } from '../expeditions/colorFuncs';
+import CheapRuler from '@/lib/cheap-ruler/cheap-ruler';
 let taskNo = 0;
 
-function calculateCellWinner(x, y, points, rangeCutoff2) {
+function calculateCellWinner(x, y, points, rangeCutoff, rangeCutoff2) {
     const scores = {};
     let highestScore = 0,
         highestParticipant = '';
+    const ruler = new CheapRuler(y, 'degrees');
     for (const point of points) {
-        const d =
-            // turf.distance(turf.point([x, y]), point, { units: 'kilometers' }) ||
-            // 1e-7;
-            (x - point.geometry.coordinates[0]) *
-                (x - point.geometry.coordinates[0]) +
-                (y - point.geometry.coordinates[1]) *
-                    (y - point.geometry.coordinates[1]) || 1e-7;
-        if (d > rangeCutoff2) {
+        const d = ruler.distance2([x, y], point.geometry.coordinates) || 1e-7;
+        if (d > rangeCutoff) {
             continue;
         }
         for (const participant of point.properties.participants) {
             if (!scores[participant]) {
                 scores[participant] = 0;
             }
-            // scores[participant] += 1 / (d * d);
             scores[participant] += 1 / d;
             if (scores[participant] > highestScore) {
                 highestScore = scores[participant];
@@ -73,6 +68,7 @@ async function makeCanvas({
                 x + cellWidth / 2,
                 y + cellHeight / 2,
                 points,
+                rangeCutoff,
                 rangeCutoff2
             );
             const rect = [
