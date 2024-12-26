@@ -214,8 +214,8 @@ export function participantToColor(participant) {
         // const s = (parseInt(hash.slice(2, 4), 16) / 256) * 25 + 50;
         // const l = (parseInt(hash.slice(4, 6), 16) / 256) * 50 + 25;
         const h = ((parseInt(hash.slice(0, 2), 16) / 256) * 300 + 120) % 360;
-        const s = (parseInt(hash.slice(2, 4), 16) / 256) * 5 + 40;
-        const l = (parseInt(hash.slice(4, 6), 16) / 256) * 10 + 50;
+        const s = (parseInt(hash.slice(3, 5), 16) / 256) * 20 + 30;
+        const l = (parseInt(hash.slice(4, 6), 16) / 256) * 20 + 40;
 
         return `hsla(${h}, ${s}%, ${l}%, 1)`;
     }

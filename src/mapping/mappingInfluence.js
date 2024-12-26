@@ -80,7 +80,7 @@ function initWorker(map) {
     influenceWorker.onmessage = (message) => {
         if (message?.data?.type === 'update-canvas') {
             const id = message.data.workerId;
-            console.log('update influence got canvas', message.data.bounds);
+            // console.log('update influence got canvas', message.data.bounds);
             const canvas = document.createElement('canvas');
             canvas.width = message.data.clientRect.width;
             canvas.height = message.data.clientRect.height;

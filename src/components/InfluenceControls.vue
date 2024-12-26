@@ -36,7 +36,7 @@ export default {
         showInfluence: window.location.hostname === 'localhost',
         showFade: true,
         rangeCutoff: 1,
-        fadeStrength: 20, // 2000...
+        fadeStrength: 4,
     }),
     created() {
         window.InfluenceControls = this;
