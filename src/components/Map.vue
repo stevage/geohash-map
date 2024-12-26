@@ -142,12 +142,11 @@ export default {
             try {
                 // map.setBearing(0);
                 // map.setPitch(0);
-                EventBus.$emit('moveend');
+                EventBus.$emit('moveend', map);
                 window.localStorage.setItem(
                     'center',
                     map.getCenter().toArray().join(',') + ',' + map.getZoom()
                 );
-                updateInfluenceStyle({ map, filters: this.filters });
             } catch (e) {
                 //
             }

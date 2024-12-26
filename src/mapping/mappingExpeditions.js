@@ -246,10 +246,12 @@ export function updateHashStyle({ map, filters, quickUpdate = false }) {
 
         map.on('moveend', () => {
             const filters = window.Filters.filters;
-            if (filters.colorVis === 'participants') {
+            if (
+                filters.colorVis === 'participants' ||
+                filters.colorVis === 'participantsFixed'
+            ) {
                 // updateHashStyle({ map, filters, quickUpdate: true });
                 const acf = colorFunc(filters);
-
                 map.U.setCircleColor(
                     'expeditions-circles',
                     circlesCircleColor(acf)

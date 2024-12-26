@@ -227,7 +227,7 @@ export function participantToColor(participant) {
     // return stringToHSL(participant);
 }
 
-colorFuncs.participants = () => {
+const makeParticipantsLookup = (mode) => {
     // TODO cache this result because it's slow to compute and a few things use this result
     // const expeditions = window.map.queryRenderedFeatures({ layers: ['expeditions-circles']});
 
@@ -264,14 +264,21 @@ colorFuncs.participants = () => {
         ['get', 'participantsOrMultiple'],
         ...visibleParticipants.flatMap((participant, i) => [
             participant.name,
-            // `rgb(${scheme[i]})`,
-            // participantDominanceColor(participant.name),
-            participantToColor(participant.name),
+            mode === 'local'
+                ? `rgb(${scheme[i]})`
+                : participantToColor(participant.name),
         ]),
         'black',
     ];
     // console.log(ret);
     return ret;
+};
+
+colorFuncs.participants = () => {
+    return makeParticipantsLookup('local');
+};
+colorFuncs.participantsFixed = () => {
+    return makeParticipantsLookup('fixed');
 };
 
 // colorFuncs.participants2 = () => {
@@ -390,7 +397,10 @@ export function legendColors(filters, activeColorFunc) {
             ];
             vals.push([weekdayName, color]);
         }
-    } else if (filters.colorVis === 'participants') {
+    } else if (
+        filters.colorVis === 'participants' ||
+        filters.colorVis === 'participantsFixed'
+    ) {
         for (const participant of visibleParticipants) {
             const color = Expression.parse(activeColorFunc).evaluate(
                 feature({

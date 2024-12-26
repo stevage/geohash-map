@@ -41,6 +41,7 @@
         option(value="experienceMax") Hasher's previous expeditions
         option(value="experienceDaysMax") Hasher's years of experience
         option(value="participants") Participant
+        option(value="participantsFixed") Participant (fixed palette)
         option(value="transportMode") Transport mode
         option(value="hardship") Hardship
 

@@ -11,20 +11,18 @@ window.md5 = md5;
 const workerCount = 8;
 const influenceWorkers = new Array(workerCount).fill(null);
 let startTime;
-async function computeInfluence({ map, filters }) {
+async function computeInfluence({ map, filters, ...options }) {
     startTime = performance.now();
     const points = getExpeditionsNearViewport(map);
     for (let workerId = 0; workerId < workerCount; workerId++) {
         // const influenceWorker = new InfluenceWorker();
 
         if (influenceWorkers[workerId]) {
-            console.log('terminate worker');
             influenceWorkers[workerId].terminate();
             influenceWorkers[workerId] = null;
         }
         influenceWorkers[workerId] = initWorker(map, workerId);
 
-        console.log(influenceWorkers[workerId]);
         if (influenceWorkers[workerId]?.postMessage) {
             // influenceWorker.postMessage({
             //     type: 'update-expeditions',
@@ -43,7 +41,6 @@ async function computeInfluence({ map, filters }) {
             const clientRect = map.getCanvas().getClientRects()[0];
             if (!clientRect) {
                 // sometimes we don't have a clientRect, immediately after resizing?
-                console.log('no clientRect');
                 window.setTimeout(() => {
                     computeInfluence({ map, filters });
                 }, 100);
@@ -61,9 +58,10 @@ async function computeInfluence({ map, filters }) {
                     height: clientRect.height,
                 },
                 workerId,
+                ...options,
             });
         } else {
-            console.log('no worker');
+            console.log("Couldn't start worker");
         }
     }
     // return makeCells(map, points);
@@ -74,11 +72,7 @@ function initWorker(map) {
         new URL('./worker/influenceWorker.js', import.meta.url)
     );
     influenceWorker.onmessage = (message) => {
-        if (message?.data?.type === 'update-data') {
-            console.log('update influence got data');
-            map.U.setData('influence', message.data.data);
-            updateStyle(map);
-        } else if (message?.data?.type === 'update-canvas') {
+        if (message?.data?.type === 'update-canvas') {
             const id = message.data.workerId;
             // console.log('update influence got canvas', id);
             const canvas = document.createElement('canvas');
@@ -119,7 +113,7 @@ function initWorker(map) {
                 'expeditions-circles'
             );
         } else if (message?.data?.type === 'finish-canvas') {
-            console.log('finish canvas', message.data.workerId);
+            // console.log('finish canvas', message.data.workerId);
             influenceWorkers[message.data.workerId].terminate();
 
             influenceWorkers[message.data.workerId] = null;
@@ -136,17 +130,15 @@ function initWorker(map) {
     return influenceWorker;
 }
 
-function updateStyle(map) {
-    const fillColor = colorFunc({ colorVis: 'participants' });
-    fillColor[1] = ['get', 'influencer'];
-    map.U.addFillLayer('influence-fill', 'influence', {
-        fillColor,
-        fillOpacity: 0.5,
-        fillOutlineColor: 'transparent',
-    });
-}
-export function updateInfluenceStyle({ map, filters }) {
-    if (map.getZoom() < 5) {
+export function updateInfluenceStyle({ map, filters, show, ...options }) {
+    for (let workerId = 0; workerId < workerCount; workerId++) {
+        if (influenceWorkers[workerId]) {
+            influenceWorkers[workerId].terminate();
+            influenceWorkers[workerId] = null;
+        }
+    }
+
+    if (map.getZoom() < 5 || !show) {
         if (map.getSource('influence')) {
             map.U.removeLayer('influence-fill');
             map.U.removeSource('influence');
@@ -158,5 +150,5 @@ export function updateInfluenceStyle({ map, filters }) {
 
     if (first) map.U.addGeoJSON('influence');
     // updateStyle(map);
-    computeInfluence({ map, filters });
+    computeInfluence({ map, filters, ...options });
 }
