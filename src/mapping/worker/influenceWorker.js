@@ -5,26 +5,43 @@ import md5 from '@/md5';
 import { participantToColor } from '../expeditions/colorFuncs';
 import CheapRuler from '@/lib/cheap-ruler/cheap-ruler';
 let taskNo = 0;
+let db;
 
-function calculateCellWinner(x, y, points, rangeCutoff, rangeCutoff2) {
+function calculateCellWinner(
+    x,
+    y,
+    points,
+    { rangeCutoff, rangeCutoff2, numberCutoff }
+) {
     const scores = {};
     let highestScore = 0,
         highestParticipant = '';
     const ruler = new CheapRuler(y, 'degrees');
-    for (const point of points) {
+
+    const closestPoints = db.getNearestExpeditions([x, y], {
+        maxResults: numberCutoff,
+        // maxDistance: Infinity,
+        maxDistance: rangeCutoff * 111,
+    });
+    let totalScore = 0;
+    for (const point of closestPoints) {
         const d = ruler.distance2([x, y], point.geometry.coordinates) || 1e-7;
-        if (d > rangeCutoff) {
-            continue;
-        }
+        // if (d > rangeCutoff) {
+        //     continue;
+        // }
         for (const participant of point.properties.participants) {
             if (!scores[participant]) {
                 scores[participant] = 0;
             }
             scores[participant] += 1 / d;
+            totalScore += 1 / d;
             if (scores[participant] > highestScore) {
                 highestScore = scores[participant];
                 highestParticipant = participant;
             }
+        }
+        if (highestScore > 2000 && highestScore / totalScore > 0.5) {
+            return [highestParticipant, highestScore];
         }
     }
     return [highestParticipant, highestScore];
@@ -39,6 +56,8 @@ async function makeCanvas({
     showFade = false,
     rangeCutoff = 15,
     fadeStrength = 2000,
+    first = false,
+    numberCutoff = 10,
     ...data
 }) {
     // width in longitude degrees, to make each cell about 10 pixels wide
@@ -63,13 +82,25 @@ async function makeCanvas({
         if (cols % 10 === 0) {
             await sendCanvas({ canvas, bounds, clientRect, ...data }, true);
         }
+        let rows = 0;
         for (let y = bounds[1]; y < bounds[3]; y += cellHeight) {
+            rows++;
+            if (!first && cols % 3 === 1 && rows % 3 === 1) {
+                // in theory we shouldn't have to draw the middle cell of each block of 9 because its color
+                // would be the same as the larger block we already drew here but for some reason this is
+                // producing artefacts
+                // continue;
+            }
+
             const [influencer, strength] = calculateCellWinner(
                 x + cellWidth / 2,
                 y + cellHeight / 2,
                 points,
-                rangeCutoff,
-                rangeCutoff2
+                {
+                    rangeCutoff,
+                    rangeCutoff2,
+                    numberCutoff,
+                }
             );
             const rect = [
                 ((x - bounds[0]) / (bounds[2] - bounds[0])) * clientRect.width,
@@ -133,7 +164,7 @@ self.onmessage = async (message) => {
     if (message.data.type === 'update-expeditions') {
         // not used
         initFromData(message.data);
-        const db = await getDB();
+        db = await getDB();
         console.log(db);
 
         console.log(
@@ -141,16 +172,21 @@ self.onmessage = async (message) => {
         );
     } else if (message.data.type === 'update-influence-canvas') {
         let data;
+        initFromData(message.data.indexData);
+        db = await getDB();
+
         // console.log('start work', message.data);
         const process = async (cellSize) => {
             data = {
                 ...message.data,
-                ...(await makeCanvas({ ...message.data, cellSize })),
+                ...(await makeCanvas({ ...message.data, cellSize, first })),
             };
 
             sendCanvas(data, true);
+            first = false;
         };
-        // await process(81);
+        let first = true;
+        await process(81);
         await process(27);
         await process(9);
         await process(3);

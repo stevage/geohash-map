@@ -30,14 +30,6 @@ async function computeInfluence({ map, filters, ...options }) {
         influenceWorkers[workerId] = initWorker(map, workerId);
 
         if (influenceWorkers[workerId]?.postMessage) {
-            // influenceWorker.postMessage({
-            //     type: 'update-expeditions',
-            //     center: map.getCenter().toArray(),
-            //     viewport: map.getBounds().toArray().flat(),
-            //     ...(await getDB()).getData(),
-            // });
-
-            // canvas method
             const bounds = map.getBounds().toArray().flat();
             // divide bounds into 4 vertical strips
             const stripWidth = (bounds[2] - bounds[0]) / workerCount;
@@ -52,8 +44,6 @@ async function computeInfluence({ map, filters, ...options }) {
                 }, 100);
                 return;
             }
-            // do same for clientRect
-            // clientRect.width = clientRect.width / workerCount;
 
             influenceWorkers[workerId].postMessage({
                 type: 'update-influence-canvas',
@@ -64,14 +54,13 @@ async function computeInfluence({ map, filters, ...options }) {
                     height: clientRect.height,
                 },
                 workerId,
+                indexData: (await getDB()).getData(),
                 ...options,
             });
         } else {
             console.log("Couldn't start worker");
         }
     }
-    // return makeCells(map, points);
-    // console.log('poitns', points);
 }
 function initWorker(map) {
     const influenceWorker = new Worker(
@@ -130,9 +119,9 @@ function initWorker(map) {
             const count = influenceWorkers.filter((w) => w).length;
             if (count === 0) {
                 console.log(
-                    `Influence canvas finished in ${
+                    `Influence canvas finished in ${Math.round(
                         performance.now() - startTime
-                    }ms`
+                    )}ms`
                 );
             }
         }

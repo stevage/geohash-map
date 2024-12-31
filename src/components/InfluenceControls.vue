@@ -20,6 +20,9 @@
         label.db.mt3(v-show="showInfluence" title="Maximum distance influence extends from a a geohash. Higher is slower, but reduces artefacts")
           input.mr1.dib(type="range" v-model.number="rangeCutoff" min="0.1" max="5" step="0.1" )
           div.dib Distance cut-off
+        label.db.mt3(v-show="showInfluence" title="")
+          input.mr1.dib(type="range" v-model.number="numberCutoff" min="1" max="250" step="1" )
+          div.dib Number cut-off {{ numberCutoff }}
 
 
 
@@ -35,8 +38,12 @@ export default {
     data: () => ({
         showInfluence: window.location.hostname === 'localhost',
         showFade: true,
-        rangeCutoff: 1,
-        fadeStrength: 4,
+        // rangeCutoff: 1,
+        // fadeStrength: 4,
+        // numberCutoff: 10,
+        rangeCutoff: 5,
+        fadeStrength: 12,
+        numberCutoff: 250,
     }),
     created() {
         window.InfluenceControls = this;
@@ -47,7 +54,7 @@ export default {
     },
     computed: {
         params() {
-            return `${this.showInfluence} ${this.showFade} ${this.rangeCutoff} ${this.fadeStrength}`;
+            return `${this.showInfluence} ${this.showFade} ${this.rangeCutoff} ${this.fadeStrength} ${this.numberCutoff}`;
         },
         usedFadeStrength() {
             // 12 maximum, 0 minimum
@@ -73,6 +80,8 @@ export default {
                 showFade: this.showFade,
                 rangeCutoff: this.rangeCutoff,
                 fadeStrength: this.usedFadeStrength, //* this.fadeStrength,
+                numberCutoff:
+                    this.numberCutoff === 250 ? Infinity : this.numberCutoff,
             });
         },
     },

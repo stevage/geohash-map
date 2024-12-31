@@ -51,6 +51,19 @@ class ExpeditionIndex {
         return results.map((i) => this.successes[i]);
     }
 
+    getNearestExpeditions(point, { maxResults, maxDistance } = {}) {
+        if (!this.successIndex) {
+            return [];
+        }
+        return around(
+            this.successIndex,
+            point[0],
+            point[1],
+            maxResults,
+            maxDistance
+        ).map((i) => this.successes[i]);
+    }
+
     getExpeditionsNearViewport(map) {
         return this.getExpeditionsNear(
             map.getCenter().toArray(),
