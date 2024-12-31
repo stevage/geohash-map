@@ -37,7 +37,7 @@ class ExpeditionIndex {
         resolveLoad();
     }
 
-    getExpeditionsNear(center, bounds) {
+    getExpeditionsNear(center, bounds, filters) {
         if (!this.successIndex) {
             return [];
         }
@@ -47,7 +47,15 @@ class ExpeditionIndex {
             [bounds[2], bounds[3]],
             { units: 'kilometers' }
         );
-        const results = around(this.successIndex, lon, lat, 1e9, dist * 3);
+        const filterFunc = expeditionFilterFunc(filters);
+        const results = around(
+            this.successIndex,
+            lon,
+            lat,
+            1e9,
+            dist * 3,
+            (i) => filterFunc(this.successes[i])
+        );
         return results.map((i) => this.successes[i]);
     }
 
@@ -64,10 +72,11 @@ class ExpeditionIndex {
         ).map((i) => this.successes[i]);
     }
 
-    getExpeditionsNearViewport(map) {
+    getExpeditionsNearViewport(map, { filters } = {}) {
         return this.getExpeditionsNear(
             map.getCenter().toArray(),
-            map.getBounds().toArray().flat()
+            map.getBounds().toArray().flat(),
+            filters
         );
     }
 
@@ -79,6 +88,39 @@ class ExpeditionIndex {
             successes: this.successes,
         };
     }
+}
+
+function expeditionFilterFunc(filters) {
+    if (!filters) {
+        return () => true;
+    }
+    return (f) => {
+        // participantsFilter = [
+        //     'any',
+        //     ...filters.participants
+        //         .split(/,\s*/)
+        //         .map((p) => [
+        //             'in',
+        //             p.replace(/ /g, '_').toLowerCase(),
+        //             ['get', 'participantsStringLower'],
+        //         ]),
+        // ];
+
+        return (
+            f.properties.year >= filters.minYear &&
+            f.properties.year <= filters.maxYear &&
+            // f.properties.success === filters.success
+            f.properties.participantsCount >= filters.minParticipants &&
+            f.properties.participantsCount <= filters.maxParticipants &&
+            filters.participants
+                .split(/,\s*/)
+                .some((p) =>
+                    f.properties.participantsStringLower.includes(
+                        p.replace(/ /g, '_').toLowerCase()
+                    )
+                )
+        );
+    };
 }
 
 db = new ExpeditionIndex();

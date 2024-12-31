@@ -25,7 +25,7 @@ function updateFilters({ map, filters }) {
                 ]),
         ];
     }
-    console.log('filter', participantsFilter);
+    // console.log('filter', participantsFilter);
     map.U.setFilter(/expeditions-/, [
         'all',
         participantsFilter,

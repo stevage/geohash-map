@@ -1,7 +1,4 @@
-import {
-    getExpeditionsNearViewport,
-    getDB,
-} from './expeditions/expeditionIndex';
+import { getDB } from './expeditions/expeditionIndex';
 import { colorFunc, legendColors } from './expeditions/colorFuncs';
 import * as turf from '@turf/turf';
 import InfluenceWorker from './worker/influenceWorker?worker';
@@ -19,7 +16,7 @@ function wrap(deg) {
 
 async function computeInfluence({ map, filters, ...options }) {
     startTime = performance.now();
-    const points = getExpeditionsNearViewport(map);
+    const points = (await getDB()).getExpeditionsNearViewport(map, { filters });
     for (let workerId = 0; workerId < workerCount; workerId++) {
         // const influenceWorker = new InfluenceWorker();
 

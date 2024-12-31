@@ -18,13 +18,15 @@ function calculateCellWinner(
         highestParticipant = '';
     const ruler = new CheapRuler(y, 'degrees');
 
-    const closestPoints = db.getNearestExpeditions([x, y], {
-        maxResults: numberCutoff,
-        // maxDistance: Infinity,
-        maxDistance: rangeCutoff * 111,
-    });
+    // const closestPoints = db.getNearestExpeditions([x, y], {
+    //     maxResults: numberCutoff,
+    //     // maxDistance: Infinity,
+    //     maxDistance: rangeCutoff * 111,
+    // });
     let totalScore = 0;
-    for (const point of closestPoints) {
+    let pointCount = 0;
+    for (const point of points) {
+        pointCount++;
         const d = ruler.distance2([x, y], point.geometry.coordinates) || 1e-7;
         // if (d > rangeCutoff) {
         //     continue;
@@ -34,15 +36,21 @@ function calculateCellWinner(
                 scores[participant] = 0;
             }
             scores[participant] += 1 / d;
-            totalScore += 1 / d;
+            // totalScore += scores[participant];
             if (scores[participant] > highestScore) {
                 highestScore = scores[participant];
                 highestParticipant = participant;
             }
         }
-        if (highestScore > 2000 && highestScore / totalScore > 0.5) {
-            return [highestParticipant, highestScore];
-        }
+        // this optimisation was meant to allow skipping scoring if we have a clear winner.
+        // if (
+        //     highestScore > 5000 &&
+        //     highestScore / totalScore > 0.75 &&
+        //     pointCount > 5
+        // ) {
+        //     // console.log('skip', highestScore, totalScore, scores);
+        //     return [highestParticipant, 100000]; //highestScore];
+        // }
     }
     return [highestParticipant, highestScore];
 }
@@ -167,9 +175,9 @@ self.onmessage = async (message) => {
         db = await getDB();
         console.log(db);
 
-        console.log(
-            db.getExpeditionsNear(message.data.center, message.data.viewport)
-        );
+        // console.log(
+        //     db.getExpeditionsNear(message.data.center, message.data.viewport)
+        // );
     } else if (message.data.type === 'update-influence-canvas') {
         let data;
         initFromData(message.data.indexData);

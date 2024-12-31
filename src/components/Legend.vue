@@ -1,7 +1,7 @@
 <template lang="pug">
-#Legend.relative.h-100
+#Legend.relative.h-100(:class="{ collapsed }" @click="collapsed = !collapsed")
     //- .bg-white.b--gray.ba.shadow-1.pa2.ma2.bottom.absolute.bottom-2
-    .bg-dark-gray.light-gray.b--gray.ba.npe.shadow-1.pa2.mh2.top.right-1.absolute(v-if="showingExpeditions" style="max-height:calc(100vh - 100px); overflow-y:hidden")
+    .bg-dark-gray.light-gray.b--gray.ba.shadow-1.npe.pa2.mh2.top.right-1.absolute(v-if="showingExpeditions" )
         //- div(style="pointer-events:none")
         h3.ma0.mb1 {{ title }}
         div(v-for="[year, color] in colors.slice().reverse()")
@@ -20,6 +20,7 @@ export default {
         colors: window.app.yearColors,
         colorVis: 'experienceDaysMax',
         showingExpeditions: true,
+        collapsed: false, // sigh, this doesn't work because Legend sits within a no-pointer-events overlay
     }),
     created() {
         window.Legend = this;
@@ -43,7 +44,17 @@ export default {
     },
 };
 </script>
+<style>
+#Legend {
+    max-height: calc(100vh - 100px);
+    overflow-y: hidden;
+}
 
+#Legend.collapsed {
+    overflow-y: hidden;
+    max-height: 50px;
+}
+</style>
 <style scoped>
 .pill {
     display: inline-block;

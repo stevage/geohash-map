@@ -238,9 +238,9 @@ export default {
             report('Update streaks', () =>
                 updateStreakStyle({ map, filters: this.filters })
             );
-            report('Update influence', () =>
-                updateInfluenceStyle({ map, filters: this.filters })
-            );
+            // report('Update influence', () =>
+            // updateInfluenceStyle({ map, filters: this.filters })
+            // );
             updateGeohashes(map);
             // console.log(performance.now() - start);
         },
