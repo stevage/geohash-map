@@ -13,12 +13,13 @@ declare global {
     interface Window {
         map: any; // Replace `any` with the correct type if known
         app: {
-            yearColors: string[];
-            fippeServer: string;
+            yearColors?: string[];
+            fippeServer?: string;
             App?: any;
-            graticules: FeatureCollection;
+            graticules?: FeatureCollection;
         };
         Filters: any;
+        InfluenceControls: any;
         expeditions: any;
         graticulesById: Record<string, GraticuleStat>;
         expeditionsByGraticule: Record<string, Expedition[]>;

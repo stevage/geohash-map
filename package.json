@@ -15,6 +15,7 @@
     "@observablehq/plot": "^0.4.2",
     "@turf/turf": "^6.5.0",
     "@types/humanize-duration": "^3.27.4",
+    "caniuse-lite": "^1.0.30001690",
     "cd": "^0.3.3",
     "chartjs": "^0.3.24",
     "core-js": "^3.8.3",

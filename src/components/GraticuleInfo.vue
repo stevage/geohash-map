@@ -36,20 +36,34 @@ import { EventBus } from '@/EventBus';
 import GraticuleRecords from '@/components/GraticuleRecords.vue';
 import WikiPage from '@/components/WikiPage.vue';
 import { setUrlParam } from '@/util';
+import { Feature } from 'geojson';
 
+type Info = {
+    graticule: {
+        properties: {
+            id: string;
+            name: string;
+            x: number;
+            y: number;
+        };
+    };
+    area: number;
+    uses: Record<string, { area: number }>;
+    other: number;
+};
 export default {
     name: 'GraticuleInfo',
-    data: () => ({
-        info: undefined,
-    }),
+    data: () =>
+        ({
+            info: undefined,
+        } as { info: Info | undefined }),
     components: { GraticuleRecords, WikiPage },
     created() {
-        window.GraticuleInfo = this;
-        EventBus.$on('show-graticule-info', (info) => (this.info = info));
+        EventBus.$on('show-graticule-info', (info: Info) => (this.info = info));
     },
     computed: {
         uses() {
-            return Object.entries(this.info.uses)
+            return Object.entries((this.info as Info).uses)
                 .sort((a, b) => b[1].area - a[1].area)
                 .filter(([key, use]) => use.area > 5e6);
         },
@@ -81,14 +95,14 @@ export default {
                     const month = new Date(date)
                         .toLocaleString('default', { month: 'long' })
                         .slice(0, 3);
-                    const joinWithAnd = (arr) => {
+                    const joinWithAnd = (arr: string[]) => {
                         if (arr.length === 1) return arr[0];
                         return `${arr.slice(0, -1).join(', ')} and ${
                             arr[arr.length - 1]
                         }`;
                     };
                     const participants = joinWithAnd(
-                        p.participants.map((p) => `[[User:${p}|${p}]]`)
+                        p.participants.map((p: string) => `[[User:${p}|${p}]]`)
                     );
                     const arrow = p.success ? 'Arrow2.png' : 'Arrow4.png';
                     let text = `[[Image:${arrow}|12px]] ${month} [[${p.id}]] ${weekday} – ${participants}.<br/>`;
@@ -105,7 +119,7 @@ export default {
                 console.error('Failed to copy: ', err);
             }
         },
-        expLink(exp) {
+        expLink(exp: Feature) {
             return `https://geohashing.site/geohashing/${exp.properties.id}`;
         },
     },
