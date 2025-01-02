@@ -77,26 +77,6 @@ export default {
         window.app.Map = this;
 
         await map.U.onLoad();
-        map.U.addRasterSource('dominance', {
-            tiles: [
-                // 'https://nr47.hohenpoelz.de/geohashing/output/{z}/{x}/{y}.png',
-                `https://fippe-geojson.glitch.me/dominance/geohashing/output/{z}/{x}/{y}.png`,
-            ],
-            tileSize: 256,
-            type: 'raster',
-            minzoom: 0,
-            maxzoom: 9,
-        });
-        map.U.addRasterLayer(
-            'dominance',
-            'dominance',
-            {
-                rasterOpacity: U.interpolateZoom({ 5: 0.25, 12: 0.1 }),
-
-                visibility: 'none',
-            },
-            'building'
-        );
         // initMappingRegions(map);
 
         if (this.globe && !window.location.hash.match(/bug/)) {

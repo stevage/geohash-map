@@ -7,7 +7,6 @@ import type mapboxgl from 'mapbox-gl';
 // @ts-ignore
 
 import md5 from '@/md5';
-// import dominanceColors from './dominanceColors';
 import type { Filters } from '@/components/Filters.vue';
 import type {
     Expedition,
