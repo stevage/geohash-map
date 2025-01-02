@@ -2,22 +2,20 @@
 
 <template lang="pug">
 #InfluenceControls
-    h3.mb1 Influence
+    //- h3.mb1 Influence
     .group
-        label
+        label(title="Shows who has had the most successful expeditions in an area.")
             input.mr2(type="checkbox" v-model="showInfluence")
-            | Show Influence heatmap
-        p(v-show="showInfluence")
-          | Shows who has had the most successful expeditions in an area.
+            | Show heatmap
         //- label.db(v-show="showInfluence")
         //-   input.mr1(type="checkbox" v-model="showFade")
         //-   span Show influence strength
-        label.db(v-show="showFade && showInfluence" title="How quickly influence fades from a geohash")
+        label.db.ml2.mt2(v-show="showFade && showInfluence" title="How quickly influence fades from a geohash")
           input.mr1.dib(type="range" v-model.number="fadeStrength" min="0" max="12" step="0.1" )
           div.dib() Fade distance
         //- div {{fadeStrength}} &rarr; {{ usedFadeStrength }}
 
-        label.db.mt3(v-show="showInfluence" title="Maximum distance influence extends from a a geohash. Higher is slower, but reduces artefacts")
+        label.db.mt2.ml2(v-show="showInfluence" title="Maximum distance influence extends from a a geohash. Higher is slower, but reduces artefacts")
           input.mr1.dib(type="range" v-model.number="rangeCutoff" min="0.1" max="5" step="0.1" )
           div.dib Distance cut-off
         //- label.db.mt3(v-show="showInfluence" title="")
@@ -35,7 +33,7 @@ import { EventBus } from '@/EventBus';
 import { updateInfluenceStyle } from '@/mapping/mappingInfluence';
 export default {
     data: () => ({
-        showInfluence: window.location.hostname === 'localhost',
+        showInfluence: false, // window.location.hostname === 'localhost',
         showFade: true,
         rangeCutoff: 1,
         fadeStrength: 4,

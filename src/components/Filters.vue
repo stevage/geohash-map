@@ -1,13 +1,14 @@
 <template lang="pug">
 #Filters.mt4(:class="{ disabled: !enabled }")
-  h3.mb2 Expeditions
+  //- h3.mb2 Expeditions filter
+  label.pointer.mb2.db(for="showfilters")
+      input.mr2#showfilters(type="checkbox" v-model="showFilters" :disabled="!enabled")
+      span Apply filter...
   .group
-    label.pointer.mb2.db(for="showfilters")
-      input#showfilters(type="checkbox" v-model="showFilters" :disabled="!enabled")
-      span  Filter
+
     div(v-if="showFilters")
       label.mb2
-        span.mr2 Participant
+        span.mr2(title="Comma-separated list of participant names") Participant
         input.mr1(type="text" v-model="filters.participants" :disabled="!enabled")
       div.mt3.mb3
       label.mv2
@@ -26,9 +27,20 @@
 
       label.mv2.db
       select(v-model="filters.outcome" :disabled="!enabled")
-        option(value="all") All expeditions
+        option(value="all") Successes and failures
         option(value="success") Successful expeditions
         option(value="failure") Failed expeditions
+      label.mv2.db
+      select(v-model="filters.dayOfWeek" :disabled="!enabled")
+        option(value="all") Any day of the week
+        option(value="Monday") Mondays
+        option(value="Tuesday") Tuesdays
+        option(value="Wednesday") Wednesdays
+        option(value="Thursday") Thursdays
+        option(value="Friday") Fridays
+        option(value="Saturday") Saturdays
+        option(value="Sunday") Sundays
+
 
   h3.mb1 Map
   .group
@@ -105,6 +117,7 @@ export default {
             minYear: 2008,
             maxYear: new Date().getUTCFullYear(),
             outcome: 'all',
+            dayOfWeek: 'all',
             colorVis: 'year',
             showStreaks: false,
             minStreakLength: 3,

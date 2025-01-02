@@ -52,6 +52,26 @@ export function updateMeridians({ map }) {
                 },
             ],
         });
+        map.U.addGeoJSON('idl', 'idl.geojson');
+        map.U.addLine('idl-line', 'idl', {
+            lineColor: U.interpolateZoom({
+                3: '#333',
+                7: '#777',
+            }),
+            lineDasharray: [8, 4, 4, 4],
+        });
+        map.U.addSymbol('idl-label', 'idl', {
+            textField: ['get', 'name'],
+            textOffset: [0, -1],
+            symbolPlacement: 'line',
+            symbolSpacing: 500,
+            textSize: 11,
+            textColor: U.interpolateZoom({
+                3: '#333',
+                7: '#777',
+            }),
+            minzoom: 8,
+        });
         map.U.addLine('meridians-line', 'meridians', {
             lineColor: U.interpolateZoom({
                 3: '#333',
@@ -69,13 +89,10 @@ export function updateMeridians({ map }) {
             filter: ['==', 'type', 'W30'],
         });
         map.U.addSymbol('meridians-label', 'meridians', {
-            textField: ['get', 'type'],
-            // textFont: ['Arial Unicode MS Bold'],
-            // textAnchor: 'left',
+            textField: ['get', 'name'],
             textOffset: [0, -0.5],
             symbolPlacement: 'line',
             symbolSpacing: 500,
-            // textSize: U.interpolateZoom({ 3: 12, 7: 24 }),
             textColor: U.interpolateZoom({
                 3: '#335',
                 7: '#559',

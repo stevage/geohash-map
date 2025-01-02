@@ -26,6 +26,10 @@ function updateFilters({ map, filters }) {
         ];
     }
     // console.log('filter', participantsFilter);
+    const dayOfWeekFilter =
+        filters.dayOfWeek === 'all'
+            ? true
+            : ['==', ['get', 'weekDayName'], filters.dayOfWeek];
     map.U.setFilter(/expeditions-/, [
         'all',
         participantsFilter,
@@ -33,6 +37,7 @@ function updateFilters({ map, filters }) {
         ['<=', ['get', 'participantsCount'], filters.maxParticipants],
         ['>=', ['get', 'year'], filters.minYear],
         ['<=', ['get', 'year'], filters.maxYear],
+        dayOfWeekFilter,
         successFilter,
     ]);
     map.U.setCircleRadius('expeditions-circles', circleRadiusFunc({ filters }));

@@ -63,6 +63,7 @@ async function loadGeohashes(map) {
 
                     const daysAtLng = daysAtLongitude(lng * lngSign);
                     const daysAtHash = dateToDays(hash.date);
+                    // don't show hashes that are already "yesterday" in local time
                     if (daysAtHash < daysAtLng) continue;
                     for (let lat = 0; lat <= 85; lat++) {
                         features.push(

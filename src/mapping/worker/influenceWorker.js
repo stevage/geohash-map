@@ -194,7 +194,7 @@ self.onmessage = async (message) => {
             first = false;
         };
         let first = true;
-        await process(81);
+        // await process(81);
         await process(27);
         await process(9);
         await process(3);

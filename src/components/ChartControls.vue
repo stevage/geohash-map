@@ -1,6 +1,6 @@
 <template lang="pug">
 #ChartControls
-  h3.mb1 Graph
+  //-   h3.mb1 Graph
   .group
     label
         input.mr2(type="checkbox" v-model="options.showChart")

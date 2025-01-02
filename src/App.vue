@@ -13,19 +13,20 @@
                         .tab.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
                             | Geohash
 
-                    div(v-if="tab === 'expeditions'")
+                    div(v-show="tab === 'expeditions'")
                         ExpeditionInfo
                         Filters.ml2
+                        InfluenceControls.ml2
+                        h3 Graphs and stats
                         ChartControls.ml2
                         HashStats.ml2
                         AnimationControls.ml2
                         //- DominanceControls.ml2
-                        InfluenceControls.ml2
-                        VoronoiControls.ml2
+                        //- VoronoiControls.ml2
                         //- RegionControls.ml2
-                    div(v-if="tab === 'geohash'")
+                    div(v-show="tab === 'geohash'")
                         HashInfo
-                    div(v-if="tab === 'graticules'")
+                    div(v-show="tab === 'graticules'")
                         GraticuleOptions
                         GraticuleInfo
 

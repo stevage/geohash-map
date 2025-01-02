@@ -118,7 +118,9 @@ function expeditionFilterFunc(filters) {
                     f.properties.participantsStringLower.includes(
                         p.replace(/ /g, '_').toLowerCase()
                     )
-                )
+                ) &&
+            (f.properties.dayOfWeek === 'all' ||
+                f.properties.weekDayName === filters.dayOfWeek)
         );
     };
 }
