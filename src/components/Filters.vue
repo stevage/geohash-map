@@ -100,15 +100,28 @@
   //-     span Show graticule labels
 </template>
 
-<script>
+<script lang="ts">
 import { EventBus } from '@/EventBus';
 import { getUrlParam, setUrlParam } from '@/util';
+export type Filters = {
+    participants: string;
+    minParticipants: number;
+    maxParticipants: number;
+    // scaleExpedition: boolean;
+    scaleExpeditionsBy: string;
+    minYear: number;
+    maxYear: number;
+    outcome: string;
+    dayOfWeek: string;
+    colorVis: string;
+    showStreaks: boolean;
+    minStreakLength: number;
+    onlySuccessStreaks: boolean;
+};
 export default {
     name: 'Filters',
-    data: () => ({
-        enabled: true,
-        showFilters: true,
-        filters: {
+    data: () => {
+        const filters: Filters = {
             participants: getUrlParam('participants') || '',
             minParticipants: 0,
             maxParticipants: 100,
@@ -122,14 +135,20 @@ export default {
             showStreaks: false,
             minStreakLength: 3,
             onlySuccessStreaks: true,
-        },
-        projection: 'mercator',
-    }),
+        };
+        return {
+            enabled: true,
+            showFilters: true,
+            filters,
+            projection: 'mercator',
+        };
+    },
     created() {
+        // @ts-ignore
         window.Filters = this;
         EventBus.$on(
             'animation-change',
-            (running) => (this.enabled = !running)
+            (running: boolean) => (this.enabled = !running)
         );
     },
     watch: {

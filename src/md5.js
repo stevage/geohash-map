@@ -1,7 +1,8 @@
+/* eslint-disable */
 module.exports = function md5(inputString) {
-    var hc = '0123456789abcdef';
+    const hc = '0123456789abcdef';
     function rh(n) {
-        var j,
+        let j,
             s = '';
         for (j = 0; j <= 3; j++)
             s +=
@@ -10,8 +11,8 @@ module.exports = function md5(inputString) {
         return s;
     }
     function ad(x, y) {
-        var l = (x & 0xffff) + (y & 0xffff);
-        var m = (x >> 16) + (y >> 16) + (l >> 16);
+        const l = (x & 0xffff) + (y & 0xffff);
+        const m = (x >> 16) + (y >> 16) + (l >> 16);
         return (m << 16) | (l & 0xffff);
     }
     function rl(n, c) {
@@ -33,9 +34,9 @@ module.exports = function md5(inputString) {
         return cm(c ^ (b | ~d), a, b, x, s, t);
     }
     function sb(x) {
-        var i;
-        var nblk = ((x.length + 8) >> 6) + 1;
-        var blks = new Array(nblk * 16);
+        let i;
+        const nblk = ((x.length + 8) >> 6) + 1;
+        const blks = new Array(nblk * 16);
         for (i = 0; i < nblk * 16; i++) blks[i] = 0;
         for (i = 0; i < x.length; i++)
             blks[i >> 2] |= x.charCodeAt(i) << ((i % 4) * 8);
@@ -43,7 +44,7 @@ module.exports = function md5(inputString) {
         blks[nblk * 16 - 2] = x.length * 8;
         return blks;
     }
-    var i,
+    let i,
         x = sb('' + inputString),
         a = 1732584193,
         b = -271733879,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const factors = {
     kilometers: 1,
     degrees: 1 / 111,

@@ -5,7 +5,7 @@ import load from 'load-json-file';
 import write from 'write-json-file';
 import {featureEach} from '@turf/meta';
 import {featureCollection, lineString, polygon, point} from '@turf/helpers';
-import polygonize from './';
+import polygonize from '.;
 
 const directories = {
   in: path.join(__dirname, '..', 'test', 'in') + path.sep,

@@ -4,7 +4,7 @@ import { report } from '@/util';
 import md5 from '@/md5';
 import { participantToColor } from '../expeditions/colorFuncs';
 import CheapRuler from '@/lib/cheap-ruler/cheap-ruler';
-let taskNo = 0;
+const taskNo = 0;
 let db;
 
 function calculateCellWinner(
@@ -23,7 +23,7 @@ function calculateCellWinner(
     //     // maxDistance: Infinity,
     //     maxDistance: rangeCutoff * 111,
     // });
-    let totalScore = 0;
+    const totalScore = 0;
     let pointCount = 0;
     for (const point of points) {
         pointCount++;
@@ -140,19 +140,12 @@ async function makeCanvas({
 async function sendCanvas(data, keep) {
     let imageBitmap;
     if (keep) {
-        // imageBitmap = data.canvas.transferToImageBitmap();
-        // data.canvas.getContext('2d').drawImage(imageBitmap, 0, 0);
-
         imageBitmap = await createImageBitmap(data.canvas);
-        // console.log('keep', imageBitmap);
     } else {
         imageBitmap = data.canvas.transferToImageBitmap();
-        // return;
     }
-    // console.log('sendCanvas', data);
     self.postMessage(
         {
-            // ...data,
             type: 'update-canvas',
             bounds: data.bounds,
             clientRect: data.clientRect,

@@ -43,7 +43,7 @@
         #bottom.bt.b--light-gray.flex-none
 </template>
 
-<script>
+<script lang="ts">
 import { EventBus } from './EventBus';
 import Map from './components/Map.vue';
 import ExpeditionInfo from './components/ExpeditionInfo.vue';
