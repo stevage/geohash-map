@@ -1,5 +1,4 @@
 import { dateToDays, dateToWeekday } from '@//util';
-// @ts-ignore
 
 import tableauColors from '@/mapping/tableauColors';
 // @ts-ignore
@@ -14,6 +13,7 @@ import type {
     Expedition,
     Expeditions,
 } from '@/mapping/expeditions/expeditionIndex';
+import { getDB } from '@/mapping/expeditions/expeditionIndex';
 let visibleParticipants: any[];
 
 const brewer12 = [
@@ -213,18 +213,10 @@ export function participantToColor(participant: string) {
     // return stringToHSL(participant);
 }
 
-const makeParticipantsLookup = (mode: 'local' | 'fixed') => {
+const makeParticipantsLookup = async (mode: 'local' | 'fixed') => {
     // TODO cache this result because it's slow to compute and a few things use this result
-    // const expeditions = window.map.queryRenderedFeatures({ layers: ['expeditions-circles']});
-
-    // @ts-ignore
-    const bounds = window.map.getBounds();
-
-    // TODO use expeditionsindex
-    // @ts-ignore
-    const visibleExpeditions = window.expeditions.features.filter(
-        (f: Expedition) => bounds.contains(f.geometry.coordinates)
-    );
+    const db = await getDB();
+    const visibleExpeditions = db.getExpeditionsNearViewport(window.map);
     const participants = {} as Record<string, { expeditions: number }>;
     for (const f of visibleExpeditions) {
         // focus on the 1-or-multiple use case
@@ -264,11 +256,11 @@ const makeParticipantsLookup = (mode: 'local' | 'fixed') => {
     return ret;
 };
 
-colorFuncs.participants = () => {
-    return makeParticipantsLookup('local');
+colorFuncs.participants = async () => {
+    return await makeParticipantsLookup('local');
 };
-colorFuncs.participantsFixed = () => {
-    return makeParticipantsLookup('fixed');
+colorFuncs.participantsFixed = async () => {
+    return await makeParticipantsLookup('fixed');
 };
 
 // colorFuncs.participants2 = () => {
@@ -314,9 +306,9 @@ colorFuncs.hardship = () => {
     return ret;
 };
 
-export function colorFunc({ colorVis }: { colorVis: colorFuncTypes }) {
+export async function colorFunc({ colorVis }: { colorVis: colorFuncTypes }) {
     // console.log('colorVis', colorVis, colorFuncs[colorVis]);
-    return colorFuncs[colorVis]();
+    return await colorFuncs[colorVis]();
 }
 
 export function legendColors(

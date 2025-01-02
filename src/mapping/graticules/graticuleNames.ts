@@ -8,6 +8,5 @@ export async function getGraticuleNames() {
         const parts = x.split(';');
         return [parts[0] + ',' + parts[1], parts[2]];
     });
-    // @ts-ignore
     window.graticuleNamesHash = Object.fromEntries(names);
 }

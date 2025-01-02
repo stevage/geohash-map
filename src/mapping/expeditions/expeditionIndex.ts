@@ -12,7 +12,7 @@ const indexLoaded = new Promise((resolve): void => {
 export type Expedition = Feature<Point, any>; // TODO...
 export type Expeditions = Expedition[];
 
-class ExpeditionIndex {
+export class ExpeditionIndex {
     expeditions: any;
     index: kdbush;
     successes: any;
@@ -163,9 +163,7 @@ function expeditionFilterFunc(filters: Filters) {
 const db = new ExpeditionIndex();
 export function initIndex(expeditions: Expeditions) {
     db.init(expeditions);
-    //@ts-ignore
     window.db = db;
-    //@ts-ignore
 
     window.si = db.successIndex;
 }
@@ -175,7 +173,7 @@ export function initFromData(data: any) {
 }
 
 export function getExpeditionsNearViewport(map: mapboxgl.Map) {
-    if (!db) {
+    if (!db.expeditions) {
         return [];
     }
 

@@ -1,4 +1,36 @@
 import type mapboxgl from 'mapbox-gl';
+import {
+    Expedition,
+    ExpeditionIndex,
+} from '@/mapping/expeditions/expeditionIndex';
+import {
+    GraticuleStat,
+    GraticuleStats,
+} from './mapping/graticules/graticuleStats';
+import { FeatureCollection } from 'geojson';
+
+declare global {
+    interface Window {
+        map: any; // Replace `any` with the correct type if known
+        app: {
+            yearColors: string[];
+            fippeServer: string;
+            App?: any;
+            graticules: FeatureCollection;
+        };
+        Filters: any;
+        expeditions: any;
+        graticulesById: Record<string, GraticuleStat>;
+        expeditionsByGraticule: Record<string, Expedition[]>;
+        maxParticipants: number;
+        maxParticipantsGraticule: string;
+        db: ExpeditionIndex;
+        si: any;
+        graticules: GraticuleStats;
+        graticuleNamesP: Promise<any>;
+        graticuleNamesHash: Record<string, string>;
+    }
+}
 
 // type that extends mapboxgl.Map but also with a U property of type any
 export type mapU = mapboxgl.Map & { U: any };

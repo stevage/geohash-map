@@ -41,7 +41,7 @@ export default {
         },
     },
     methods: {
-        update() {
+        async update() {
             let points = getExpeditionsNearViewport(window.map);
             if (this.onlySolo) {
                 points = points.filter(
@@ -56,7 +56,7 @@ export default {
             window.map.U.setData('voronoi', v);
             window.map.U.setFillColor(
                 'voronoi-fill',
-                colorFunc({ colorVis: 'participants' })
+                await colorFunc({ colorVis: 'participants' })
             );
             //
         },

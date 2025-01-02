@@ -4,7 +4,3 @@
 /deployed/
 .*/*
 .history/
-/docs/
-/docs/js/*
-/docs/**/*
-docs/js/*

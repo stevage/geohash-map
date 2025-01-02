@@ -64,7 +64,6 @@ export async function getExpeditions(
     // const newExpeditions = await window.fetch(url).then((x) => x.json());
 
     const newExpeditions = await expeditionsToGeoJSON();
-    // @ts-ignore
     await window.graticuleNamesP;
 
     if (loadedExpeditions && local) {
@@ -96,7 +95,6 @@ export async function getExpeditions(
         exp.y = +y || 0;
         exp.global = /global/.test(exp.id);
 
-        // @ts-ignore
         const gname = window.graticuleNamesHash[`${y},${x}`];
         exp.graticuleName = gname;
         exp.graticuleNameShort =

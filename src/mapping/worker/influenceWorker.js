@@ -151,6 +151,7 @@ async function sendCanvas(data, keep) {
             clientRect: data.clientRect,
             workerId: data.workerId,
             imageBitmap,
+            layerId: data.layerId,
         },
         { transfer: [imageBitmap] }
     );
@@ -190,8 +191,10 @@ self.onmessage = async (message) => {
         // await process(81);
         await process(27);
         await process(9);
-        await process(3);
-        await process(1);
+        if (message.data.finished) {
+            await process(3);
+            await process(1);
+        }
         self.postMessage({
             type: 'finish-canvas',
             workerId: message.data.workerId,

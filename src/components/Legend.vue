@@ -25,7 +25,6 @@ export default {
     created() {
         window.Legend = this;
         EventBus.$on('colors-change', ({ colorVis, colors }) => {
-            console.log(colors);
             this.colors = colors;
             this.colorVis = colorVis;
         });

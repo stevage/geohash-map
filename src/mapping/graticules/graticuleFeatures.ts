@@ -2,7 +2,7 @@ import { string0 } from '@/util';
 import * as turf from '@turf/turf';
 import humanizeDuration from 'humanize-duration';
 import type { Properties } from '@turf/turf';
-import type { Feature, Polygon, Point } from 'geojson';
+import type { Feature, Polygon, Point, FeatureCollection } from 'geojson';
 
 export function makeGraticuleFeature(
     xstr: string,
@@ -79,7 +79,6 @@ export function makeGraticuleFeatures({
             y = +ystr;
 
         const gstats = getGraticuleStats(xstr, ystr);
-        // @ts-ignore
         const g = window.graticules[xstr] && window.graticules[xstr][ystr];
 
         return {
@@ -122,7 +121,6 @@ export function makeGraticuleFeatures({
                 const xstr = string0(ax * signx);
                 const ystr = string0(ay * signy);
                 const yxstr = `${ystr},${xstr}`;
-                // @ts-ignore
                 const name = window.graticuleNamesHash[yxstr] || null;
                 const gratProps = {
                     type: 'graticule',
@@ -194,9 +192,7 @@ export function makeGraticuleFeatures({
     const fc = {
         type: 'FeatureCollection',
         features: [...graticules, ...graticuleLabels, ...graticuleCenterLabels],
-    };
-    // console.log(fc.features.filter(length, 'graticules');
-    // @ts-ignore
+    } as FeatureCollection<Polygon | Point>;
     window.app.graticules = fc;
     return fc;
 }

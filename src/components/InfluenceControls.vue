@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template lang="pug">
 #InfluenceControls
     //- h3.mb1 Influence
@@ -26,7 +24,7 @@
 
 </template>
 
-<script>
+<script lang="ts">
 // future idea: if number cutoff is 1, you essentially get Voronoi polygons. but only works if we're using the method
 // of computing points in decreasing distance order, which is quite slow
 import { EventBus } from '@/EventBus';
@@ -44,10 +42,15 @@ export default {
     }),
     created() {
         window.InfluenceControls = this;
-        EventBus.$on(
-            'moveend',
-            (map) => this.showInfluence && this.update(map)
-        );
+        // another great idea that didn't work...
+        // EventBus.$on('move', () => {
+        //     this.showInfluence && this.update();
+        // });
+        EventBus.$on('moveend', () => {
+            window.setTimeout(() => {
+                this.showInfluence && this.update(true);
+            }, 100);
+        });
         EventBus.$on('filters-change', () => this.update());
     },
     computed: {
@@ -70,13 +73,14 @@ export default {
     },
 
     methods: {
-        update() {
+        update(finished = false) {
             updateInfluenceStyle({
                 map: window.map,
                 filters: window.Filters.filters,
+                finished: !!finished,
                 show: this.showInfluence,
                 showFade: this.showFade,
-                rangeCutoff: this.rangeCutoff,
+                rangeCutoff: !finished ? 0.1 : this.rangeCutoff,
                 fadeStrength: this.usedFadeStrength, //* this.fadeStrength,
                 numberCutoff:
                     this.numberCutoff === 250 ? Infinity : this.numberCutoff,

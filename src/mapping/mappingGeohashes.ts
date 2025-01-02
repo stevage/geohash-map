@@ -7,11 +7,11 @@ import * as turf from '@turf/turf';
 import { Feature, LineString, MultiLineString, Point } from 'geojson';
 
 // return a number from 0 to 24, using current time UTC to work out the hour, ignoring actual timezones, daylight savings etc
-function timeAtLongitude(longitude: number) {
-    const date = new Date();
-    const hours = date.getUTCHours() + (longitude / 360) * 24;
-    return hours < 0 ? hours + 24 : hours;
-}
+// function timeAtLongitude(longitude: number) {
+//     const date = new Date();
+//     const hours = date.getUTCHours() + (longitude / 360) * 24;
+//     return hours < 0 ? hours + 24 : hours;
+// }
 
 function dateToDays(date: string | number | Date) {
     return Math.floor(new Date(date).getTime() / 1000 / 60 / 60 / 24);
@@ -255,24 +255,25 @@ export function updateGeohashes(map: mapU) {
         loadGeohashes(map);
         map.on('moveend', () => makeHashRing(map));
         EventBus.$on('geohash-loaded', () => makeHashRing(map));
-    }
-    // @ts-ignore
-    map.U.toggle(/hashRing|geohashes/, window.app.App.tab === 'geohash');
+        map.U.toggle(/hashRing|geohashes/, window.app.App.tab === 'geohash');
 
-    const scale = new mapboxgl.ScaleControl();
-    console.log(scale);
-    EventBus.$on('tab-change', (tab: string) => {
-        map.U.toggle(/hashRing|geohashes/, tab === 'geohash');
-        if (tab === 'geohash') {
-            console.log(scale, map);
-            makeHashRing(map);
-            map.addControl(scale);
-        } else {
-            try {
-                map.removeControl(scale);
-            } catch (e) {
-                //
+        const scale = new mapboxgl.ScaleControl();
+        console.log(scale);
+        EventBus.$on('tab-change', (tab: string) => {
+            map.U.toggle(/hashRing|geohashes/, tab === 'geohash');
+            if (tab === 'geohash') {
+                console.log(scale, map);
+                makeHashRing(map);
+                map.addControl(scale);
+            } else {
+                try {
+                    map.removeControl(scale);
+                    console.log('remove scale');
+                } catch (e) {
+                    console.error('removing scale prob', e);
+                    //
+                }
             }
-        }
-    });
+        });
+    }
 }

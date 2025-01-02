@@ -144,7 +144,6 @@ export default {
         };
     },
     created() {
-        // @ts-ignore
         window.Filters = this;
         EventBus.$on(
             'animation-change',

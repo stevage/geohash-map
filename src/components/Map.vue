@@ -22,8 +22,6 @@ import { setGraticuleStyle } from '@/mapping/mappingGraticules';
 
 import { dateToDays, getGraticuleBounds, report } from '@//util';
 import { updateStreakStyle } from '@/mapping/mappingStreaks';
-import { updateInfluenceStyle } from '@/mapping/mappingInfluence';
-import { initMappingRegions } from '@/mapping/mappingRegions';
 import debounce from 'debounce';
 export default {
     data: () => ({
@@ -138,6 +136,16 @@ export default {
         EventBus.$on('tab-change', (tab) => {
             this.map.U.toggle(/^expeditions/, tab === 'expeditions');
         });
+        const debouncedMove = debounce(
+            () => {
+                EventBus.$emit('move', map);
+            },
+            300,
+            { immediate: true }
+        );
+        map.on('move', debouncedMove);
+
+        // map.on('move', () => EventBus.$emit('move', map));
         map.on('moveend', () => {
             try {
                 // map.setBearing(0);
@@ -167,7 +175,7 @@ export default {
     created() {
         this.updateMapStyleDebounced = debounce(() => {
             this.updateMapStyle();
-        }, 500);
+        }, 300);
     },
     computed: {
         animationMonthISO() {
@@ -208,26 +216,21 @@ export default {
                 }
             }
             console.log(out);
-            for (const [p1, p2s] of Object.entries(pairs).filter(
-                (pair) => pair[0] === 'Stevage'
-            )) {
-                for (const [p2, count] of Object.entries(p2s)) {
-                    if (true) {
-                        console.log(p1, p2, count);
-                        // out += `${p1} ${p2} ${count}\n`;
-                    }
-                }
-            }
+            // for (const [p1, p2s] of Object.entries(pairs).filter(
+            //     (pair) => pair[0] === 'Stevage'
+            // )) {
+            //     for (const [p2, count] of Object.entries(p2s)) {
+            //     }
+            // }
         },
 
-        async initMapContent(map) {
+        async initMapContent() {
             // const colorFunc = this.experienceDaysColorFunc();
             // const colorFunc = this.yearColorFunc();
             this.updateMapStyle();
         },
         updateMapStyle() {
             const map = this.map;
-            let start = performance.now();
             report('Update meridians', () => updateMeridians({ map }));
             report('Update expeditions', () =>
                 updateHashStyle({ map: this.map, filters: this.filters })
@@ -235,9 +238,9 @@ export default {
             report('Update graticules', () =>
                 setGraticuleStyle({ map: this.map, filters: this.filters })
             );
-            report('Update streaks', () =>
-                updateStreakStyle({ map, filters: this.filters })
-            );
+            // report('Update streaks', () =>
+            //     updateStreakStyle({ map, filters: this.filters })
+            // );
             // report('Update influence', () =>
             // updateInfluenceStyle({ map, filters: this.filters })
             // );
@@ -312,10 +315,6 @@ export default {
         },
         updateGlobeAnimation() {
             if (this.globe) {
-                const round = (n, places) => {
-                    const mult = Math.pow(10, places);
-                    return Math.round(n * mult) / mult;
-                };
                 // 14092
                 const daysPerLoop = 50000;
                 // We want x in range -1 to 1

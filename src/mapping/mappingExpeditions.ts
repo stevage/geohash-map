@@ -108,7 +108,6 @@ function loadSelectedExpedition(expeditions: FeatureCollection<Point>) {
         );
         if (expedition) {
             EventBus.$emit('select-feature', expedition);
-            // @ts-ignore
             window.map.jumpTo({
                 center: expedition.geometry.coordinates,
                 zoom: 9,
@@ -145,14 +144,13 @@ export async function updateHashStyle({
             ...expeditions,
         });
         loadSelectedExpedition(expeditions);
-        // @ts-ignore
         window.expeditions = expeditions;
         resetHashAnimation({ map });
 
         resetHashAnimation({ map, show: true });
     }
 
-    const activeColorFunc = colorFunc(filters);
+    const activeColorFunc = await colorFunc(filters);
     map.U.addCircle('expeditions-glow', 'expeditions', {
         circleColor: glowCircleColor(activeColorFunc),
 
@@ -271,15 +269,14 @@ export async function updateHashStyle({
             { closeButton: false }
         );
 
-        map.on('moveend', () => {
-            // @ts-ignore
+        map.on('moveend', async () => {
             const filters = window.Filters.filters;
             if (
                 filters.colorVis === 'participants' ||
                 filters.colorVis === 'participantsFixed'
             ) {
                 // updateHashStyle({ map, filters, quickUpdate: true });
-                const acf = colorFunc(filters);
+                const acf = await colorFunc(filters);
                 map.U.setCircleColor(
                     'expeditions-circles',
                     circlesCircleColor(acf)
@@ -335,7 +332,6 @@ export function resetHashAnimation({
     map: mapU;
     show?: boolean;
 }) {
-    // @ts-ignore
     for (const f of window.expeditions.features) {
         map.setFeatureState(
             { id: f.id, source: 'expeditions' },
@@ -360,7 +356,6 @@ export function updateHashAnimation({
     animationDay: number;
 }) {
     let updated = 0;
-    // @ts-ignore
     for (const f of window.expeditions.features) {
         // heh, why did I do it this way? could just use actual x/y, not graticule x/y
         if (

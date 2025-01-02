@@ -31,7 +31,7 @@
     WikiPage(:pageId="`${info.graticule.properties.name}`")
 </template>
 
-<script>
+<script lang="ts">
 import { EventBus } from '@/EventBus';
 import GraticuleRecords from '@/components/GraticuleRecords.vue';
 import WikiPage from '@/components/WikiPage.vue';

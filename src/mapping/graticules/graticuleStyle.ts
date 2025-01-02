@@ -2,6 +2,8 @@ import tableauColors from '@/mapping/tableauColors';
 // @ts-ignore
 import U from 'map-gl-utils/noflow/index';
 import type { mapU } from '@/util';
+import { GraticuleStat } from './graticuleStats';
+
 const uninitiatedFillColor = [
     'case',
     ['>', ['get', 'successes'], 0],
@@ -84,7 +86,6 @@ function graticuleColorByParticipantsFunc(
     //         bounds.contains(f.geometry.coordinates[0][0]) ||
     //         bounds.contains(f.geometry.coordinates[0][2])
     // );
-    // @ts-ignore
     const map = window.map;
     // TODO filter out dupes
     const visibleGraticules = map.queryRenderedFeatures({
@@ -95,13 +96,11 @@ function graticuleColorByParticipantsFunc(
     // const firstParticipants = {};
     // const lastParticipants = {};
     // const mostSuccessfulParticipants = {};
-    const field = `${type}OrMultiple`;
+    const field = `${type}OrMultiple` as keyof GraticuleStat;
 
     for (const f of visibleGraticules) {
         const g =
-            // @ts-ignore
             window.graticules[f.properties.x] &&
-            // @ts-ignore
             window.graticules[f.properties.x][f.properties.y];
         if (!g) {
             continue;
@@ -114,7 +113,8 @@ function graticuleColorByParticipantsFunc(
         // for (const p of g.lastParticipants.split('\n')) {
         //     lastParticipants[p] = (lastParticipants[p] || 0) + 1;
         // }
-        counts[g[field]] = (counts[g[field]] || 0) + 1;
+        const stat = g[field] as string;
+        counts[stat] = (counts[stat] || 0) + 1;
     }
     const scheme = tableauColors[3].map((rgb) => `rgb(${rgb})`);
     const participantList = Object.entries(counts)

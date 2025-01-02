@@ -63,6 +63,7 @@ import InfluenceControls from '@/components/InfluenceControls.vue';
 import { getUrlParam, setUrlParam } from './util';
 
 import './components/stats';
+
 window.app = {
     yearColors:
         '#000 #e69f00 #56b4e9 #009e73 #f0e442 #0072b2 #d55e00 #cc79a7 #999999'.split(
@@ -94,6 +95,10 @@ export default {
             sidebarOpen: true,
             tab: 'expeditions',
             animationMonthISO: null,
+        } as {
+            sidebarOpen: boolean;
+            tab: string;
+            animationMonthISO: string | null;
         };
     },
     created() {
@@ -101,10 +106,12 @@ export default {
         EventBus.$on('select-feature', () => (this.sidebarOpen = true));
         EventBus.$on(
             'animation-cycle',
-            ({ animationMonthISO }) =>
+            ({ animationMonthISO }: { animationMonthISO: string }) =>
                 (this.animationMonthISO = animationMonthISO)
         );
-        EventBus.$on('animation-ended', () => (this.animationMonthISO = null));
+        EventBus.$on('animation-ended', () => {
+            this.animationMonthISO = null;
+        });
         EventBus.$on('map-loaded', () => {
             if (getUrlParam('tab')) {
                 this.tab = getUrlParam('tab');
@@ -249,9 +256,6 @@ body,
 /* .dark {
     color: #555;
 } */
-
-.dark-border {
-}
 
 .tab {
     color: #555;

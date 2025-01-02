@@ -25,13 +25,19 @@ export type GraticuleStat = {
     mostSuccessfulParticipantsOrMultiple?: string;
     failuresBeforeSuccess?: number;
 };
+export type GraticuleStats = {
+    [x: string]: {
+        [y: string]: GraticuleStat;
+    };
+};
+
 export function makeGraticuleStats({
     local,
     ...hashes
 }: {
     local: boolean;
     [key: string]: any; // featurecollection
-}) {
+}): GraticuleStats {
     let graticules = {} as {
         [x: string]: {
             [y: string]: GraticuleStat;
@@ -150,14 +156,10 @@ export function makeGraticuleStats({
                   )[0][0];
     }
 
-    // @ts-ignore
     window.graticulesById = graticulesById;
-    // @ts-ignore
     window.expeditionsByGraticule = expeditionsByGraticule;
-    // @ts-ignore
     window.maxParticipants = maxParticipants;
-    // @ts-ignore
     window.maxParticipantsGraticule = maxParticipantsGraticule;
-
+    console.log('graticules', graticules);
     return graticules;
 }
