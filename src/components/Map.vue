@@ -116,14 +116,14 @@ export default {
         EventBus.$on('tab-change', (tab) => {
             this.map.U.toggle(/^expeditions/, tab === 'expeditions');
         });
-        const debouncedMove = debounce(
-            () => {
-                EventBus.$emit('move', map);
-            },
-            300,
-            { immediate: true }
-        );
-        map.on('move', debouncedMove);
+        // const debouncedMove = debounce(
+        //     () => {
+        //         EventBus.$emit('move', map);
+        //     },
+        //     300,
+        //     { immediate: true }
+        // );
+        // map.on('move', debouncedMove);
 
         // map.on('move', () => EventBus.$emit('move', map));
         map.on('moveend', () => {

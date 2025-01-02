@@ -1,4 +1,4 @@
-import { dateToDays, dateToWeekday } from '@//util';
+import { dateToDays, dateToWeekday, report } from '@//util';
 import { EventBus } from '@/EventBus';
 import { initIndex } from './expeditionIndex';
 import type { Expedition } from './expeditionIndex';
@@ -12,65 +12,59 @@ let loadedExpeditions: boolean;
 
 // The data on fippe.de is actually a piece of JavaScript that needs to be parsed
 async function expeditionsToGeoJSON(): Promise<FeatureCollection<Point>> {
-    const raw =
-        (await window
-            .fetch('https://fippe.de/alldata.js')
-            // .fetch('demo.js')
-            .then((x) => x.text())
-            .catch((e) => {
-                console.error(e);
-                return;
-            })) || '';
-    const lines = raw.split('\n').slice(1, -2);
-    // remove trailing comma
-    const vals = JSON.parse('[' + lines.join(' ').slice(0, -1) + ']') as [
-        string,
-        number,
-        number,
-        string[],
-        boolean,
-        number,
-        string[]
-    ][];
+    let raw = '';
+    await report(
+        'fetch expeditions data',
+        async () => {
+            raw =
+                (await window
+                    .fetch('https://fippe.de/alldata.js')
+                    // .fetch('demo.js')
+                    .then((x) => x.text())
+                    .catch((e) => {
+                        console.error(e);
+                        return;
+                    })) || '';
+        },
+        true
+    );
+    let points;
+    report('parse expeditions data', () => {
+        const lines = raw.split('\n').slice(1, -2);
+        // remove trailing comma
+        const vals = JSON.parse('[' + lines.join(' ').slice(0, -1) + ']') as [
+            string,
+            number,
+            number,
+            string[],
+            boolean,
+            number,
+            string[]
+        ][];
 
-    const points = {
-        type: 'FeatureCollection',
-        features: vals.map((val) => ({
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [val[2], val[1]],
-            },
-            properties: {
-                id: val[0],
-                participants: val[3],
-                success: val[4],
-                reportKb: val[5],
-                achievements: val[6],
-            },
-        })),
-    } as FeatureCollection<Point>;
+        points = {
+            type: 'FeatureCollection',
+            features: vals.map((val) => ({
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [val[2], val[1]],
+                },
+                properties: {
+                    id: val[0],
+                    participants: val[3],
+                    success: val[4],
+                    reportKb: val[5],
+                    achievements: val[6],
+                },
+            })),
+        } as FeatureCollection<Point>;
+    });
     return points;
 }
 let expeditions: FeatureCollection<Point>;
 
-export async function getExpeditions(
-    local: boolean
-): Promise<FeatureCollection<Point>> {
-    // this was needed when fippe.de didn't have CORS setup
-    // const url = local
-    //     ? 'alldata.json'
-    //     : 'https://fippe-geojson.glitch.me/alldata.json';
-    // const newExpeditions = await window.fetch(url).then((x) => x.json());
-
-    const newExpeditions = await expeditionsToGeoJSON();
-    await window.graticuleNamesP;
-
-    if (loadedExpeditions && local) {
-        // if non-cached data loads first for some reason, abort
-        return expeditions;
-    }
-    expeditions = newExpeditions;
+function enrichExpeditions(expeditions: FeatureCollection<Point>) {
     const participants = {} as {
         [key: string]: { expeditions: number; firstExpeditionDays: number };
     };
@@ -182,6 +176,29 @@ export async function getExpeditions(
             ? days.reduce((a: number, b: number) => a + b, 0)
             : 0;
     });
+    return expeditions;
+}
+
+export async function getExpeditions(
+    local: boolean
+): Promise<FeatureCollection<Point>> {
+    // this was needed when fippe.de didn't have CORS setup
+    // const url = local
+    //     ? 'alldata.json'
+    //     : 'https://fippe-geojson.glitch.me/alldata.json';
+    // const newExpeditions = await window.fetch(url).then((x) => x.json());
+
+    const newExpeditions = await expeditionsToGeoJSON();
+    await window.graticuleNamesP;
+
+    if (loadedExpeditions && local) {
+        // if non-cached data loads first for some reason, abort
+        return window.expeditions;
+    }
+    const expeditions = report('enrich expeditions', () =>
+        enrichExpeditions(newExpeditions)
+    ) as FeatureCollection<Point>;
+
     loadedExpeditions = true;
     window.setTimeout(() => initIndex(expeditions.features), 1000);
     return expeditions;

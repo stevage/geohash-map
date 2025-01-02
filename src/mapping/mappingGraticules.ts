@@ -13,9 +13,12 @@ import {
     addGraticuleLayers,
     updateGraticuleStyle,
 } from './graticules/graticuleStyle';
+import { report } from '@/util';
 
 EventBus.$on('expeditions-loaded', ({ local, ...hashes }) => {
-    const graticuleStats = makeGraticuleStats({ local, ...hashes });
+    const graticuleStats = report('make graticule stats', () =>
+        makeGraticuleStats({ local, ...hashes })
+    );
     window.graticules = graticuleStats;
     // future idea, use feature-state instead of rewriting the geoms
     recalculateGraticules({ graticuleStats, map: window.map });

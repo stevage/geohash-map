@@ -75,8 +75,25 @@ export function getUrlParam(key: string) {
     return new URL(window.location.toString()).searchParams.get(key);
 }
 
-export const report = (name: any, task: () => void) => {
+export const report = (
+    name: any,
+    task: (() => any) | (() => Promise<any>),
+    isAsync = false
+) => {
     const start = performance.now();
-    task();
-    console.log(`${name} in`, performance.now() - start, `ms`);
+    if (isAsync) {
+        console.log('async start', name);
+        return (task as () => Promise<any>)().then((ret) => {
+            console.log(
+                `${name} in`,
+                Math.round(performance.now() - start),
+                `ms`
+            );
+            return ret;
+        });
+    } else {
+        const ret = task();
+        console.log(`${name} in`, Math.round(performance.now() - start), `ms`);
+        return ret;
+    }
 };

@@ -167,7 +167,6 @@ self.onmessage = async (message) => {
         // not used
         initFromData(message.data);
         db = await getDB();
-        console.log(db);
 
         // console.log(
         //     db.getExpeditionsNear(message.data.center, message.data.viewport)
