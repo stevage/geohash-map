@@ -21,7 +21,7 @@
       td
       td
       td
-        span(v-if="timeTillNextUnpublishedHash.days") Available in {{ timeTillNextUnpublishedHash.days }} days, {{ timeTillNextUnpublishedHash.hours }} hrs.
+        span(v-if="timeTillNextUnpublishedHash.days") Available in {{ durationString(timeTillNextUnpublishedHash) }}.
         span(v-else) Available in {{ timeTillNextUnpublishedHash.hours }} hrs, {{ timeTillNextUnpublishedHash.minutes }} mins.
   p Your local time is {{ localTime }} on {{ nowDateTime.toPlainDate().toLocaleString() }}.
   small You are {{ isEast ? 'East' : 'West' }} of -30º for the purpose of <a href="https://geohashing.site/geohashing/30W_Time_Zone_Rule">the 30W rule</a>.
@@ -36,6 +36,14 @@ import { Temporal } from 'temporal-polyfill';
 // const nowString = window.app.overrideTime || new Date().toISOString();
 window.z = window.z ?? {};
 window.z.Temporal = Temporal;
+
+function durationString(duration: Temporal.Duration): string {
+    let s: string = '';
+    if (duration.days) s += `${duration.days} days, `;
+    s += `${duration.hours} hrs`;
+    if (!duration.days) s += `, ${duration.minutes} minutes`;
+    return s;
+}
 export default {
     name: 'HashInfo',
     data: () => ({
@@ -89,11 +97,10 @@ export default {
                     hashDate.add({ days: 1 })
                 );
                 // debugger;
+                const duration = endDiff.negated().round('minute');
                 return {
                     class: 'active',
-                    label:
-                        'Expires in ' +
-                        endDiff.negated().round('minute').toLocaleString(),
+                    label: `Expires in ${durationString(duration)}`,
                 };
                 // return (
                 //     'Expires in ' +
