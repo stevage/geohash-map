@@ -17,9 +17,12 @@ declare global {
             fippeServer?: string;
             App?: any;
             graticules?: FeatureCollection;
+            overrideTime?: string;
+            overrideTimezone?: string;
         };
         Filters: any;
         InfluenceControls: any;
+        HashInfo: any;
         expeditions: any;
         graticulesById: Record<string, GraticuleStat>;
         expeditionsByGraticule: Record<string, Expedition[]>;
@@ -30,6 +33,7 @@ declare global {
         graticules: GraticuleStats;
         graticuleNamesP: Promise<any>;
         graticuleNamesHash: Record<string, string>;
+        z: { [key: string]: any };
     }
 }
 

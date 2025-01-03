@@ -68,7 +68,15 @@ window.app = {
             ' '
         ),
     fippeServer: '', //'https://fippe.de/'
+    // overrideTime: '2024-12-31T09:30:00',
+    // overrideTime: undefined, //'2024-12-31T09:30:00',
+    // overrideTime: '2024-05-31T20:30:00',
+    // overrideTime: '2025-01-01T20:30:00',
+    // overrideTime: '2025-01-02T10:19:00',
+    // // overrideTimezone: 'America/New_York',
+    // overrideTimezone: 'Europe/London',
 };
+window.z = window.z ?? {};
 export default {
     name: 'app',
     components: {

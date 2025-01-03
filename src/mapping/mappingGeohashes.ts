@@ -5,6 +5,7 @@ import type { mapU } from '@/util';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
 import { Feature, LineString, MultiLineString, Point } from 'geojson';
+import { Temporal } from 'temporal-polyfill';
 
 // return a number from 0 to 24, using current time UTC to work out the hour, ignoring actual timezones, daylight savings etc
 // function timeAtLongitude(longitude: number) {
@@ -24,12 +25,18 @@ function daysAtLongitude(longitude: number) {
     date.setTime(date.getTime() + hours * 60 * 60 * 1000);
     return dateToDays(date);
 }
+export type Geohash = {
+    date: string;
+    east: { lng: number; lat: number };
+    west: { lng: number; lat: number };
+    weekday?: string;
+    weekdayShort?: string;
+};
 
 async function loadGeohashes(map: mapU) {
     function makeHash(
         coordinates: number[],
         [graticuleX, graticuleY]: [number, number],
-        date: Date,
         weekday: string
     ) {
         return {
@@ -46,22 +53,29 @@ async function loadGeohashes(map: mapU) {
         };
     }
     // startDate is todays' date, minus one day
-    const startDate = new Date();
+    const startDate = window.app.overrideTime
+        ? new Date(window.app.overrideTime)
+        : new Date();
     startDate.setDate(startDate.getDate() - 1);
 
     const [year, month, day] = startDate.toISOString().slice(0, 10).split('-');
-    const hashes = await fetch(
+    const hashes = (await fetch(
         `https://data.geohashing.info/hash/wk/${year}/${month}/${day}.json`
-    ).then((res) => res.json());
+    ).then((res) => res.json())) as Geohash[];
 
     console.log('hashes', hashes);
     const features = [];
 
     for (const hash of hashes) {
-        const date = new Date(hash.date);
+        const date = Temporal.PlainDate.from(hash.date);
         const weekday = date.toLocaleString(navigator.language, {
             weekday: 'long',
         });
+        const weekdayShort = date.toLocaleString(navigator.language, {
+            weekday: 'short',
+        });
+        hash.weekday = weekday;
+        hash.weekdayShort = weekdayShort;
         for (const lngSign of [-1, 1]) {
             for (const latSign of [-1, 1]) {
                 for (let lng = 0; lng <= 179; lng++) {
@@ -81,7 +95,6 @@ async function loadGeohashes(map: mapU) {
                                     latSign * (lat + whichHash?.lat),
                                 ],
                                 [lngSign * lng, latSign * lat],
-                                date,
                                 weekday
                             )
                         );
@@ -94,6 +107,7 @@ async function loadGeohashes(map: mapU) {
     EventBus.$emit('geohash-loaded', {
         hash: hashes.slice(-1)[0],
         date: `${year}-${month}-${day}`,
+        hashes,
     });
 }
 

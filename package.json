@@ -33,6 +33,7 @@
     "md5": "^2.3.0",
     "polygon-splitter": "^0.0.11",
     "polygonize": "^1.0.4",
+    "temporal-polyfill": "^0.2.5",
     "vue": "^2.5.21"
   },
   "devDependencies": {
