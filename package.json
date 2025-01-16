@@ -27,7 +27,7 @@
     "kdbush": "^4.0.2",
     "map-gl-utils": "0.44.3",
     "mapbox-expression": "^0.0.3",
-    "mapbox-gl": "^2.12.1",
+    "mapbox-gl": "^3.9.2",
     "mapgl-expression": "^0.0.4",
     "maplibre-gl": "^1.15.2",
     "md5": "^2.3.0",

@@ -25,7 +25,7 @@
             optgroup(label="Other")
                 option(value="countByWeekday") Count by weekday
                 option(value="graticuleByParticipant") Graticule by participant
-    label.db.mt2(v-if="options.showChart && selectedSettings.type === 'bin' && selectedSettings.x === 'date'")
+    label.db.mt2(v-if="options.showChart && selectedSettings.type === 'bin' && selectedSettings.x.match(/date|dayOf2008/)")
         | Interval
         select.ml2(v-model="options.interval")
             option(value="day") Day
@@ -106,6 +106,12 @@ const chartSettings = {
         name: 'Count by weekday',
         type: 'bin',
         x: 'weekday',
+        fill: 'participantsCount',
+    },
+    countByDayOfYear: {
+        name: 'Count by day of year',
+        type: 'bin',
+        x: 'dayOf2008',
         fill: 'participantsCount',
     },
     reportKb: {

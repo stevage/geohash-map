@@ -26,7 +26,15 @@ export default {
                     ).then((res) => {
                         return res.json();
                     });
-                    // debugger;
+                    if (raw.error) {
+                        if (raw.error.code === 'missingtitle') {
+                            this.pageContent = `<p>No wiki description.</p>`;
+                        } else {
+                            this.pageContent = `<p>Error: ${raw.error.info}</p>`;
+                        }
+                        this.loading = false;
+                        return;
+                    }
 
                     this.pageContent = raw.parse.text['*']
                         .replace(

@@ -4,7 +4,7 @@ import { EventBus } from '@/EventBus';
 import { colorFunc, legendColors } from './expeditions/colorFuncs';
 import { circleRadiusFunc } from './expeditions/radiusFunc';
 import { getExpeditions } from './expeditions/expeditionsData';
-import { setUrlParam } from '@/util';
+import { report, setUrlParam } from '@/util';
 import type { Expression, MapLayerMouseEvent, MapMouseEvent } from 'mapbox-gl';
 import type { mapU } from '@/util';
 
@@ -12,6 +12,11 @@ import debounce from 'debounce';
 import { FeatureCollection, Point } from 'geojson';
 import { Expedition } from './expeditions/expeditionIndex';
 import type { Filters } from '@/components/Filters.vue';
+import {
+    getStoredExpeditions,
+    saveExpeditions,
+    secondsSinceExpeditionsUpdated,
+} from './expeditions/expeditionStore';
 
 function updateFilters({ map, filters }: { map: mapU; filters: Filters }) {
     const successFilter =
@@ -137,8 +142,58 @@ export async function updateHashStyle({
         // getExpeditions(true, map).then(() =>
         //     resetHashAnimation({ map, filters, show: true })
         // );
-        const expeditions = await getExpeditions(false);
-        map.U.setData('expeditions', expeditions);
+        // const expeditions = await getExpeditions(false);
+        let expeditions: FeatureCollection<Point> | null = null;
+        await report('Load stored expeditions', async () => {
+            expeditions = await getStoredExpeditions();
+        });
+
+        // if (!expeditions) {
+        //     await report('Fetch expeditions', async () => {
+        //         expeditions = await getExpeditions(false);
+        //     });
+        // }
+        if (expeditions) {
+            report('Add expeditions to map', () => {
+                map.U.setData('expeditions', expeditions);
+            });
+        }
+        let gotExpeditions: (value: unknown) => void;
+        const waitForExpeditions = new Promise(
+            (resolve) => (gotExpeditions = resolve)
+        );
+
+        if (secondsSinceExpeditionsUpdated() > 60 * 20 || !expeditions) {
+            window.setTimeout(
+                async () => {
+                    console.log('Now fetch fresh expeditions');
+                    expeditions = await getExpeditions(false);
+                    gotExpeditions(0);
+                    map.U.setData('expeditions', expeditions);
+                    saveExpeditions(expeditions);
+                },
+                !expeditions ? 0 : 5000
+            );
+        }
+        if (!expeditions) {
+            console.log('No expeditions, waiting on fetch');
+        } else {
+            gotExpeditions(0);
+        }
+        await waitForExpeditions;
+        report('Map is idle', async () => {
+            const p = new Promise((resolve) => {
+                map.once('idle', resolve);
+            });
+            await p;
+        });
+
+        // window.localStorage.setItem('expeditions', JSON.stringify(expeditions));
+        // window.localStorage.setItem(
+        //     'expeditions-updated',
+        //     new Date().toISOString()
+        // );
+
         EventBus.$emit('expeditions-loaded', {
             local: false,
             ...expeditions,

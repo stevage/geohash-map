@@ -1,7 +1,7 @@
 import { EventBus } from '@/EventBus';
 // @ts-ignore
 import U from 'map-gl-utils/noflow/index';
-import type { mapU } from '@/util';
+import { report, type mapU } from '@/util';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
 import { Feature, LineString, MultiLineString, Point } from 'geojson';
@@ -32,13 +32,13 @@ export type Geohash = {
     weekday?: string;
     weekdayShort?: string;
 };
-
+window.z.Temporal = Temporal;
 async function loadGeohashes(map: mapU) {
     function makeHash(
         coordinates: number[],
         [graticuleX, graticuleY]: [number, number],
         weekday: string
-    ) {
+    ): Feature<Point> {
         return {
             type: 'Feature',
             properties: {
@@ -64,7 +64,7 @@ async function loadGeohashes(map: mapU) {
     ).then((res) => res.json())) as Geohash[];
 
     console.log('hashes', hashes);
-    const features = [];
+    const features: Feature<Point>[] = [];
 
     for (const hash of hashes) {
         const date = Temporal.PlainDate.from(hash.date);

@@ -93,9 +93,10 @@ function initWorker(map: mapU) {
                 [message.data.bounds[2], message.data.bounds[3]],
                 [message.data.bounds[0], message.data.bounds[3]],
             ];
-            // console.log('adding influence canvas', id, coordinates);
+            console.log('adding influence canvas', id, coordinates);
             try {
                 map.addSource(sourceId, {
+                    // @ts-ignore
                     type: 'canvas',
                     canvas: canvas,
                     animate: false,

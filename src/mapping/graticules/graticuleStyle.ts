@@ -4,6 +4,14 @@ import U from 'map-gl-utils/noflow/index';
 import type { mapU } from '@/util';
 import { GraticuleStat } from './graticuleStats';
 
+/*'match',
+    ['to-string', ['feature-state', 'gtg']],
+    'in',
+    'hsla(120,100%,80%,0.4)',
+    'out',
+    'hsla(0,100%,20%,0.4)',
+    'hsla(0,50%,30%,0.4)',
+    */
 const uninitiatedFillColor = [
     'case',
     ['>', ['get', 'successes'], 0],
@@ -231,6 +239,7 @@ export function updateGraticuleStyle(
     //     options.showGraticules && options.fillStyle !== 'none'
     // );
     // console.log('colorFunc', colorFunc);
+    console.log('are we');
     map.U.setFillColor('graticules-fill', colorFunc[options.fillStyle]());
     map.U.setTextField(
         'graticules-center-label',

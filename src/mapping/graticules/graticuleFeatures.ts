@@ -8,13 +8,13 @@ export function makeGraticuleFeature(
     xstr: string,
     ystr: string,
     props: Properties
-) {
+): Feature<Polygon, { [name: string]: any }> {
     const x = +xstr;
     const y = +ystr;
     const signx = xstr[0] === '-' ? -1 : 1;
     const signy = ystr[0] === '-' ? -1 : 1;
 
-    return turf.polygon(
+    const f = turf.polygon(
         [
             [
                 [x, y],
@@ -26,6 +26,8 @@ export function makeGraticuleFeature(
         ],
         props
     );
+    f.id = idStringToNumeric(`${ystr},${xstr}`);
+    return f;
 }
 
 const splitBy10 = (string: string) => string.match(/.{1,10}/g).join('\n');
@@ -40,6 +42,27 @@ interface GraticuleStats {
         };
     };
 }
+
+export function idStringToNumeric(yxstr: string = ''): number {
+    // need to be very careful about -0
+    const [ystr, xstr] = yxstr.split(',');
+    const yn = Math.abs(+ystr) + (ystr[0] === '-' ? 0 : 200);
+    const xn = Math.abs(+xstr) + (xstr[0] === '-' ? 0 : 500);
+    // const yn = (Math.abs(+ystr) + 1) * (ystr[0] === '-' ? -1 : 1);
+    // const xn = (Math.abs(+xstr) + 1) * (xstr[0] === '-' ? -1 : 1);
+    return yn * 1000 + xn;
+}
+
+export function numericToIdString(n: number): string {
+    const y = Math.floor(n / 1000);
+    const x = n % 1000;
+    const ystr = (y < 200 ? '-' : '') + (y % 200);
+    const xstr = (x < 500 ? '-' : '') + (x % 500);
+    return `${ystr},${xstr}`;
+}
+window.z = window.z || {};
+window.z.idStringToNumeric = idStringToNumeric;
+window.z.numericToIdString = numericToIdString;
 
 export function makeGraticuleFeatures({
     graticuleStats,

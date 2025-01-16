@@ -85,6 +85,9 @@ function enrichExpeditions(expeditions: FeatureCollection<Point>) {
         // if (x !== undefined && y !== undefined) {
         // sigh globalexpeditions
         exp.dayOfYear = exp.days - dateToDays(exp.year + '');
+
+        exp.dayOf2008 = date.replace(/^\d\d\d\d/, '2008');
+
         exp.x = +x || 0;
         exp.y = +y || 0;
         exp.global = /global/.test(exp.id);

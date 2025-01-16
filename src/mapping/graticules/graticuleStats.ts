@@ -160,6 +160,6 @@ export function makeGraticuleStats({
     window.expeditionsByGraticule = expeditionsByGraticule;
     window.maxParticipants = maxParticipants;
     window.maxParticipantsGraticule = maxParticipantsGraticule;
-    console.log('graticules', graticules);
+    // console.log('graticules', graticules);
     return graticules;
 }

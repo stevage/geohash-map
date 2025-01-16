@@ -22,6 +22,8 @@ import { setGraticuleStyle } from '@/mapping/mappingGraticules';
 
 import { dateToDays, getGraticuleBounds, report } from '@//util';
 import { updateStreakStyle } from '@/mapping/mappingStreaks';
+import { updateInfluenceStyle } from '@/mapping/mappingInfluence';
+// import { initGTG } from '@/mapping/gtg';
 import debounce from 'debounce';
 export default {
     data: () => ({
@@ -131,6 +133,7 @@ export default {
                 // map.setBearing(0);
                 // map.setPitch(0);
                 EventBus.$emit('moveend', map);
+
                 window.localStorage.setItem(
                     'center',
                     map.getCenter().toArray().join(',') + ',' + map.getZoom()
@@ -221,11 +224,13 @@ export default {
             // report('Update streaks', () =>
             //     updateStreakStyle({ map, filters: this.filters })
             // );
-            // report('Update influence', () =>
-            // updateInfluenceStyle({ map, filters: this.filters })
-            // );
+            report('Update influence', () =>
+                updateInfluenceStyle({ map, filters: this.filters })
+            );
             updateGeohashes(map);
             // console.log(performance.now() - start);
+
+            // initGTG(map);
         },
         startAnimation() {
             this.stopAnimation();

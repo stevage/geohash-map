@@ -46,8 +46,10 @@ export default {
                 year: d3.utcYear,
             }[interval];
 
-            if (x === 'date') {
+            if (x === 'date' || x === 'dayOf2008') {
                 x = { value: x, interval: plotInterval };
+            } else {
+                x = { value: x, interval: 1 };
             }
 
             console.log(x);
@@ -124,6 +126,7 @@ export default {
             return { legendEl, plotEl };
         },
         barChart(expeditions, { chartId, x, y, interval, fill }, chartOptions) {
+            debugger;
             // interval = 'week';
             const plotInterval = {
                 month: d3.utcMonth,

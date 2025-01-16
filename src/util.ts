@@ -34,6 +34,7 @@ declare global {
         graticuleNamesP: Promise<any>;
         graticuleNamesHash: Record<string, string>;
         z: { [key: string]: any };
+        gtg: any;
     }
 }
 
@@ -82,11 +83,11 @@ export function getUrlParam(key: string) {
 export const report = (
     name: any,
     task: (() => any) | (() => Promise<any>),
-    isAsync = false
+    isAsync = task.constructor.name === 'AsyncFunction'
 ) => {
     const start = performance.now();
     if (isAsync) {
-        console.log('async start', name);
+        // console.log('(async)', name);
         return (task as () => Promise<any>)().then((ret) => {
             console.log(
                 `${name} in`,

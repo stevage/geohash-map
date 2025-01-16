@@ -37,13 +37,6 @@ import { Temporal } from 'temporal-polyfill';
 window.z = window.z ?? {};
 window.z.Temporal = Temporal;
 
-function durationString(duration: Temporal.Duration): string {
-    let s: string = '';
-    if (duration.days) s += `${duration.days} days, `;
-    s += `${duration.hours} hrs`;
-    if (!duration.days) s += `, ${duration.minutes} minutes`;
-    return s;
-}
 export default {
     name: 'HashInfo',
     data: () => ({
@@ -75,6 +68,14 @@ export default {
         );
     },
     methods: {
+        durationString(duration: Temporal.Duration): string {
+            let s: string = '';
+            if (duration.days) s += `${duration.days} days, `;
+            s += `${duration.hours} hrs`;
+            if (!duration.days) s += `, ${duration.minutes} minutes`;
+            return s;
+        },
+
         getStatus(hash: Geohash): { label: string; class: string } {
             const hashDate = Temporal.PlainDate.from(hash.date);
             const nowDate = Temporal.PlainDate.from(this.nowDateTime);
@@ -100,7 +101,7 @@ export default {
                 const duration = endDiff.negated().round('minute');
                 return {
                     class: 'active',
-                    label: `Expires in ${durationString(duration)}`,
+                    label: `Expires in ${this.durationString(duration)}`,
                 };
                 // return (
                 //     'Expires in ' +
