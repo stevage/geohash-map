@@ -1,6 +1,6 @@
 import { EventBus } from '@/EventBus';
 // @ts-ignore
-import U from 'map-gl-utils/noflow/index';
+import U from 'map-gl-utils';
 import { report, type mapU } from '@/util';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';

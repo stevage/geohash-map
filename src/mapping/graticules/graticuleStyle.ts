@@ -1,6 +1,7 @@
 import tableauColors from '@/mapping/tableauColors';
-// @ts-ignore
-import U from 'map-gl-utils/noflow/index';
+// @aots-ignore
+//a
+import U from 'map-gl-utils/dist/index.esm.js';
 import type { mapU } from '@/util';
 import { GraticuleStat } from './graticuleStats';
 
@@ -22,7 +23,7 @@ const uninitiatedFillColor = [
 export function addGraticuleLayers(map: mapU) {
     map.U.addGeoJSON('graticules');
 
-    map.U.addLine('graticules-line', 'graticules', {
+    map.U.addLineLayer('graticules-line', 'graticules', {
         // lineOffset: 0.5,
         lineColor: [
             'case',
@@ -48,7 +49,7 @@ export function addGraticuleLayers(map: mapU) {
         // lineColor: 'red',
         filter: ['==', ['get', 'type'], 'graticule'],
     });
-    map.U.addSymbol('graticules-label', 'graticules', {
+    map.U.addSymbolLayer('graticules-label', 'graticules', {
         textField: U.stepZoom(['get', 'nameShort'], {
             9: ['get', 'name'],
             11: ['get', 'nameLong'],

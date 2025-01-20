@@ -1,5 +1,5 @@
 //@ts-ignore
-import U from 'map-gl-utils/noflow/index';
+import U from 'map-gl-utils';
 interface CircleRadiusFuncParams {
     isGlow?: boolean;
     isFlash?: boolean;

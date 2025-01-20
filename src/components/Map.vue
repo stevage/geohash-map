@@ -2,14 +2,14 @@
 #map.absolute.absolute--fill
 </template>
 
-<script>
+<script lang="ts">
 // import mapboxgl from 'maplibre-gl';
 // import 'maplibre-gl/dist/maplibre-gl.css';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-dev';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import U from 'map-gl-utils/noflow/index';
+import U from 'map-gl-utils/dist/index.esm.js';
 import { EventBus } from '../EventBus';
-
+// import '../global.d.ts';
 import {
     updateHashStyle,
     updateHashAnimation,

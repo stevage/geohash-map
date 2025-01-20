@@ -1,4 +1,5 @@
 import type mapboxgl from 'mapbox-gl';
+import type { MapGlUtils } from 'map-gl-utils/dist/index.esm.js';
 import {
     Expedition,
     ExpeditionIndex,
@@ -39,7 +40,7 @@ declare global {
 }
 
 // type that extends mapboxgl.Map but also with a U property of type any
-export type mapU = mapboxgl.Map & { U: any };
+export type mapU = mapboxgl.Map & { U: MapGlUtils };
 export function dateToDays(date: string | number | Date) {
     if (String(date).length === 4) {
         date = `${date}-01-01`;

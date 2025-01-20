@@ -1,5 +1,5 @@
 // @ts-nocheck
-import U from 'map-gl-utils/noflow/index';
+import U from 'map-gl-utils';
 import { EventBus } from '@/EventBus';
 import * as turf from '@turf/turf';
 import { makeGraticuleStats } from '@/mapping/graticules/graticuleStats';

@@ -1,5 +1,5 @@
 //@ts-ignore
-import U from 'map-gl-utils/noflow/index';
+import U from 'map-gl-utils';
 import type { mapU } from '@/util';
 export function updateMeridians({ map }: { map: mapU }) {
     const first = !map.getSource('meridians');

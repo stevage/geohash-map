@@ -15,10 +15,12 @@
     "types": [
       "webpack-env"
     ],
+    "typeRoots" : ["./node_modules/@types", "./type-definitions-folder", "./node_modules/map-gl-utils/dist/types"],
     "paths": {
       "@/*": [
         "src/*"
-      ]
+      ],
+      "map-gl-utils": ["node_modules/map-gl-utils/dist/index.esm.js"]
     },
     "lib": [
       "esnext",
@@ -36,8 +38,10 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "src/**/*.js"
+    "src/**/*.js",
+    "src/global.d.ts"
  ],
+
   "exclude": [
     "node_modules"
   ]

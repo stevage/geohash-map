@@ -1,5 +1,5 @@
 // @ts-ignore
-import U from 'map-gl-utils/noflow/index';
+import U from 'map-gl-utils';
 import { EventBus } from '@/EventBus';
 import { colorFunc, legendColors } from './expeditions/colorFuncs';
 import { circleRadiusFunc } from './expeditions/radiusFunc';

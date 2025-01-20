@@ -1,4 +1,4 @@
-import U from 'map-gl-utils/noflow/index';
+import U from 'map-gl-utils';
 import { dateToDays } from '@//util';
 import { EventBus } from '@/EventBus';
 function makeStreaks(hashesFC) {
