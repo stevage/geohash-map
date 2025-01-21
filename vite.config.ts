@@ -5,7 +5,6 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
-// skip type checking on build
 export default defineConfig({
   build: {
     outDir: 'docs',
