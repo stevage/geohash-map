@@ -34,139 +34,139 @@
             option(value="year") Year
 </template>
 
-<script>
-import { EventBus } from '@/EventBus';
-EventBus.$emit('');
+<script lang="ts">
+import { EventBus } from '@/EventBus'
+EventBus.$emit('')
 
 const chartSettings = {
-    weekDay: {
-        name: 'Week day',
-        type: 'bin',
-        x: 'date',
-        fill: 'weekDayName',
-    },
-    success: {
-        name: 'Success/failure',
-        type: 'bin',
-        x: 'date',
-        fill: 'success',
-    },
-    participantsCount: {
-        name: 'Number of participants',
-        type: 'bin',
-        x: 'date',
-        fill: 'participantsCount',
-        scheme: 'turbo',
-    },
-    participants: {
-        name: 'Participants',
-        type: 'bin',
-        x: 'date',
-        fill: 'participantsOrMultiple',
-    },
-    graticule: {
-        name: 'Graticule',
-        type: 'bin',
-        x: 'date',
-        fill: 'graticule',
-    },
-    graticuleLongitude: {
-        name: 'Graticule longitude',
-        type: 'bin',
-        x: 'date',
-        fill: 'graticuleLongitude',
-    },
-    graticuleLatitude: {
-        name: 'Graticule latitude',
-        type: 'bin',
-        x: 'date',
-        fill: 'graticuleLatitude',
-    },
-    graticuleName: {
-        name: 'Graticule name',
-        type: 'bin',
-        x: 'date',
-        fill: 'graticuleNameShort',
-    },
-    graticuleCountry: {
-        name: 'Graticule country',
-        type: 'bin',
-        x: 'date',
-        fill: 'graticuleCountry',
-    },
-    latitude: {
-        name: 'Latitude',
-        type: 'scatter',
-        x: 'date',
-        y: 'latitude',
-        fill: 'longitude',
-        r: 'participantsCount',
-    },
-    countByWeekday: {
-        name: 'Count by weekday',
-        type: 'bin',
-        x: 'weekday',
-        fill: 'participantsCount',
-    },
-    countByDayOfYear: {
-        name: 'Count by day of year',
-        type: 'bin',
-        x: 'dayOf2008',
-        fill: 'participantsCount',
-    },
-    reportKb: {
-        name: 'Write-up length',
-        type: 'bar',
-        x: 'yearMonth',
-        y: 'reportKb',
-        length: 'reportKb',
-    },
-    participantCountStacked: {
-        name: 'Number of participants',
-        type: 'bar',
-        x: 'yearMonth',
-        y: 'participantsCount',
-        length: 'participantsCount',
-    },
-    graticuleByParticipant: {
-        name: 'Graticule by participant',
-        type: 'cell',
-        x: 'participantsOrMultiple',
-        y: 'graticuleNameShort',
-        fill: 'count',
-    },
-};
+  weekDay: {
+    name: 'Week day',
+    type: 'bin',
+    x: 'date',
+    fill: 'weekDayName',
+  },
+  success: {
+    name: 'Success/failure',
+    type: 'bin',
+    x: 'date',
+    fill: 'success',
+  },
+  participantsCount: {
+    name: 'Number of participants',
+    type: 'bin',
+    x: 'date',
+    fill: 'participantsCount',
+    scheme: 'turbo',
+  },
+  participants: {
+    name: 'Participants',
+    type: 'bin',
+    x: 'date',
+    fill: 'participantsOrMultiple',
+  },
+  graticule: {
+    name: 'Graticule',
+    type: 'bin',
+    x: 'date',
+    fill: 'graticule',
+  },
+  graticuleLongitude: {
+    name: 'Graticule longitude',
+    type: 'bin',
+    x: 'date',
+    fill: 'graticuleLongitude',
+  },
+  graticuleLatitude: {
+    name: 'Graticule latitude',
+    type: 'bin',
+    x: 'date',
+    fill: 'graticuleLatitude',
+  },
+  graticuleName: {
+    name: 'Graticule name',
+    type: 'bin',
+    x: 'date',
+    fill: 'graticuleNameShort',
+  },
+  graticuleCountry: {
+    name: 'Graticule country',
+    type: 'bin',
+    x: 'date',
+    fill: 'graticuleCountry',
+  },
+  latitude: {
+    name: 'Latitude',
+    type: 'scatter',
+    x: 'date',
+    y: 'latitude',
+    fill: 'longitude',
+    r: 'participantsCount',
+  },
+  countByWeekday: {
+    name: 'Count by weekday',
+    type: 'bin',
+    x: 'weekday',
+    fill: 'participantsCount',
+  },
+  countByDayOfYear: {
+    name: 'Count by day of year',
+    type: 'bin',
+    x: 'dayOf2008',
+    fill: 'participantsCount',
+  },
+  reportKb: {
+    name: 'Write-up length',
+    type: 'bar',
+    x: 'yearMonth',
+    y: 'reportKb',
+    length: 'reportKb',
+  },
+  participantCountStacked: {
+    name: 'Number of participants',
+    type: 'bar',
+    x: 'yearMonth',
+    y: 'participantsCount',
+    length: 'participantsCount',
+  },
+  graticuleByParticipant: {
+    name: 'Graticule by participant',
+    type: 'cell',
+    x: 'participantsOrMultiple',
+    y: 'graticuleNameShort',
+    fill: 'count',
+  },
+}
 
 export default {
-    name: 'ChartControls',
-    data: () => ({
-        options: {
-            showChart: false, //!!window.location.host.match(/localhost/),
-            chartId: 'success',
-            interval: 'month',
-        },
-        chartSettings,
-    }),
-    created() {
-        window.ChartControls = this;
+  name: 'ChartControls',
+  data: () => ({
+    options: {
+      showChart: false, //!!window.location.host.match(/localhost/),
+      chartId: 'success',
+      interval: 'month',
     },
-    watch: {
-        options: {
-            deep: true,
-            handler() {
-                EventBus.$emit('chart-options-change', {
-                    ...this.options,
-                    colorBy: this.options.chartId,
-                });
-            },
-        },
+    chartSettings,
+  }),
+  created() {
+    window.ChartControls = this
+  },
+  watch: {
+    options: {
+      deep: true,
+      handler() {
+        EventBus.$emit('chart-options-change', {
+          ...this.options,
+          colorBy: this.options.chartId,
+        })
+      },
     },
-    computed: {
-        selectedSettings() {
-            return chartSettings[this.options.chartId];
-        },
+  },
+  computed: {
+    selectedSettings() {
+      return chartSettings[this.options.chartId]
     },
-};
+  },
+}
 </script>
 
 <style scoped></style>

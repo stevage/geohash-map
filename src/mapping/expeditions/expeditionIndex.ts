@@ -1,5 +1,7 @@
 import { around } from 'geokdbush'
 import kdbush from 'kdbush'
+
+// @ts-ignore TODO
 import * as turf from '@turf/turf'
 import type { Feature, Point } from 'geojson'
 import type mapboxgl from 'mapbox-gl'
@@ -10,18 +12,20 @@ const indexLoaded = new Promise((resolve): void => {
   resolveLoad = resolve as () => void
 })
 // let expeditions, successes;
-export type Expedition = Feature<Point, any> // TODO...
-export type Expeditions = Expedition[]
+// export type Expedition = Feature<Point, any> // TODO...
+// export type Expeditions = Expedition[]
+
+import type { Expedition } from '@/mapping/expeditions/expeditionsData'
 
 export class ExpeditionIndex {
-  expeditions: any
-  index: kdbush
+  expeditions?: Expedition[]
+  index?: kdbush
   successes: any
-  successIndex: kdbush
+  successIndex?: kdbush
   constructor() {}
 
-  init(expeditions: Expeditions) {
-    function makeIndex(es: Expeditions) {
+  init(expeditions: Expedition[]) {
+    function makeIndex(es: Expedition[]) {
       const newIndex = new kdbush(es.length)
       for (const f of es) {
         newIndex.add(f.geometry.coordinates[0], f.geometry.coordinates[1])
@@ -65,7 +69,7 @@ export class ExpeditionIndex {
     const filterFunc = expeditionFilterFunc(filters)
     const results = around(this.successIndex, lon, lat, 1e9, dist * 3, (i: number) =>
       filterFunc(this.successes[i]),
-    )
+    ) as number[]
     return results.map((i: number) => this.successes[i])
   }
 
@@ -79,9 +83,8 @@ export class ExpeditionIndex {
     if (!this.successIndex) {
       return []
     }
-    return around(this.successIndex, point[0], point[1], maxResults, maxDistance).map(
-      (i: number) => this.successes[i],
-    )
+    const indices: number[] = around(this.successIndex, point[0], point[1], maxResults, maxDistance)
+    return indices.map((i: number) => this.successes[i])
   }
 
   getExpeditionsNearViewport(
@@ -90,6 +93,7 @@ export class ExpeditionIndex {
   ) {
     return this.getExpeditionsNear(
       map.getCenter().toArray(),
+      // @ts-ignore
       map.getBounds().toArray().flat(),
       filters,
     )
@@ -97,8 +101,8 @@ export class ExpeditionIndex {
 
   getData() {
     return {
-      indexData: this.index.data,
-      successIndexData: this.successIndex.data,
+      indexData: this.index?.data,
+      successIndexData: this.successIndex?.data,
       expeditions: this.expeditions,
       successes: this.successes,
     }
@@ -138,7 +142,7 @@ function expeditionFilterFunc(filters: Filters) {
 }
 
 const db = new ExpeditionIndex()
-export function initIndex(expeditions: Expeditions) {
+export function initIndex(expeditions: Expedition[]) {
   db.init(expeditions)
   window.db = db
 

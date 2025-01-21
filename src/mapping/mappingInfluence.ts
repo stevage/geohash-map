@@ -1,6 +1,4 @@
 import { getDB } from './expeditions/expeditionIndex'
-import { colorFunc, legendColors } from './expeditions/colorFuncs'
-import * as turf from '@turf/turf'
 import type { mapU } from '@/util'
 import type { UtilsMap } from 'map-gl-utils'
 import type { Filters } from '@/global'
@@ -10,11 +8,6 @@ import type { Filters } from '@/global'
 const workerCount = 8
 const influenceWorkers = new Array(workerCount).fill(null)
 let startTime: number
-function wrap(deg: number) {
-  while (deg < -180) deg += 360
-  while (deg > 180) deg -= 360
-  return deg
-}
 
 const layerId = 'a'
 

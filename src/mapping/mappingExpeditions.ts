@@ -155,7 +155,8 @@ export async function updateHashStyle({
     let gotExpeditions: (value: unknown) => void
     const waitForExpeditions = new Promise((resolve) => (gotExpeditions = resolve))
 
-    if (secondsSinceExpeditionsUpdated() > 60 * 20 || !expeditions) {
+    const maxAge = window.location.hostname === 'localhost' ? 60 * 60 * 24 : 60 * 20
+    if (secondsSinceExpeditionsUpdated() > maxAge || !expeditions) {
       window.setTimeout(
         async () => {
           console.log('Now fetch fresh expeditions')

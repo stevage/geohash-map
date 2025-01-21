@@ -21,7 +21,6 @@
                         ChartControls.ml2
                         HashStats.ml2
                         AnimationControls.ml2
-                        //- VoronoiControls.ml2
                         //- RegionControls.ml2
                     div(v-show="tab === 'geohash'")
                         HashInfo
@@ -56,7 +55,6 @@ import Chart from '@/components/Chart.vue'
 import GraticuleInfo from '@/components/GraticuleInfo.vue'
 import GraticuleOptions from '@/components/GraticuleOptions.vue'
 import RegionControls from '@/components/RegionControls.vue'
-import VoronoiControls from '@/components/VoronoiControls.vue'
 import InfluenceControls from '@/components/InfluenceControls.vue'
 import { getUrlParam, setUrlParam } from './util'
 
@@ -89,7 +87,6 @@ export default {
     GraticuleInfo,
     GraticuleOptions,
     RegionControls,
-    VoronoiControls,
     InfluenceControls,
   },
   data() {
@@ -104,6 +101,7 @@ export default {
     }
   },
   created() {
+    // @ts-ignore
     window.app.App = this
     EventBus.$on('select-feature', () => (this.sidebarOpen = true))
     EventBus.$on(

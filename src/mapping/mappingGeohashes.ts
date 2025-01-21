@@ -134,7 +134,7 @@ async function makeHashRing(map: mapU) {
     makeBushBash(map)
   }
 }
-let lastHash: Feature<Point>
+let lastHash: Feature<Point> | null = null
 async function makeBushBash(map: mapU) {
   function reset() {
     map.U.setData('bushBash')
@@ -161,8 +161,8 @@ async function makeBushBash(map: mapU) {
 
     const hash = hashes.slice(-1)[0]
 
-    const roadIds = map
-      .getStyle()
+    const roadIds = map!
+      .getStyle()!
       .layers.map((l) => l.id)
       .filter((id) => id.match(/road/))
 
@@ -177,7 +177,7 @@ async function makeBushBash(map: mapU) {
 
     type Road = Feature<LineString | MultiLineString>
     const distances = roads
-      .map((road) => {
+      .map((road: Road) => {
         const d: [Road, number] = [road, turf.pointToLineDistance(hash, road)]
         return d
       })
@@ -269,8 +269,8 @@ export function updateGeohashes(map: mapU) {
         try {
           map.removeControl(scale)
           console.log('remove scale')
-        } catch (e) {
-          console.error('removing scale prob', e)
+        } catch {
+          // console.error('removing scale prob', e)
           //
         }
       }

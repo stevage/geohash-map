@@ -27,42 +27,39 @@
         option(value="history") History
 </template>
 
-<script>
-import { EventBus } from '@/EventBus';
+<script lang="ts">
+import { EventBus } from '@/EventBus'
 export default {
-    data: () => ({
-        graticules: {
-            showGraticules: true,
-            showGraticuleLabels: true,
-            fillStyle: 'uninitiated',
-            infoLabel: 'none',
-        },
-    }),
-    created() {
-        window.GraticuleOptions = this;
+  data: () => ({
+    graticules: {
+      showGraticules: true,
+      showGraticuleLabels: true,
+      fillStyle: 'uninitiated',
+      infoLabel: 'none',
     },
-    computed: {
-        graticuleFillStyle() {
-            return this.graticules.fillStyle;
-        },
+  }),
+  created() {
+    window.GraticuleOptions = this
+  },
+  computed: {
+    graticuleFillStyle() {
+      return this.graticules.fillStyle
     },
-    watch: {
-        graticuleFillStyle() {
-            if (
-                this.graticules.fillStyle !== 'none' &&
-                this.graticules.fillStyle !== 'uninitiated'
-            ) {
-                this.graticules.infoLabel = this.graticules.fillStyle;
-            }
-        },
-        graticules: {
-            deep: true,
-            handler() {
-                EventBus.$emit('graticule-options-change', this.graticules);
-            },
-        },
+  },
+  watch: {
+    graticuleFillStyle() {
+      if (this.graticules.fillStyle !== 'none' && this.graticules.fillStyle !== 'uninitiated') {
+        this.graticules.infoLabel = this.graticules.fillStyle
+      }
     },
-};
+    graticules: {
+      deep: true,
+      handler() {
+        EventBus.$emit('graticule-options-change', this.graticules)
+      },
+    },
+  },
+}
 </script>
 
 <style scoped></style>

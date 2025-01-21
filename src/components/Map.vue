@@ -9,7 +9,9 @@ import mapboxgl from 'mapbox-gl/dist/mapbox-gl-dev'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import U from 'map-gl-utils/dist/index.esm.js'
 import type { UtilsMap } from 'map-gl-utils/dist/types'
+import type { FeatureCollection, Point } from 'geojson'
 import { EventBus } from '../EventBus'
+import type { DebouncedFunction } from 'debounce'
 // import '../global.d.ts';
 import {
   updateHashStyle,
@@ -36,6 +38,7 @@ export default {
       participants: '',
       outcome: 'all',
     } as Filters,
+    frameNo: 0,
     animationDay: 0,
     globe: window.location.hash.match(/globe/),
   }),
@@ -59,12 +62,23 @@ export default {
       //
     }
     console.log(center, zoom)
+    const minimal = {
+      version: 8,
+      sources: {},
+
+      layers: [],
+      glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf',
+    }
     const map: UtilsMap = new mapboxgl.Map({
       container: 'map',
       center, //: [144.96, -37.81],
       zoom,
       // style: 'mapbox://styles/mapbox/light-v9',
-      style: 'mapbox://styles/stevage/ckzoqlsr1000115qtr5pendfa/draft', // geohash-dark
+      style:
+        window.location.hostname === 'localhost'
+          ? minimal
+          : 'mapbox://styles/stevage/ckzoqlsr1000115qtr5pendfa', // geohash-dark
+
       hash: 'center',
       projection: this.globe
         ? 'globe' //{ name: 'globe', center: [0, 0], parallels: [30, 30] }
@@ -75,7 +89,6 @@ export default {
     window.map = map
     window.map.hash = 'center'
     window.map = map
-    window.app.Map = this
 
     await map.U!.onLoad()
     // initMappingRegions(map);
@@ -90,20 +103,10 @@ export default {
       // add the DEM source as a terrain layer with exaggerated height
       map.setTerrain({ source: 'mapbox-dem', exaggeration: 0 })
     }
-    map.U!.addGeoJSON('voronoi')
-    map.U!.addFillLayer(
-      'voronoi-fill',
-      'voronoi',
-      {
-        fillOpacity: 0.5,
-        fillAntiAlias: false,
-        fillOutlineColor: 'transparent',
-      },
-      'natural-point-label',
-    )
+
     EventBus.$emit('map-loaded', map)
     this.filters = window.Filters?.filters ?? true
-    this.initMapContent(map)
+    this.initMapContent()
     EventBus.$on('filters-change', (filters: Filters) => {
       console.log('filters-change')
       this.filters = filters
@@ -149,7 +152,7 @@ export default {
         map.setBearing(0)
       }
     })
-    EventBus.$on('projection-change', (projection) => {
+    EventBus.$on('projection-change', (projection: string) => {
       console.log(projection)
       window.map.setProjection(projection)
     })
@@ -165,7 +168,8 @@ export default {
     },
   },
   methods: {
-    findPairs(expeditions) {
+    updateMapStyleDebounced: (() => undefined) as DebouncedFunction<() => void>, // body will be replaced
+    findPairs(expeditions: FeatureCollection<Point>) {
       const pairs = {}
       let max = [0, null]
       for (const f of expeditions.features) {
@@ -235,7 +239,6 @@ export default {
       }
       resetHashAnimation({
         map: window.map,
-        filters: this.filters,
         show: false,
       })
 
@@ -282,7 +285,6 @@ export default {
       })
       updateHashAnimation({
         map: window.map,
-        filters: this.filters,
         minx,
         miny,
         maxx,

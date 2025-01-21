@@ -1,6 +1,7 @@
 import type { mapU } from '@/util'
+// @ts-ignore TODO
 import * as turf from '@turf/turf'
-import type { Feature, FeatureCollection, Polygon } from 'geojson'
+import type { Feature, Polygon } from 'geojson'
 
 export function getClassAreasByVectorLayer(
   map: mapU,
@@ -28,14 +29,16 @@ export function getClassAreasByVectorLayer(
   )
 
   // console.log(landUses);
-  const landUsesClipped = landUsesAll.map((f) => turf.bboxClip(f, bbox)) as Feature<Polygon>[]
+  const landUsesClipped = landUsesAll.map((f: Feature) =>
+    turf.bboxClip(f, bbox),
+  ) as Feature<Polygon>[]
   const landUsesClipped2 = turf.dissolve(turf.flatten(turf.featureCollection(landUsesClipped)), {
     propertyName: 'class',
   }).features
 
   const landUsesClipped3 = landUsesClipped2
-    .map((f) => ({ area: turf.area(f), ...f.properties }))
-    .filter((f) => f.area > 0)
+    .map((f: Feature<Polygon>) => ({ area: turf.area(f), ...f.properties }))
+    .filter((f: { area: number }) => f.area > 0)
 
   // @ts-ignore
   return aggregateClasses(landUsesClipped3)

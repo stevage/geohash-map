@@ -6,23 +6,24 @@
     //- span.b {{ hash.date }}
     span(v-if="isEast") {{' '}}(using 30W rule)
   table.mt3(style="font-size:12px")
-    tr
-      th
-      th Lat.
-      th Long.
-    tr(v-for="hash in applicableHashes" :class="getStatus(hash).class")
-      //- td Your location
-      td {{hash.weekdayShort }} <wbr> {{ hash.date }}
-      td {{ isEast ? hash.east.lat : hash.west.lat}}
-      td {{ isEast ? hash.east.lng : hash.west.lng}}
-      td {{ getStatus(hash).label }}
-    tr.unpublished
-      td {{ nextUnpublishedHashDate.toLocaleString('en-US', { weekday: 'short' }) + ' ' + nextUnpublishedHashDate.toString() }}
-      td
-      td
-      td
-        span(v-if="timeTillNextUnpublishedHash.days") Available in {{ durationString(timeTillNextUnpublishedHash) }}.
-        span(v-else) Available in {{ timeTillNextUnpublishedHash.hours }} hrs, {{ timeTillNextUnpublishedHash.minutes }} mins.
+    tbody
+      tr
+        th
+        th Lat.
+        th Long.
+      tr(v-for="hash in applicableHashes" :class="getStatus(hash).class")
+        //- td Your location
+        td {{hash.weekdayShort }} <wbr> {{ hash.date }}
+        td {{ isEast ? hash.east.lat : hash.west.lat}}
+        td {{ isEast ? hash.east.lng : hash.west.lng}}
+        td {{ getStatus(hash).label }}
+      tr.unpublished
+        td {{ nextUnpublishedHashDate.toLocaleString('en-US', { weekday: 'short' }) + ' ' + nextUnpublishedHashDate.toString() }}
+        td
+        td
+        td
+          span(v-if="timeTillNextUnpublishedHash.days") Available in {{ durationString(timeTillNextUnpublishedHash) }}.
+          span(v-else) Available in {{ timeTillNextUnpublishedHash.hours }} hrs, {{ timeTillNextUnpublishedHash.minutes }} mins.
   p Your local time is {{ localTime }} on {{ nowDateTime.toPlainDate().toLocaleString() }}.
   small You are {{ isEast ? 'East' : 'West' }} of -30º for the purpose of <a href="https://geohashing.site/geohashing/30W_Time_Zone_Rule">the 30W rule</a>.
   //- p The next time it's 9:30AM in New York City is in {{ nextDowOpening.hours }} hours and {{ nextDowOpening.minutes }} minutes.

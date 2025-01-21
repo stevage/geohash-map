@@ -1,24 +1,26 @@
 import type mapboxgl from 'mapbox-gl'
-import type { MapGlUtils } from 'map-gl-utils/dist/index.esm.js'
-import type { Expedition, ExpeditionIndex } from '@/mapping/expeditions/expeditionIndex'
+import type { MapGlUtils, UtilsMap } from 'map-gl-utils/dist/types'
+import type { ExpeditionIndex } from '@/mapping/expeditions/expeditionIndex'
+import type { Expedition } from '@/mapping/expeditions/expeditionsData'
 import type { GraticuleStat, GraticuleStats } from './mapping/graticules/graticuleStats'
 import type { FeatureCollection } from 'geojson'
-import type Vue from 'vue/@compat'
+import Vue from 'vue'
 
 declare global {
   interface Window {
-    map: mapU // Replace `any` with the correct type if known
+    map: UtilsMap // Replace `any` with the correct type if known
     app: {
       yearColors?: string[]
       fippeServer?: string
-      App?: Vue
+      App?: typeof Vue
       graticules?: FeatureCollection
       overrideTime?: string
       overrideTimezone?: string
     }
-    Filters: Vue
-    InfluenceControls: Vue
-    HashInfo: Vue
+    Filters: typeof Vue
+    InfluenceControls: typeof Vue
+    HashInfo: typeof Vue
+    AnimationControls: typeof Vue
     expeditions: any
     graticulesById: Record<string, GraticuleStat>
     expeditionsByGraticule: Record<string, Expedition[]>

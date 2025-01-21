@@ -1,9 +1,5 @@
 import { dateToDays, dateToWeekday, report } from '@//util'
-import { EventBus } from '@/EventBus'
-import { initIndex } from './expeditionIndex'
-import type { Expedition } from './expeditionIndex'
 import type { FeatureCollection, Feature, Point } from 'geojson'
-import type { mapU } from '@/util'
 /* TODO:
 - generate all these extra properties in a different dataset that doesn't have to go onto the map
 */
@@ -60,9 +56,50 @@ async function expeditionsToGeoJSON(): Promise<FeatureCollection<Point>> {
       })),
     } as FeatureCollection<Point>
   })
-  return points
+  return points as unknown as FeatureCollection<Point>
 }
-let expeditions: FeatureCollection<Point>
+
+export type ExpeditionProps = {
+  id: string
+  participants: string[]
+  success: boolean
+  reportKb: number
+  achievements: string[]
+  year: number
+  days: number
+  month: number
+  yearMonth: number
+  weekday: number
+  weekDayName: string
+  x: number
+  y: number
+  global: boolean
+  dayOfYear: number
+  dayOf2008: string
+  graticule: string
+  graticuleName: string
+  graticuleNameShort: string
+  graticuleCountry: string
+  latitude: number
+  longitude: number
+  graticuleLatitude: number
+  graticuleLongitude: number
+  transportMode: string
+  hardship: string
+  participantsString: string
+  participantsOrMultiple: string
+  participantsStringLower: string
+  participantsCount: number
+  experienceMax: number
+  experienceMin: number
+  experienceTotal: number
+  experienceDaysMax: number
+  experienceDaysMin: number
+  experienceDaysTotal: number
+}
+
+export type Expedition = Feature<Point, ExpeditionProps>
+export type Expeditions = FeatureCollection<Point, ExpeditionProps>
 
 function enrichExpeditions(expeditions: FeatureCollection<Point>) {
   const participants = {} as {
@@ -72,7 +109,7 @@ function enrichExpeditions(expeditions: FeatureCollection<Point>) {
     f.id = i
     // type is object with any properties
     const exp = f.properties as { [key: string]: any }
-    const [date, y, x] = f.properties.id.split('_')
+    const [date, y, x] = f.properties?.id.split('_')
     exp.year = +date.slice(0, 4)
     exp.days = dateToDays(exp.id.slice(0, 10))
     exp.month = +date.slice(5, 7)
@@ -136,9 +173,9 @@ function enrichExpeditions(expeditions: FeatureCollection<Point>) {
                   ? 'Frozen'
                   : 'Other'
   })
-  expeditions.features.sort((a, b) => a.properties.days - b.properties.days)
+  expeditions.features.sort((a, b) => a.properties?.days - b.properties?.days)
   expeditions.features.forEach((f) => {
-    const exp = f.properties
+    const exp: ExpeditionProps = f.properties as ExpeditionProps
     for (const p of exp.participants) {
       if (!participants[p]) {
         participants[p] = {
