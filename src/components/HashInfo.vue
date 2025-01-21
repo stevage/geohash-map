@@ -30,188 +30,166 @@
 </template>
 
 <script lang="ts">
-import { EventBus } from '@/EventBus';
-import { Geohash } from '@/mapping/mappingGeohashes';
-import { Temporal } from 'temporal-polyfill';
+import { EventBus } from '@/EventBus'
+import type { Geohash } from '@/mapping/mappingGeohashes'
+import { Temporal } from 'temporal-polyfill'
 // const nowString = window.app.overrideTime || new Date().toISOString();
-window.z = window.z ?? {};
-window.z.Temporal = Temporal;
+window.z = window.z ?? {}
+window.z.Temporal = Temporal
 
 export default {
-    name: 'HashInfo',
-    data: () => ({
-        date: null as string | null,
-        hash: null as Geohash | null,
-        hashes: null as Geohash[] | null,
-        nowDateTime: Temporal.PlainDateTime.from(
-            window.app.overrideTime ||
-                Temporal.Now.zonedDateTimeISO().toPlainDateTime()
-        ),
-    }),
-    created() {
-        window.HashInfo = this;
-        EventBus.$on(
-            'geohash-loaded',
-            ({
-                hash,
-                date,
-                hashes,
-            }: {
-                hash: Geohash;
-                date: string;
-                hashes: Geohash[];
-            }) => {
-                this.hashes = hashes;
-                this.hash = hash;
-                this.date = date;
-            }
-        );
+  name: 'HashInfo',
+  data: () => ({
+    date: null as string | null,
+    hash: null as Geohash | null,
+    hashes: null as Geohash[] | null,
+    nowDateTime: Temporal.PlainDateTime.from(
+      window.app.overrideTime || Temporal.Now.zonedDateTimeISO().toPlainDateTime(),
+    ),
+  }),
+  created() {
+    window.HashInfo = this
+    EventBus.$on(
+      'geohash-loaded',
+      ({ hash, date, hashes }: { hash: Geohash; date: string; hashes: Geohash[] }) => {
+        this.hashes = hashes
+        this.hash = hash
+        this.date = date
+      },
+    )
+  },
+  methods: {
+    durationString(duration: Temporal.Duration): string {
+      let s: string = ''
+      if (duration.days) s += `${duration.days} days, `
+      s += `${duration.hours} hrs`
+      if (!duration.days) s += `, ${duration.minutes} minutes`
+      return s
     },
-    methods: {
-        durationString(duration: Temporal.Duration): string {
-            let s: string = '';
-            if (duration.days) s += `${duration.days} days, `;
-            s += `${duration.hours} hrs`;
-            if (!duration.days) s += `, ${duration.minutes} minutes`;
-            return s;
-        },
 
-        getStatus(hash: Geohash): { label: string; class: string } {
-            const hashDate = Temporal.PlainDate.from(hash.date);
-            const nowDate = Temporal.PlainDate.from(this.nowDateTime);
-            const daysSinceStart = nowDate.since(hashDate).days;
-            if (daysSinceStart > 0) {
-                return { class: 'expired', label: 'Expired' };
-            } else if (daysSinceStart < 0) {
-                const startDiff = this.nowDateTime.since(hashDate);
-                let timeSpec =
-                    'in ' +
-                    startDiff.negated().round('minute').toLocaleString();
-                // if (daysSinceStart === -2) {
-                //     timeSpec = 'tomorrow';
-                if (daysSinceStart < -1) {
-                    timeSpec = 'in ' + -daysSinceStart + ' days';
-                }
-                return { class: 'future', label: 'Activates ' + timeSpec };
-            } else {
-                const endDiff = this.nowDateTime.since(
-                    hashDate.add({ days: 1 })
-                );
-                // debugger;
-                const duration = endDiff.negated().round('minute');
-                return {
-                    class: 'active',
-                    label: `Expires in ${this.durationString(duration)}`,
-                };
-                // return (
-                //     'Expires in ' +
-                //     -endDiff.hours +
-                //     ' hours and ' +
-                //     -endDiff.minutes +
-                //     ' minutes'
-                // );
-            }
-        },
+    getStatus(hash: Geohash): { label: string; class: string } {
+      const hashDate = Temporal.PlainDate.from(hash.date)
+      const nowDate = Temporal.PlainDate.from(this.nowDateTime)
+      const daysSinceStart = nowDate.since(hashDate).days
+      if (daysSinceStart > 0) {
+        return { class: 'expired', label: 'Expired' }
+      } else if (daysSinceStart < 0) {
+        const startDiff = this.nowDateTime.since(hashDate)
+        let timeSpec = 'in ' + startDiff.negated().round('minute').toLocaleString()
+        // if (daysSinceStart === -2) {
+        //     timeSpec = 'tomorrow';
+        if (daysSinceStart < -1) {
+          timeSpec = 'in ' + -daysSinceStart + ' days'
+        }
+        return { class: 'future', label: 'Activates ' + timeSpec }
+      } else {
+        const endDiff = this.nowDateTime.since(hashDate.add({ days: 1 }))
+        // debugger;
+        const duration = endDiff.negated().round('minute')
+        return {
+          class: 'active',
+          label: `Expires in ${this.durationString(duration)}`,
+        }
+        // return (
+        //     'Expires in ' +
+        //     -endDiff.hours +
+        //     ' hours and ' +
+        //     -endDiff.minutes +
+        //     ' minutes'
+        // );
+      }
     },
-    computed: {
-        timezone() {
-            return (
-                window.app.overrideTimezone ||
-                Temporal.Now.zonedDateTimeISO().getTimeZone()
-            );
-        },
-        timezoneOffset() {
-            const zst = window.z.Temporal.Now.zonedDateTimeISO(this.timezone);
-            return zst.offsetNanoseconds / 1e9 / 3600;
-        },
-        longitude() {
-            return this.timezoneOffset * 15;
-        },
+  },
+  computed: {
+    timezone() {
+      return window.app.overrideTimezone || Temporal.Now.zonedDateTimeISO().getTimeZone()
+    },
+    timezoneOffset() {
+      const zst = window.z.Temporal.Now.zonedDateTimeISO(this.timezone)
+      return zst.offsetNanoseconds / 1e9 / 3600
+    },
+    longitude() {
+      return this.timezoneOffset * 15
+    },
 
-        isEast() {
-            return this.longitude > -30;
-        },
-        applicableHashes() {
-            return this.hashes.filter((hash: Geohash) =>
-                this.isEast ? hash.east : hash.west
-            );
-        },
-        // return time object of the next time it's 9.30AM in New York City
-        nextDowOpening() {
-            const nyc = this.nowDateTimeZoned
-                .withTimeZone('America/New_York')
-                .withPlainTime({ hour: 9, minute: 30 });
-            const here = this.nowDateTimeZoned;
-            let diff = nyc.since(here);
-            const isTomorrow = diff.hours < 0;
-            if (isTomorrow) {
-                diff = diff.add({ days: 1 });
-            }
-            return { hours: diff.hours, minutes: diff.minutes, isTomorrow };
-        },
-        localTime() {
-            return this.nowDateTime.toPlainTime().toLocaleString();
-        },
-        nowDateTimeZoned() {
-            return this.nowDateTime.toZonedDateTime(this.timezone);
-        },
-        nextUnpublishedHashDate() {
-            if (!this.hashes) {
-                return null;
-            } else if (this.applicableHashes.length === 0) {
-                return Temporal.PlainDate.from(this.nowDateTime);
-            }
-            const nextDate = Temporal.PlainDate.from(
-                this.applicableHashes.slice(-1)[0].date
-            ).add({ days: 1 });
-            return nextDate;
-        },
-        timeTillNextUnpublishedHash() {
-            const nextDate = Temporal.PlainDateTime.from(
-                this.nextUnpublishedHashDate
-            );
-            const dowOpening = nextDate
-                .subtract({ days: this.isEast ? 1 : 0 })
-                .withPlainTime({ hour: 9, minute: 30 })
-                .toZonedDateTime('America/New_York');
-            const diff = dowOpening
-                .since(this.nowDateTimeZoned)
-                .round({ largestUnit: 'days' }); // cross-timezone comparisons don't return days
-            return {
-                days: diff.days,
-                hours: diff.hours,
-                minutes: diff.minutes,
-                // isTomorrow: diff.hours < 0,
-            };
-        },
+    isEast() {
+      return this.longitude > -30
     },
-};
+    applicableHashes() {
+      return this.hashes.filter((hash: Geohash) => (this.isEast ? hash.east : hash.west))
+    },
+    // return time object of the next time it's 9.30AM in New York City
+    nextDowOpening() {
+      const nyc = this.nowDateTimeZoned
+        .withTimeZone('America/New_York')
+        .withPlainTime({ hour: 9, minute: 30 })
+      const here = this.nowDateTimeZoned
+      let diff = nyc.since(here)
+      const isTomorrow = diff.hours < 0
+      if (isTomorrow) {
+        diff = diff.add({ days: 1 })
+      }
+      return { hours: diff.hours, minutes: diff.minutes, isTomorrow }
+    },
+    localTime() {
+      return this.nowDateTime.toPlainTime().toLocaleString()
+    },
+    nowDateTimeZoned() {
+      return this.nowDateTime.toZonedDateTime(this.timezone)
+    },
+    nextUnpublishedHashDate() {
+      if (!this.hashes) {
+        return null
+      } else if (this.applicableHashes.length === 0) {
+        return Temporal.PlainDate.from(this.nowDateTime)
+      }
+      const nextDate = Temporal.PlainDate.from(this.applicableHashes.slice(-1)[0].date).add({
+        days: 1,
+      })
+      return nextDate
+    },
+    timeTillNextUnpublishedHash() {
+      const nextDate = Temporal.PlainDateTime.from(this.nextUnpublishedHashDate)
+      const dowOpening = nextDate
+        .subtract({ days: this.isEast ? 1 : 0 })
+        .withPlainTime({ hour: 9, minute: 30 })
+        .toZonedDateTime('America/New_York')
+      const diff = dowOpening.since(this.nowDateTimeZoned).round({ largestUnit: 'days' }) // cross-timezone comparisons don't return days
+      return {
+        days: diff.days,
+        hours: diff.hours,
+        minutes: diff.minutes,
+        // isTomorrow: diff.hours < 0,
+      }
+    },
+  },
+}
 </script>
 
 <style scoped>
 p {
-    font-size: 12px;
+  font-size: 12px;
 }
 td,
 th {
-    padding: 7px 4px;
+  padding: 7px 4px;
 }
 th {
-    font-weight: normal;
+  font-weight: normal;
 }
 td {
-    /* font-weight: bold; */
+  /* font-weight: bold; */
 }
 
 .expired {
-    color: #999;
+  color: #999;
 }
 
 .unpublished {
-    color: #999;
+  color: #999;
 }
 
 .active {
-    color: hsl(120, 60%, 50%);
+  color: hsl(120, 60%, 50%);
 }
 </style>

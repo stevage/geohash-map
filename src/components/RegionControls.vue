@@ -7,15 +7,15 @@
 
 </template>
 
-<script>
+<script lang="ts">
 export default {
-    data: () => ({
-        show: false,
-    }),
-    created() {
-        window.RegionControls = this;
-    },
-};
+  data: () => ({
+    show: false,
+  }),
+  created() {
+    window.RegionControls = this
+  },
+}
 </script>
 
 <style scoped></style>

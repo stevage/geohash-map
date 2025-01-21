@@ -13,57 +13,57 @@
 </template>
 
 <script>
-import { EventBus } from '@/EventBus';
+import { EventBus } from '@/EventBus'
 export default {
-    name: 'Legend',
-    data: () => ({
-        colors: window.app.yearColors,
-        colorVis: 'experienceDaysMax',
-        showingExpeditions: true,
-        collapsed: false, // sigh, this doesn't work because Legend sits within a no-pointer-events overlay
-    }),
-    created() {
-        window.Legend = this;
-        EventBus.$on('colors-change', ({ colorVis, colors }) => {
-            this.colors = colors;
-            this.colorVis = colorVis;
-        });
-        EventBus.$on('tab-change', (tab) => {
-            this.showingExpeditions = tab === 'expeditions';
-        });
+  name: 'Legend',
+  data: () => ({
+    colors: window.app.yearColors,
+    colorVis: 'experienceDaysMax',
+    showingExpeditions: true,
+    collapsed: false, // sigh, this doesn't work because Legend sits within a no-pointer-events overlay
+  }),
+  created() {
+    window.Legend = this
+    EventBus.$on('colors-change', ({ colorVis, colors }) => {
+      this.colors = colors
+      this.colorVis = colorVis
+    })
+    EventBus.$on('tab-change', (tab) => {
+      this.showingExpeditions = tab === 'expeditions'
+    })
+  },
+  computed: {
+    title() {
+      return {
+        experienceMax: 'Expeditions',
+        experienceDaysMax: 'Years of geohashing',
+        year: 'Year',
+      }[this.colorVis]
     },
-    computed: {
-        title() {
-            return {
-                experienceMax: 'Expeditions',
-                experienceDaysMax: 'Years of geohashing',
-                year: 'Year',
-            }[this.colorVis];
-        },
-    },
-};
+  },
+}
 </script>
 <style>
 #Legend {
-    max-height: calc(100vh - 100px);
-    overflow-y: hidden;
+  max-height: calc(100vh - 100px);
+  overflow-y: hidden;
 }
 
 #Legend.collapsed {
-    overflow-y: hidden;
-    max-height: 50px;
+  overflow-y: hidden;
+  max-height: 50px;
 }
 </style>
 <style scoped>
 .pill {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin-right: 5px;
-    border-radius: 50%;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border-radius: 50%;
 }
 
 .npe * {
-    ponter-events: none;
+  /* pointer-events: none; */
 }
 </style>

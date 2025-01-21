@@ -1,48 +1,11 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "strict": false,
-    "jsx": "preserve",
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "useDefineForClassFields": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "types": [
-      "webpack-env"
-    ],
-    "typeRoots" : ["./node_modules/@types", "./type-definitions-folder", "./node_modules/map-gl-utils/dist/types"],
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "map-gl-utils": ["node_modules/map-gl-utils/dist/index.esm.js"]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ],
-    "noImplicitAny": true,
-    "useUnknownInCatchVariables": false,
-    "noPropertyAccessFromIndexSignature":false
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    "src/**/*.js",
-    "src/global.d.ts"
- ],
-
-  "exclude": [
-    "node_modules"
+    {
+      "path": "./tsconfig.app.json"
+    }
   ]
 }

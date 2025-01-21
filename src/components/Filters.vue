@@ -101,111 +101,94 @@
 </template>
 
 <script lang="ts">
-import { EventBus } from '@/EventBus';
-import { getUrlParam, setUrlParam } from '@/util';
-export type Filters = {
-    participants: string;
-    minParticipants: number;
-    maxParticipants: number;
-    // scaleExpedition: boolean;
-    scaleExpeditionsBy: string;
-    minYear: number;
-    maxYear: number;
-    outcome: string;
-    dayOfWeek: string;
-    colorVis: string;
-    showStreaks: boolean;
-    minStreakLength: number;
-    onlySuccessStreaks: boolean;
-};
+import { EventBus } from '@/EventBus'
+import { getUrlParam, setUrlParam } from '@/util'
+import type { Filters } from '@/global'
 export default {
-    name: 'Filters',
-    data: () => {
-        const filters: Filters = {
-            participants: getUrlParam('participants') || '',
-            minParticipants: 0,
-            maxParticipants: 100,
-            // scaleExpedition: false,
-            scaleExpeditionsBy: 'none',
-            minYear: 2008,
-            maxYear: new Date().getUTCFullYear(),
-            outcome: 'all',
-            dayOfWeek: 'all',
-            colorVis: 'year',
-            showStreaks: false,
-            minStreakLength: 3,
-            onlySuccessStreaks: true,
-        };
-        return {
-            enabled: true,
-            showFilters: true,
-            filters,
-            projection: 'mercator',
-        };
+  name: 'Filters',
+  data: () => {
+    const filters: Filters = {
+      participants: getUrlParam('participants') || '',
+      minParticipants: 0,
+      maxParticipants: 100,
+      // scaleExpedition: false,
+      scaleExpeditionsBy: 'none',
+      minYear: 2008,
+      maxYear: new Date().getUTCFullYear(),
+      outcome: 'all',
+      dayOfWeek: 'all',
+      colorVis: 'year',
+      showStreaks: false,
+      minStreakLength: 3,
+      onlySuccessStreaks: true,
+    }
+    return {
+      enabled: true,
+      showFilters: true,
+      filters,
+      projection: 'mercator',
+    }
+  },
+  created() {
+    window.Filters = this
+    EventBus.$on('animation-change', (running: boolean) => (this.enabled = !running))
+  },
+  watch: {
+    filters: {
+      deep: true,
+      handler() {
+        if (this.filters.minYear > this.filters.maxYear) {
+          this.filters.minYear = this.filters.maxYear
+        }
+        EventBus.$emit('filters-change', this.filters)
+        setUrlParam('participants', this.filters.participants || null)
+      },
     },
-    created() {
-        window.Filters = this;
-        EventBus.$on(
-            'animation-change',
-            (running: boolean) => (this.enabled = !running)
-        );
-    },
-    watch: {
-        filters: {
-            deep: true,
-            handler() {
-                if (this.filters.minYear > this.filters.maxYear) {
-                    this.filters.minYear = this.filters.maxYear;
-                }
-                EventBus.$emit('filters-change', this.filters);
-                setUrlParam('participants', this.filters.participants || null);
-            },
-        },
 
-        projection() {
-            console.log('projection change', this.projection);
-            EventBus.$emit('projection-change', this.projection);
-        },
+    projection() {
+      console.log('projection change', this.projection)
+      EventBus.$emit('projection-change', this.projection)
     },
-};
+  },
+}
 </script>
 
 <style scoped>
 label {
-    /* display: block; */
-    /* margin-bottom: 1em; */
+  /* display: block; */
+  /* margin-bottom: 1em; */
 }
 
 .disabled {
-    opacity: 0.5;
-    pointer-events: none;
-    user-select: none;
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
 }
 
 h4,
 h5 {
-    margin-bottom: 0.25em;
+  margin-bottom: 0.25em;
 }
 </style>
 <style>
 select,
 input[type='checkbox'] {
-    background: #333;
-    color: #ddd;
-    border: 1px solid #666;
+  background: #333;
+  color: #ddd;
+  border: 1px solid #666;
 }
 input[type='text'],
 input[type='number'] {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background: #333;
-    color: #ddd;
-    border: #666 solid 1px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #333;
+  color: #ddd;
+  border: #666 solid 1px;
 }
 
 .group {
-    padding-left: 16px;
-    border-left: 1px solid hsla(0, 100%, 100%, 0.1);
-    margin-bottom: 16px;
+  padding-left: 16px;
+  border-left: 1px solid hsla(0, 100%, 100%, 0.1);
+  margin-bottom: 16px;
 }
 </style>
