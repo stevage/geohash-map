@@ -121,6 +121,9 @@ export default {
     EventBus.$on('tab-change', (tab: string) => {
       map.U!.toggle(/^expeditions/, tab === 'expeditions')
       map.U!.toggle(/^participants/, tab === 'participants')
+      if (tab === 'participants') {
+        updateParticipants(map)
+      }
     })
     // const debouncedMove = debounce(
     //     () => {

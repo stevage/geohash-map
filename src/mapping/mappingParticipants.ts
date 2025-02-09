@@ -42,14 +42,14 @@ function getCenter(points: Position[], participant: string): Feature<Point> {
   const fc = featureCollection(points.map(point))
   let clusters: Feature<Point>[] = []
   try {
-    clusters = clustersDbscan(fc, 200, { mutate: false }).features
+    clusters = clustersDbscan(fc, 200, { mutate: false, minPoints: 2 }).features
   } catch (e) {
     console.error(e)
   }
   const pointsByCluster = clusters.reduce(
     (acc, f) => {
       const { cluster, dbscan } = f.properties
-      if (cluster !== undefined && dbscan === 'core') {
+      if (cluster !== undefined && dbscan !== 'edge') {
         acc[cluster] = [...(acc[cluster] ?? []), f]
       }
       return acc
@@ -67,11 +67,6 @@ function getCenter(points: Position[], participant: string): Feature<Point> {
       ? weightedCenterOfMass(fc.features.map((f) => f.geometry.coordinates as Position))
       : weightedCenterOfMass(biggestCluster.map((f) => f.geometry.coordinates as Position))
 
-  if (participant.match(/TdL/)) {
-    console.log(participant, center)
-    console.log(featureCollection(clusters))
-    console.log(biggestCluster)
-  }
   return center
 }
 
@@ -113,33 +108,16 @@ export async function updateParticipants(map: mapU) {
   const visibility = window.app.App.tab === 'participants' ? 'visible' : 'none'
   if (!map.getSource('participants')?._data?.features?.length) {
     map.U.addGeoJSON('participants')
-    if (!participantsFeatures) {
-      // && window.app.App.tab === 'participants') {
+    if (!participantsFeatures && window.app.App.tab === 'participants') {
       await makeParticipantsData()
     }
     map.U.setData('participants', featureCollection(participantsFeatures))
     map.U.addSymbolLayer('participants-label', 'participants', {
       textField: ['get', 'name'],
-      // textAllowOverlap: true,
-      // textOffset: [0, 1],
-      // textAnchor: 'top',
-      // textAnchor: 'center',
-      textSize: U.interpolate('count', 0, 8, 12, 10, 50, 14, 100, 16, 200, 20),
-      // textColor: 'white',
-      // textColor: [
-      //   'interpolate-hcl',
-      //   ['linear'],
-      //   ['get', 'count'],
-      //   0,
-      //   'hsl(0, 100%, 50%)',
-      //   100,
-      //   'hsl(240, 100%, 50%)',
-      // ],
+      textSize: U.interpolate('count', { 0: 8, 12: 10, 50: 14, 100: 16, 200: 20 }),
       textColor: await colorFunc({ colorVis: 'year', lighten: 10 }),
       minzoom: 1,
       symbolSortKey: ['-', ['get', 'count']],
-      // symbolSortKey: ['-', ['get', 'days']],
-
       textHaloColor: 'hsla(0, 0%, 0%, 0.5)',
       textHaloWidth: 2,
       textVariableAnchor: [
@@ -153,9 +131,10 @@ export async function updateParticipants(map: mapU) {
         'bottom-left',
         'bottom-right',
       ],
-      textRadialOffset: 1,
+      textJustify: 'auto',
+      textRadialOffset: 0.75,
 
-      filter: ['>=', ['get', 'count'], U.interpolateZoom(5, 5, 10, 1)],
+      filter: ['>=', ['get', 'count'], U.interpolateZoom(5, 3, 10, 1)],
       // textIgnorePlacement: true,
       // textJustify: 'center',
       // textVariableAnchor: ['top', 'bottom', 'left', 'right'],
