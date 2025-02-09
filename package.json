@@ -29,7 +29,7 @@
     "geokdbush": "^2",
     "humanize-duration": "^3.29.0",
     "kdbush": "^4.0.2",
-    "map-gl-utils": "^0.46.0-rc.13",
+    "map-gl-utils": "0.50.4",
     "mapbox-expression": "^0.0.3",
     "mapbox-gl": "^3.9.2",
     "mapgl-expression": "^0.0.4",

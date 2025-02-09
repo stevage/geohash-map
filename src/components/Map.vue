@@ -26,6 +26,7 @@ import { setGraticuleStyle } from '@/mapping/mappingGraticules'
 import { dateToDays, getGraticuleBounds, report } from '@//util'
 // import { updateStreakStyle } from '@/mapping/mappingStreaks'
 import { updateInfluenceStyle } from '@/mapping/mappingInfluence'
+import { updateParticipants } from '@/mapping/mappingParticipants'
 // import { initGTG } from '@/mapping/gtg';
 import debounce from 'debounce'
 import type { Filters } from '@/globals'
@@ -75,7 +76,7 @@ export default {
       zoom,
       // style: 'mapbox://styles/mapbox/light-v9',
       style:
-        window.location.hostname === 'localhost'
+        window.location.hostname === 'localhosot'
           ? minimal
           : 'mapbox://styles/stevage/ckzoqlsr1000115qtr5pendfa', // geohash-dark
 
@@ -117,8 +118,9 @@ export default {
     )
     // window.map.U.toggle(/^expeditions/, window.app.App.tab === 'expeditions');
 
-    EventBus.$on('tab-change', (tab) => {
+    EventBus.$on('tab-change', (tab: string) => {
       map.U!.toggle(/^expeditions/, tab === 'expeditions')
+      map.U!.toggle(/^participants/, tab === 'participants')
     })
     // const debouncedMove = debounce(
     //     () => {
@@ -226,6 +228,7 @@ export default {
       // );
       report('Update influence', () => updateInfluenceStyle({ map, filters: this.filters }))
       updateGeohashes(map)
+      updateParticipants(map)
       // console.log(performance.now() - start);
 
       // initGTG(map);

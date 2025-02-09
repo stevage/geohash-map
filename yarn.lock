@@ -4330,10 +4330,10 @@ magic-string@^0.30.11, magic-string@^0.30.4:
   dependencies:
     "@jridgewell/sourcemap-codec" "^1.5.0"
 
-map-gl-utils@^0.46.0-rc.13:
-  version "0.46.0-rc.13"
-  resolved "https://registry.yarnpkg.com/map-gl-utils/-/map-gl-utils-0.46.0-rc.13.tgz#29765bad40c74ad4125c1855f5e5c4b09167fcb7"
-  integrity sha512-GQHXKMMkdOEJm0Sov6nZbXunVXl3AWh0f5HvBjuey/kR0mEUSNzAR2ScGfnwUOivzIqgeAUJRIEBO1JBnrJTUA==
+map-gl-utils@0.50.4:
+  version "0.50.4"
+  resolved "https://registry.yarnpkg.com/map-gl-utils/-/map-gl-utils-0.50.4.tgz#c7ed20cb2cd5f97bbcd929fa20c0097c217fa56d"
+  integrity sha512-aXfkbVEYhIuSF+GeOQm853V2Muara8UDvVixydGfPetGa1CnBg6GoYWdOKc8mtc3aAu9MgL0vK5mspOYCY3iew==
 
 mapbox-expression@^0.0.3:
   version "0.0.3"

@@ -1,5 +1,5 @@
 import type { MapGlUtils } from 'map-gl-utils/dist/types/index.d.ts'
-import U from 'map-gl-utils/dist/index.esm'
+import U from 'map-gl-utils'
 import { EventBus } from '@/EventBus'
 import { colorFunc, legendColors } from './expeditions/colorFuncs'
 import { circleRadiusFunc } from './expeditions/radiusFunc'
@@ -126,6 +126,7 @@ export async function updateHashStyle({
 }) {
   // const colors = window.app.yearColors;
 
+  const visibility = window.app.App.tab === 'expeditions' ? 'visible' : 'none'
   const dark = true
 
   const first = !map.getLayer('expeditions-circles')
@@ -208,11 +209,13 @@ export async function updateHashStyle({
     circleBlur: 0.5,
     circleRadius: circleRadiusFunc({ isGlow: true, filters }),
     circleSortKey: ['get', 'days'],
+    visibility,
   })
   map.U.addCircleLayer('expeditions-clickable', 'expeditions', {
     circleColor: 'transparent',
     circleRadius: circleRadiusFunc({ filters, isClickable: true }),
     circleSortKey: ['get', 'days'],
+    visibility,
   })
 
   map.U.addCircleLayer('expeditions-circles', 'expeditions', {
@@ -230,6 +233,7 @@ export async function updateHashStyle({
     // circleOpacity: ['case', ['feature-state', 'show'], 1, 0],
     circleOpacity: ['to-number', ['feature-state', 'opacity']],
     circleStrokeOpacity: ['case', ['to-boolean', ['feature-state', 'show']], 1, 0],
+    visibility,
   })
   map.U.addCircleLayer('expedition-selected', 'expedition-selected', {
     circleColor: 'transparent',
@@ -237,6 +241,7 @@ export async function updateHashStyle({
     circleStrokeWidth: 2,
     circleRadius: 20,
     circleBlur: 0.2,
+    visibility,
   })
   map.U.addCircleLayer('expeditions-flash', 'expeditions', {
     circleColor: U.stepZoom(activeColorFunc, {
@@ -249,6 +254,7 @@ export async function updateHashStyle({
     circleOpacity: ['to-number', ['feature-state', 'flashOpacity']],
     circleStrokeOpacity: ['case', ['to-boolean', ['feature-state', 'show']], 1, 0],
     circleBlur: 1.5,
+    visibility,
   })
   map.U.addSymbolLayer('expeditions-label', 'expeditions', {
     textField: U.stepZoom(['slice', ['get', 'id'], 0, 4], {
@@ -263,6 +269,7 @@ export async function updateHashStyle({
     textHaloWidth: 1,
     textOpacity: ['feature-state', 'opacity'],
     minzoom: 9,
+    visibility,
   })
   // updateCircleColors({ map, filters, activeColorFunc });
 

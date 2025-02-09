@@ -5,13 +5,21 @@
             #sidebar.br.b--dark-gray.overflow-auto.pv2-ns(:class="{ collapsed: !sidebarOpen}")
                 .container.overflow-auto.pa2.bw2
                     .credits By <a href="https://hire.stevebennett.me">Steve Bennett</a>. Data by <a href="https://fippe.de/all">Fippe</a>.
-                    .tabs.mb2.mh4.flex
-                        .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
-                            | Expeditions
-                        .tab.ba.pa3.flex-auto(:class="{ activeTab: tab === 'graticules'}" @click="tab='graticules'")
-                            | Graticules
-                        .tab.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
-                            | Geohash
+
+                    label
+                      //- span.pa2 Explore
+                      select.pa2(v-model="tab" style="width:calc(100% - 30px)")
+                          option(value="expeditions") Expeditions
+                          option(value="graticules") Graticules
+                          option(value="geohash") Geohash
+                          option(value="participants") People
+                    //- .tabs.mb2.mh4.flex
+                    //-     .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
+                    //-         | Expeditions
+                    //-     .tab.ba.pa3.flex-auto(:class="{ activeTab: tab === 'graticules'}" @click="tab='graticules'")
+                    //-         | Graticules
+                    //-     .tab.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
+                    //-         | Geohash
 
                     div(v-show="tab === 'expeditions'")
                         ExpeditionInfo
@@ -22,6 +30,7 @@
                         HashStats.ml2
                         AnimationControls.ml2
                         //- RegionControls.ml2
+                        //- VoronoiControls.ml2
                     div(v-show="tab === 'geohash'")
                         HashInfo
                     div(v-show="tab === 'graticules'")
@@ -56,6 +65,7 @@ import GraticuleInfo from '@/components/GraticuleInfo.vue'
 import GraticuleOptions from '@/components/GraticuleOptions.vue'
 import RegionControls from '@/components/RegionControls.vue'
 import InfluenceControls from '@/components/InfluenceControls.vue'
+import VoronoiControls from '@/components/VoronoiControls.vue'
 import { getUrlParam, setUrlParam } from './util'
 
 import './components/stats'
@@ -88,6 +98,7 @@ export default {
     GraticuleOptions,
     RegionControls,
     InfluenceControls,
+    VoronoiControls,
   },
   data() {
     return {

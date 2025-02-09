@@ -71,20 +71,21 @@ type colorFuncTypes =
   | 'transportMode'
   | 'hardship'
 const colorFuncs: Record<colorFuncTypes, () => any> = {} as any
-colorFuncs.year = () => {
+colorFuncs.year = ({ lighten } = { lighten: 0 }) => {
+  lighten = lighten ?? 0
   const ret = [
     'interpolate-hcl',
     ['linear'],
     ['get', 'days'],
     dateToDays(2008),
-    'hsl(200, 80%, 40%)',
+    `hsl(200, 80%, ${40 + lighten}%)`,
     dateToDays(2016),
 
     'red',
     dateToDays(2021),
-    'hsl(60,100%,40%)',
+    `hsl(60,100%,${40 + lighten}%)`,
     dateToDays(new Date().getUTCFullYear()),
-    'hsl(120, 100%, 70%)',
+    `hsl(120, 100%, ${70 + lighten}%)`,
   ]
   return ret
 }
@@ -298,9 +299,9 @@ colorFuncs.hardship = () => {
   return ret
 }
 
-export async function colorFunc({ colorVis }: { colorVis: colorFuncTypes }) {
+export async function colorFunc({ colorVis, ...rest }: { colorVis: colorFuncTypes }) {
   // console.log('colorVis', colorVis, colorFuncs[colorVis]);
-  return await colorFuncs[colorVis]()
+  return await colorFuncs[colorVis](rest)
 }
 
 export function legendColors(filters: Filters, activeColorFunc: mapboxgl.Expression) {
