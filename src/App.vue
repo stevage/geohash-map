@@ -27,7 +27,6 @@
                         InfluenceControls.ml2
                         h3 Graphs and stats
                         ChartControls.ml2
-                        HashStats.ml2
                         AnimationControls.ml2
                         //- RegionControls.ml2
                         //- VoronoiControls.ml2
@@ -36,6 +35,9 @@
                     div(v-show="tab === 'graticules'")
                         GraticuleOptions
                         GraticuleInfo
+                    div(v-show="tab === 'participants'")
+                      //- HashStats.ml2
+                      Participant
 
             #sidebar-rim.relative.br.b--gray.bg-dark.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
             #map-container.relative.flex-auto
@@ -57,7 +59,6 @@ import ExpeditionInfo from './components/ExpeditionInfo.vue'
 import MapLegend from '@/components/Legend.vue'
 import Filters from '@/components/Filters.vue'
 import AnimationControls from '@/components/AnimationControls.vue'
-import HashStats from '@/components/HashStats.vue'
 import HashInfo from '@/components/HashInfo.vue'
 import ChartControls from '@/components/ChartControls.vue'
 import Chart from '@/components/Chart.vue'
@@ -66,6 +67,7 @@ import GraticuleOptions from '@/components/GraticuleOptions.vue'
 import RegionControls from '@/components/RegionControls.vue'
 import InfluenceControls from '@/components/InfluenceControls.vue'
 import VoronoiControls from '@/components/VoronoiControls.vue'
+import Participant from '@/components/Participant.vue'
 import { getUrlParam, setUrlParam } from './util'
 
 import './components/stats'
@@ -90,7 +92,7 @@ export default {
     MapLegend,
     Filters,
     AnimationControls,
-    HashStats,
+    // HashStats,
     HashInfo,
     ChartControls,
     Chart,
@@ -99,6 +101,7 @@ export default {
     RegionControls,
     InfluenceControls,
     VoronoiControls,
+    Participant,
   },
   data() {
     return {

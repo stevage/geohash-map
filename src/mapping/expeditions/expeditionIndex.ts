@@ -58,19 +58,30 @@ export class ExpeditionIndex {
     resolveLoad()
   }
 
-  getExpeditionsNear(center: number[], bounds: number[], filters: any): Feature<Point, any>[] {
+  getExpeditionsNear(
+    center: number[],
+    bounds: number[],
+    filters: any,
+    { allExpeditions } = {},
+  ): Feature<Point, any>[] {
     if (!this.successIndex) {
       return []
     }
+
     const [lon, lat] = center
     const dist = turf.distance([bounds[0], bounds[1]], [bounds[2], bounds[3]], {
       units: 'kilometers',
     })
     const filterFunc = expeditionFilterFunc(filters)
-    const results = around(this.successIndex, lon, lat, 1e9, dist * 3, (i: number) =>
-      filterFunc(this.successes[i]),
+    const results = around(
+      allExpeditions ? this.index : this.successIndex,
+      lon,
+      lat,
+      1e9,
+      dist * 3,
+      (i: number) => filterFunc(this.successes[i]),
     ) as number[]
-    return results.map((i: number) => this.successes[i])
+    return results.map((i: number) => (allExpeditions ? this.expeditions : this.successes)[i])
   }
 
   getNearestExpeditions(
@@ -97,6 +108,27 @@ export class ExpeditionIndex {
       map.getBounds().toArray().flat(),
       filters,
     )
+  }
+
+  getExpeditionsInViewport(
+    map: mapboxgl.Map,
+    { filters }: { filters?: any } = { filters: undefined },
+  ) {
+    return this.getExpeditionsNear(
+      map.getCenter().toArray(),
+      // @ts-ignore
+      map.getBounds().toArray().flat(),
+      filters,
+      { allExpeditions: true },
+    ).filter((f) => {
+      const coords = f.geometry.coordinates
+      return (
+        coords[0] >= map.getBounds()!.getWest() &&
+        coords[0] <= map.getBounds()!.getEast() &&
+        coords[1] >= map.getBounds()!.getSouth() &&
+        coords[1] <= map.getBounds()!.getNorth()
+      )
+    })
   }
 
   getData() {

@@ -104,6 +104,37 @@ async function makeParticipantsData() {
   console.log('participantsFeatures', participantsFeatures)
 }
 
+let selectedParticipant = ''
+export function setSelectedParticipant(p: string) {
+  selectedParticipant = p
+  window.Filters.filters.participants = p
+  updateParticipants(window.map)
+}
+
+async function clickLabel(e: MapMouseEvent) {
+  if (window.app.App.tab !== 'participants') return
+  const fs = window.map.queryRenderedFeatures(e.point, { layers: ['participants-label'] })
+  const participant = fs?.[0]?.properties?.name || ''
+
+  if (!participant) {
+    // hmm, there's a problem that clicking on an expedition makes this think you missed everything
+    // definitely not hacky at all
+    const fs2 = window.map.queryRenderedFeatures(e.point, { layers: ['expeditions-clickable'] })
+    if (fs2.length > 0) {
+      return
+    }
+  }
+
+  window.app.Participant.participant = participant
+  // await $nextTick()
+  window.setTimeout(() => {
+    setSelectedParticipant(participant)
+  }, 10)
+  if (participant) {
+    // window.setTimeout(() => window.map.U.show(/expeditions/), 300)
+  }
+}
+
 export async function updateParticipants(map: mapU) {
   const visibility = window.app.App.tab === 'participants' ? 'visible' : 'none'
   if (!map.getSource('participants')?._data?.features?.length) {
@@ -111,34 +142,46 @@ export async function updateParticipants(map: mapU) {
     if (!participantsFeatures && window.app.App.tab === 'participants') {
       await makeParticipantsData()
     }
-    map.U.setData('participants', featureCollection(participantsFeatures))
-    map.U.addSymbolLayer('participants-label', 'participants', {
-      textField: ['get', 'name'],
-      textSize: U.interpolate('count', { 0: 8, 12: 10, 50: 14, 100: 16, 200: 20 }),
-      textColor: await colorFunc({ colorVis: 'year', lighten: 10 }),
-      minzoom: 1,
-      symbolSortKey: ['-', ['get', 'count']],
-      textHaloColor: 'hsla(0, 0%, 0%, 0.5)',
-      textHaloWidth: 2,
-      textVariableAnchor: [
-        'center',
-        'left',
-        'right',
-        'top',
-        'bottom',
-        'top-left',
-        'top-right',
-        'bottom-left',
-        'bottom-right',
-      ],
-      textJustify: 'auto',
-      textRadialOffset: 0.75,
-
-      filter: ['>=', ['get', 'count'], U.interpolateZoom(5, 3, 10, 1)],
-      // textIgnorePlacement: true,
-      // textJustify: 'center',
-      // textVariableAnchor: ['top', 'bottom', 'left', 'right'],
-      visibility,
-    })
+    map.on('click', clickLabel)
   }
+
+  map.U.setData('participants', featureCollection(participantsFeatures))
+
+  const ifHighlighted = (special, non) => {
+    if (selectedParticipant) {
+      return ['case', ['==', ['get', 'name'], selectedParticipant], special, non]
+    } else return special
+  }
+  map.U.addSymbolLayer('participants-label', 'participants', {
+    textField: ['get', 'name'],
+    textSize: U.interpolate('count', { 0: 8, 12: 10, 50: 14, 100: 16, 200: 20 }),
+    textColor: ifHighlighted(
+      await colorFunc({ colorVis: 'year', lighten: 10 }),
+      'hsla(0, 0%, 60%, 0.8)',
+    ),
+    minzoom: 1,
+    symbolSortKey: ['-', ['get', 'count']],
+    textHaloColor: 'hsla(0, 0%, 0%, 0.5)',
+    textVariableAnchor: [
+      'center',
+      'left',
+      'right',
+      'top',
+      'bottom',
+      'top-left',
+      'top-right',
+      'bottom-left',
+      'bottom-right',
+    ],
+    textJustify: 'auto',
+    textRadialOffset: 0.75,
+
+    filter: ['>=', ['get', 'count'], U.interpolateZoom(5, 3, 10, 1)],
+    // textOpacity: ifHighlighted(1, 0.5),
+    textHaloWidth: ifHighlighted(2, 0),
+    // textIgnorePlacement: true,
+    // textJustify: 'center',
+    // textVariableAnchor: ['top', 'bottom', 'left', 'right'],
+    visibility,
+  })
 }

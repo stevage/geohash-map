@@ -2,12 +2,12 @@
 #HashStats
   //-   h3.mb1 Stats
   .group
-    label
-        input.mr2(type="checkbox" v-model="showStats")
-        | Show stats
-    div(v-show="showStats && expeditions.length")
+    //- label
+    //-     input.mr2(type="checkbox" v-model="showStats")
+    //-     | Show stats
+    div(v-show="showStats")
         //- div (Based on visible area)
-        h3.mb1 Hashers in this area
+        h3.mb1 In this area
         //- ol
         //-   li(v-for="hasher in topHashers.slice(0,5)") {{ hasher.name }} ({{ hasher.success }} + {{ hasher.fail }} = {{ hasher.success + hasher.fail }})
         table.mt3
@@ -19,7 +19,8 @@
                     th Total
                 tr(v-for="hasher in topHashers.slice(0,10)")
                     td
-                        a(:href="`https://geohashing.site/geohashing/User:${hasher.name}`") {{ hasher.name }}
+                      a.prevent(href="#" @click="clickHasher(hasher.name)") {{ hasher.name }}
+                      //- a(:href="`https://geohashing.site/geohashing/User:${hasher.name}`") {{ hasher.name }}
                     td {{ hasher.success }}
                     td {{ hasher.fail }}
                     td {{ hasher.success + hasher.fail }}
@@ -28,48 +29,61 @@
 
 <script>
 import { EventBus } from '@/EventBus'
+import { getDB } from '@/mapping/expeditions/expeditionIndex'
+import { report } from '@/util'
 export default {
   name: 'HashStats',
-  data: () => ({ expeditions: [], showStats: false }),
+  data: () => ({ expeditions: [], showStats: true, topHashers: [] }),
   created() {
     window.HashStats = this
-    EventBus.$on('map-loaded', (map) => map.on('moveend', () => this.update(map)))
+    EventBus.$on('map-loaded', (map) => {
+      this.update(map)
+      map.on('moveend', () => this.update(map))
+    })
   },
+  mounted() {},
   methods: {
-    update(map) {
+    clickHasher(participant) {
+      window.app.Participant.participant = participant
+    },
+    async update(map) {
+      console.log('update')
       if (this.showStats) {
         //TODO filter for unique features
-        this.expeditions = map.queryRenderedFeatures({
-          layers: ['expeditions-circles'],
+        report('update hash stats', async () => {
+          const db = await getDB()
+          console.log(db)
+          // this.expeditions = db.getExpeditionsInViewport(map)
+          this.expeditions.splice(0, this.expeditions.length, ...db.getExpeditionsInViewport(map))
+          console.log(this.expeditions)
+          this.updateTopHashers()
         })
+        // this.expeditions = map.queryRenderedFeatures({
+        //   layers: ['expeditions-circles'],
+        // })
       }
     },
-  },
-  computed: {
-    topHashers() {
-      // if (this.expeditions.length > 1000) {
-      //     return [];
-      // }
+    updateTopHashers() {
       const hashers = {}
-      for (const hash of this.expeditions) {
-        for (const p of JSON.parse(hash.properties.participants)) {
+      for (const expedition of this.expeditions) {
+        for (const p of expedition.properties.participants) {
           hashers[p] = hashers[p] || { success: 0, fail: 0 }
-          hashers[p][hash.properties.success ? 'success' : 'fail']++
+          hashers[p][expedition.properties.success ? 'success' : 'fail']++
         }
       }
       const hashList = Object.entries(hashers)
         .map(([name, props]) => ({ name, ...props }))
         .sort((a, b) => b.success - a.success)
       window.topHashers = hashList
-      return hashList
+      this.topHashers = hashList
     },
   },
-  watch: {
-    showStats() {
-      if (this.showStats) {
-        this.update(window.map)
-      }
-    },
+  computed: {
+    // topHashers() {
+    //   // if (this.expeditions.length > 1000) {
+    //   //     return [];
+    //   // }
+    // },
   },
 }
 </script>

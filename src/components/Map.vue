@@ -119,10 +119,13 @@ export default {
     // window.map.U.toggle(/^expeditions/, window.app.App.tab === 'expeditions');
 
     EventBus.$on('tab-change', (tab: string) => {
-      map.U!.toggle(/^expeditions/, tab === 'expeditions')
+      map.U!.toggle(/^expedition/, tab === 'expeditions')
       map.U!.toggle(/^participants/, tab === 'participants')
       if (tab === 'participants') {
         updateParticipants(map)
+      }
+      if (tab !== 'expeditions') {
+        map.U.setData('expedition-selected')
       }
     })
     // const debouncedMove = debounce(

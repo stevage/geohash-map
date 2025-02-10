@@ -103,7 +103,10 @@ export default {
   },
   created() {
     window.app.ExpeditionInfo = this
-    EventBus.$on('select-feature', (feature) => (this.feature = feature))
+    EventBus.$on('select-feature', (feature) => {
+      this.feature = feature
+      window.app.App.tab = 'expeditions'
+    })
   },
   methods: {
     navigate({ expeditions, index }, step) {

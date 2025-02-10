@@ -126,7 +126,10 @@ export async function updateHashStyle({
 }) {
   // const colors = window.app.yearColors;
 
-  const visibility = window.app.App.tab === 'expeditions' ? 'visible' : 'none'
+  let visibility = window.app.App.tab === 'expeditions' ? 'visible' : 'none'
+  if (window.app.App.tab === 'participants' && window.app.Participant.participant) {
+    visibility = 'visible'
+  }
   const dark = true
 
   const first = !map.getLayer('expeditions-circles')
@@ -278,7 +281,7 @@ export async function updateHashStyle({
   }
 
   if (first) {
-    map.U.hoverPointer(/expeditions-(clickable)/)
+    map.U.hoverPointer(['expeditions-clickable', 'participants-label'])
     const clickFunc = (e: MapLayerMouseEvent) => {
       console.log(e)
       EventBus.$emit('select-feature', e.features?.[0])
@@ -312,6 +315,7 @@ export async function updateHashStyle({
       map.U.setData('expedition-selected', feature || { type: 'FeatureCollection', features: [] })
 
       setUrlParam('expedition', feature ? feature.properties.id : null)
+      map.U.show('expedition-selected')
     })
     EventBus.$on('navigate-expedition', (expedition: Expedition) => {
       if (expedition) {
