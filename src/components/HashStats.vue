@@ -10,14 +10,15 @@
         h3.mb1 In this area
         //- ol
         //-   li(v-for="hasher in topHashers.slice(0,5)") {{ hasher.name }} ({{ hasher.success }} + {{ hasher.fail }} = {{ hasher.success + hasher.fail }})
-        table.mt3
+        div(style="max-height:300px; overflow-y:scroll")
+          table.mt3
             tbody
                 tr
                     th.tl.pv2 Name
                     th Success
                     th Fail
                     th Total
-                tr(v-for="hasher in topHashers.slice(0,10)")
+                tr(v-for="hasher in topHashers.slice(0, listSize)")
                     td
                       a.prevent(href="#" @click="clickHasher(hasher.name)") {{ hasher.name }}
                       //- a(:href="`https://geohashing.site/geohashing/User:${hasher.name}`") {{ hasher.name }}
@@ -33,7 +34,7 @@ import { getDB } from '@/mapping/expeditions/expeditionIndex'
 import { report } from '@/util'
 export default {
   name: 'HashStats',
-  data: () => ({ expeditions: [], showStats: true, topHashers: [] }),
+  data: () => ({ expeditions: [], showStats: true, topHashers: [], listSize: 1000 }),
   created() {
     window.HashStats = this
     EventBus.$on('map-loaded', (map) => {

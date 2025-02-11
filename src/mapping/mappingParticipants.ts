@@ -70,22 +70,38 @@ function getCenter(points: Position[], participant: string): Feature<Point> {
   return center
 }
 
-async function makeParticipantsData() {
-  // const expeditionsByParticipant: { [key: string]: Feature<Point>[] } = {}
+let expeditionsByParticipant:
+  | { [participant: string]: { points: Position[]; dates: Date[]; expeditions: any[] } }
+  | undefined
+
+// export async function getExpeditionsByParticipant(participant: string) {}
+
+export async function getExpeditionsByParticipant() {
+  if (expeditionsByParticipant) return expeditionsByParticipant
   const expeditions = await getExpeditions(false)
-  const expeditionsByParticipant: { [participant: string]: { points: Position[]; dates: Date[] } } =
-    {}
+  expeditionsByParticipant = {}
   for (const e of expeditions.features) {
     const participants = e.properties.participants
     for (const p of participants) {
-      expeditionsByParticipant[p] = expeditionsByParticipant[p] ?? { points: [], dates: [] }
+      expeditionsByParticipant[p] = expeditionsByParticipant[p] ?? {
+        points: [],
+        dates: [],
+        expeditions: [],
+      }
       // expeditionsByParticipant[p].push(e)
       expeditionsByParticipant[p].points.push(e.geometry.coordinates)
       expeditionsByParticipant[p].dates.push(e.properties.days)
+      expeditionsByParticipant[p].expeditions.push(e)
     }
   }
+  return expeditionsByParticipant
+}
+
+export async function getParticipantsData() {
+  // const expeditionsByParticipant: { [key: string]: Feature<Point>[] } = {}
+
   participantsFeatures = []
-  for (const [p, e] of Object.entries(expeditionsByParticipant)) {
+  for (const [p, e] of Object.entries(await getExpeditionsByParticipant())) {
     const center = getCenter(e.points, p)
     participantsFeatures.push({
       // ...centerOfMass(featureCollection(e.points.map(point))),
@@ -140,7 +156,7 @@ export async function updateParticipants(map: mapU) {
   if (!map.getSource('participants')?._data?.features?.length) {
     map.U.addGeoJSON('participants')
     if (!participantsFeatures && window.app.App.tab === 'participants') {
-      await makeParticipantsData()
+      await getParticipantsData()
     }
     map.on('click', clickLabel)
   }
