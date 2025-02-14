@@ -119,7 +119,10 @@ export default {
     // window.map.U.toggle(/^expeditions/, window.app.App.tab === 'expeditions');
 
     EventBus.$on('tab-change', (tab: string) => {
-      map.U!.toggle(/^expedition/, tab === 'expeditions')
+      map.U!.toggle(
+        /^expedition/,
+        tab === 'expeditions' || (tab === 'participants' && window.Filters.filters.participants),
+      )
       map.U!.toggle(/^participants/, tab === 'participants')
       if (tab === 'participants') {
         updateParticipants(map)

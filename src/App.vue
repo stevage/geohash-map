@@ -8,11 +8,24 @@
 
                     label
                       //- span.pa2 Explore
-                      select.pa2(v-model="tab" style="width:calc(100% - 30px)")
-                          option(value="expeditions") Expeditions
-                          option(value="graticules") Graticules
-                          option(value="geohash") Geohash
-                          option(value="participants") People
+                      //- select.pa2(v-model="tab" style="width:calc(100% - 30px)")
+                      //-     option(value="expeditions") Expeditions
+                      //-     option(value="graticules") Graticules
+                      //-     option(value="geohash") Geohash
+                      //-     option(value="participants") People
+                    .tabs.mb2.mh4.flex
+                        .tab.ba.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
+                          img(src="@/assets/hiking.png")
+                          .tooltip Explore expeditions
+                        .tab.ba.flex-auto(:class="{ activeTab: tab === 'participants'}" @click="tab='participants'")
+                          img(src="@/assets/multiple-users-silhouette.png")
+                          .tooltip Explore by participant
+                        .tab.ba.flex-auto(:class="{ activeTab: tab === 'graticules'}" @click="tab='graticules'")
+                          img(src="@/assets/grid(1).png")
+                          .tooltip Explore graticule statistics
+                        .tab.ba.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
+                          img(src="@/assets/pin.png")
+                          .tooltip See today's geohash
                     //- .tabs.mb2.mh4.flex
                     //-     .tab.ba.pa3.br3.br--left.flex-auto(:class="{ activeTab: tab === 'expeditions'}" @click="tab='expeditions'")
                     //-         | Expeditions
@@ -151,6 +164,9 @@ export default {
     tab() {
       EventBus.$emit('tab-change', this.tab)
       setUrlParam('tab', this.tab === 'expeditions' ? null : this.tab)
+      if (this.tab !== 'graticule') {
+        setUrlParam('graticule', null)
+      }
     },
   },
 }
@@ -274,6 +290,8 @@ body,
 .tab {
   color: #555;
   cursor: pointer;
+  text-align: center;
+  position: relative;
 }
 .tab:hover {
   background: #555;
@@ -282,6 +300,17 @@ body,
 .activeTab {
   border: 1px solid #eee;
   color: white;
+}
+
+.tab {
+  padding: 16px 20px;
+}
+
+.tab img {
+  height: 30px;
+  width: 30px;
+  /* margin: 18px 28px; */
+  filter: invert(1) brightness(0.75);
 }
 
 .animationMonth {
@@ -320,5 +349,26 @@ a:visited {
 a:hover {
   color: hsl(230, 40%, 80%);
   text-decoration: underline;
+}
+
+.tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: hsla(0, 0%, 30%, 0.6);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  /* transition: opacity 0.2s; */
+  transition: opacity 0.3s ease-in-out;
+}
+
+*:hover > .tooltip {
+  opacity: 1;
 }
 </style>

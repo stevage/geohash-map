@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, Point } from 'geojson'
 
-async function openDatabase(dbName: string, storeName: string): Promise<IDBDatabase> {
+export async function openDatabase(dbName: string, storeName: string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request: IDBOpenDBRequest = indexedDB.open(dbName, 1)
 

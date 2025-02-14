@@ -3,9 +3,29 @@ import type { Feature, Point, Position } from 'geojson'
 import { featureCollection, point, centerOfMass, centroid, clustersDbscan } from '@turf/turf'
 import { getExpeditions } from '@/mapping/expeditions/expeditionsData'
 import { colorFunc } from './expeditions/colorFuncs'
+import { getUrlParam } from '@/util'
 import U from 'map-gl-utils/dist/index.esm.js'
 
+import { openDatabase } from '@/mapping/expeditions/expeditionStore'
 let participantsFeatures: Feature<Point>[] | undefined
+
+async function saveExpeditionsByParticipant() {
+  const eByP = await getExpeditionsByParticipant()
+  const storeName = 'expeditionsByParticipant'
+  const db = await openDatabase('participantsdb', storeName)
+
+  const transaction = db.transaction(storeName, 'readwrite')
+  const store = transaction.objectStore(storeName)
+
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => {
+      console.log('saved expeditionsByParticipant successfully!')
+
+      resolve('expeditionsByParticipant successfully!')
+    }
+    // transaction.commit()
+  })
+}
 
 function weightedCenterOfMass(points: Point[]): Point {
   if (points.length === 0) {
@@ -94,6 +114,7 @@ export async function getExpeditionsByParticipant() {
       expeditionsByParticipant[p].expeditions.push(e)
     }
   }
+  saveExpeditionsByParticipant(expeditionsByParticipant)
   return expeditionsByParticipant
 }
 
@@ -120,7 +141,7 @@ export async function getParticipantsData() {
   console.log('participantsFeatures', participantsFeatures)
 }
 
-let selectedParticipant = ''
+let selectedParticipant = getUrlParam('participants')
 export function setSelectedParticipant(p: string) {
   selectedParticipant = p
   window.Filters.filters.participants = p
@@ -175,7 +196,7 @@ export async function updateParticipants(map: mapU) {
       await colorFunc({ colorVis: 'year', lighten: 10 }),
       'hsla(0, 0%, 60%, 0.8)',
     ),
-    minzoom: 1,
+    // minzoom: 0,
     symbolSortKey: ['-', ['get', 'count']],
     textHaloColor: 'hsla(0, 0%, 0%, 0.5)',
     textVariableAnchor: [

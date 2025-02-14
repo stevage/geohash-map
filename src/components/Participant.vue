@@ -10,11 +10,8 @@ import HashStats from '@/components/HashStats.vue'
     div(style="display: flex; flex-direction:row")
       h3(style="flex-grow:1") {{ participant }}
       .close.pointer(style="flex-grow:0; " @click="participant=''") ×
-    div(style="max-height:200px; overflow-y:auto")
-      //- emdash unicode:
-      //- https://www.fileformat.info/info/unicode/char/2014/index.htm
-      //- put it here literally: —
-      p.mt1 {{ expeditions.length }} expeditions {{ expeditions.slice(-1)[0].properties.id.slice(0,4) }} — {{ expeditions[0].properties.id.slice(0,4) }}
+    div(v-if="expeditions" style="max-height:200px; overflow-y:auto")
+      p.mt1 {{ expeditions.length }} expeditions {{ expeditions.slice(-1)?.[0]?.properties?.id?.slice(0,4) }} — {{ expeditions[0]?.properties?.id?.slice(0,4) }}
         span.pointer(v-if="!showList" @click="showList=true") (Show list...)
 
       table.expeditions(v-if="showList")
@@ -38,20 +35,22 @@ import HashStats from '@/components/HashStats.vue'
 import { setSelectedParticipant } from '@/mapping/mappingParticipants'
 import { getExpeditionsByParticipant } from '@/mapping/mappingParticipants'
 import { EventBus } from '@/EventBus'
+import { getUrlParam } from '@/util'
 export default {
-  data: () => ({ participant: null, expeditions: [], showList: true }),
+  data: () => ({ participant: getUrlParam('participants'), expeditions: [], showList: true }),
   created() {
     window.app.Participant = this
     // close unicode symbol
+    EventBus.$on('map-loaded', () => {
+      this.updateParticipant()
+    })
   },
   methods: {
     clickExpedition(expedition) {
       EventBus.$emit('select-feature', expedition)
       window.map.flyTo({ center: expedition.geometry.coordinates, zoom: 8 })
     },
-  },
-  watch: {
-    async participant() {
+    async updateParticipant() {
       setSelectedParticipant(this.participant || '')
       if (this.participant) {
         const eByP = await getExpeditionsByParticipant(this.participant)
@@ -59,6 +58,14 @@ export default {
       } else {
         this.expeditions = []
       }
+    },
+  },
+  watch: {
+    participant: {
+      // immediate: true,
+      async handler() {
+        this.updateParticipant()
+      },
     },
   },
 }
