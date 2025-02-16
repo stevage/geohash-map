@@ -25,4 +25,5 @@ export type Filters = {
   showStreaks: boolean
   minStreakLength: number
   onlySuccessStreaks: boolean
+  animating: boolean
 }

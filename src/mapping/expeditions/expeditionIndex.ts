@@ -114,6 +114,10 @@ export class ExpeditionIndex {
     map: mapboxgl.Map,
     { filters }: { filters?: any } = { filters: undefined },
   ) {
+    if (!map) {
+      console.error('No map for getExpeditionsInViewport')
+      return []
+    }
     return this.getExpeditionsNear(
       map.getCenter().toArray(),
       // @ts-ignore

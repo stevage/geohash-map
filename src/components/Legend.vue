@@ -1,13 +1,14 @@
 <template lang="pug">
 #Legend.relative.h-100(:class="{ collapsed }" @click="collapsed = !collapsed")
     //- .bg-white.b--gray.ba.shadow-1.pa2.ma2.bottom.absolute.bottom-2
-    .bg-dark-gray.light-gray.b--gray.ba.shadow-1.npe.pa2.mh2.top.right-1.absolute(v-if="showingExpeditions" )
+    .bg-dark-gray.light-gray.b--gray.ba.shadow-1.npe.pa2.top.right-0.right-1-ns.top-1-ns.absolute(v-if="showingExpeditions" )
         //- div(style="pointer-events:none")
         h3.ma0.mb1 {{ title }}
-        div(v-for="[year, color] in colors.slice().reverse()")
-            .pill(:style="{ backgroundColor: color }")
-                //-   | {{ i === colors.length-1 ? " <= " : "" }}
-            | {{ year }}
+        div(:class="{ [`legend-colorvis-${colorVis}`]: true } ")
+          div.legend-item(v-for="([year, color], i) in colors.slice().reverse()" :class="{ [`legend-item-${i}`]: true }" )
+              .pill(:style="{ backgroundColor: color }")
+                  //-   | {{ i === colors.length-1 ? " <= " : "" }}
+              | {{ year }}
 
 
 </template>
@@ -66,4 +67,24 @@ export default {
 .npe * {
   /* pointer-events: none; */
 }
+
+/* @media (max-height: 800px) { */
+
+.legend-colorvis-year {
+  .legend-item:nth-child(odd) {
+    display: none;
+  }
+  .legend-item:first-child {
+    display: block;
+  }
+  .legend-item:last-child {
+    display: block;
+  }
+}
+@media (max-width: 500px) {
+  .legend-item {
+    font-size: 12px;
+  }
+}
+/* } */
 </style>

@@ -115,7 +115,7 @@ function loadSelectedExpedition(expeditions: FeatureCollection<Point>) {
   }
 }
 
-export async function updateHashStyle({
+export async function updateExpeditionsStyle({
   map,
   filters,
   quickUpdate = false,
@@ -221,6 +221,7 @@ export async function updateHashStyle({
     visibility,
   })
 
+  // Note: the map would render much faster in congested areas (eg Germany zoom < 7)if we didn't have both a -circles and -glow layer.
   map.U.addCircleLayer('expeditions-circles', 'expeditions', {
     circleColor: circlesCircleColor(activeColorFunc),
     circleStrokeColor: circlesStrokeColor(activeColorFunc),
@@ -257,7 +258,7 @@ export async function updateHashStyle({
     circleOpacity: ['to-number', ['feature-state', 'flashOpacity']],
     circleStrokeOpacity: ['case', ['to-boolean', ['feature-state', 'show']], 1, 0],
     circleBlur: 1.5,
-    visibility,
+    visibility: filters.animating ? visibility : 'none',
   })
   map.U.addSymbolLayer('expeditions-label', 'expeditions', {
     textField: U.stepZoom(['slice', ['get', 'id'], 0, 4], {

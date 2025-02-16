@@ -20,7 +20,7 @@
                     th Total
                 tr(v-for="hasher in topHashers.slice(0, listSize)")
                     td
-                      a.prevent(href="#" @click="clickHasher(hasher.name)") {{ hasher.name }}
+                      a.prevent(href="#" @click="clickHasher(hasher.name)") {{ String(hasher.name).slice(0,20) }}
                       //- a(:href="`https://geohashing.site/geohashing/User:${hasher.name}`") {{ hasher.name }}
                     td {{ hasher.success }}
                     td {{ hasher.fail }}
@@ -34,6 +34,7 @@ import { getDB } from '@/mapping/expeditions/expeditionIndex'
 import { report } from '@/util'
 export default {
   name: 'HashStats',
+  props: ['active'],
   data: () => ({ expeditions: [], showStats: true, topHashers: [], listSize: 1000 }),
   created() {
     window.HashStats = this
@@ -48,15 +49,16 @@ export default {
       window.app.Participant.participant = participant
     },
     async update(map) {
+      if (!this.active) {
+        return
+      }
       console.log('update')
       if (this.showStats) {
         //TODO filter for unique features
         report('update hash stats', async () => {
           const db = await getDB()
-          console.log(db)
           // this.expeditions = db.getExpeditionsInViewport(map)
           this.expeditions.splice(0, this.expeditions.length, ...db.getExpeditionsInViewport(map))
-          console.log(this.expeditions)
           this.updateTopHashers()
         })
         // this.expeditions = map.queryRenderedFeatures({
@@ -77,6 +79,11 @@ export default {
         .sort((a, b) => b.success - a.success)
       window.topHashers = hashList
       this.topHashers = hashList
+    },
+  },
+  watch: {
+    active() {
+      this.update(window.map)
     },
   },
   computed: {

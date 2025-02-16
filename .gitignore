@@ -36,3 +36,4 @@ coverage
 /deployed/
 .*/*
 .history/
+table.js

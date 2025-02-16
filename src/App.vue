@@ -33,28 +33,28 @@
                     //-         | Graticules
                     //-     .tab.ba.pa3.br3.br--right.flex-auto(:class="{ activeTab: tab === 'geohash'}" @click="tab='geohash'")
                     //-         | Geohash
-
-                    div(v-show="tab === 'expeditions'")
-                        ExpeditionInfo
-                        Filters.ml2
-                        InfluenceControls.ml2
-                        h3 Graphs and stats
-                        ChartControls.ml2
-                        AnimationControls.ml2
-                        //- RegionControls.ml2
-                        //- VoronoiControls.ml2
-                    div(v-show="tab === 'geohash'")
-                        HashInfo
-                    div(v-show="tab === 'graticules'")
-                        GraticuleOptions
-                        GraticuleInfo
-                    div(v-show="tab === 'participants'")
-                      //- HashStats.ml2
-                      Participant
+                    div(v-if="mapExists")
+                      div(v-show="tab === 'expeditions'")
+                          ExpeditionInfo
+                          Filters.ml2
+                          InfluenceControls.ml2
+                          h3 Graphs and stats
+                          ChartControls.ml2
+                          AnimationControls.ml2
+                          //- RegionControls.ml2
+                          //- VoronoiControls.ml2
+                      div(v-show="tab === 'geohash'")
+                          HashInfo
+                      div(v-show="tab === 'graticules'")
+                          GraticuleOptions
+                          GraticuleInfo
+                      div(v-show="tab === 'participants'")
+                        //- HashStats.ml2
+                        Participant(:active="tab === 'participants'")
 
             #sidebar-rim.relative.br.b--gray.bg-dark.bw2(v-show="!sidebarOpen"  style="width:20px" @click="sidebarOpen = true")
             #map-container.relative.flex-auto
-                Mapping
+                Mapping(@map-created="mapExists = true")
                 #sidebarToggle.absolute.bg-black-5.white-90.f3.br.bt.bb.br--right.br-100.bw1.pa1.pointer.grow.fw8(@click="sidebarOpen = !sidebarOpen" style="margin-left:-25px;z-index:100; background:#222;top:10px;")
                   span(v-if="!sidebarOpen") &rarr;
                   span(v-if="sidebarOpen") &larr;
@@ -121,10 +121,12 @@ export default {
       sidebarOpen: true,
       tab: 'expeditions',
       animationMonthISO: null,
+      mapExists: false,
     } as {
       sidebarOpen: boolean
       tab: string
       animationMonthISO: string | null
+      mapExists: boolean
     }
   },
   created() {
@@ -303,7 +305,7 @@ body,
 }
 
 .tab {
-  padding: 16px 20px;
+  padding: 16px 0px;
 }
 
 .tab img {
@@ -377,5 +379,12 @@ a:hover {
 
 *:hover > .tooltip {
   opacity: 1;
+}
+
+* {
+  scrollbar-color: #777 #444; /* thumb color, track color */
+}
+::-webkit-scrollbar-track {
+  /* background: #333; Dark background */
 }
 </style>

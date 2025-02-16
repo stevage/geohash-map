@@ -5,7 +5,7 @@ import HashStats from '@/components/HashStats.vue'
 
 <template lang="pug">
 #Participant
-  HashStats(v-show="!participant")
+  HashStats(v-show="!participant && active" :active="active")
   div(v-if="participant")
     div(style="display: flex; flex-direction:row")
       h3(style="flex-grow:1") {{ participant }}
@@ -38,6 +38,7 @@ import { EventBus } from '@/EventBus'
 import { getUrlParam } from '@/util'
 export default {
   data: () => ({ participant: getUrlParam('participants'), expeditions: [], showList: true }),
+  props: ['active'],
   created() {
     window.app.Participant = this
     // close unicode symbol

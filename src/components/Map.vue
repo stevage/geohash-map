@@ -14,7 +14,7 @@ import { EventBus } from '../EventBus'
 import type { DebouncedFunction } from 'debounce'
 // import '../global.d.ts';
 import {
-  updateHashStyle,
+  updateExpeditionsStyle,
   updateHashAnimation,
   resetHashAnimation,
 } from '@/mapping/mappingExpeditions'
@@ -29,7 +29,7 @@ import { updateInfluenceStyle } from '@/mapping/mappingInfluence'
 import { updateParticipants } from '@/mapping/mappingParticipants'
 // import { initGTG } from '@/mapping/gtg';
 import debounce from 'debounce'
-import type { Filters } from '@/globals'
+import type { Filters } from '@/global'
 export default {
   data: () => ({
     filters: {
@@ -38,6 +38,7 @@ export default {
       colorVis: 'experienceDaysMax',
       participants: '',
       outcome: 'all',
+      animating: false,
     } as Filters,
     frameNo: 0,
     animationDay: 0,
@@ -90,6 +91,7 @@ export default {
     window.map = map
     window.map.hash = 'center'
     window.map = map
+    this.$emit('map-created', map)
 
     await map.U!.onLoad()
     // initMappingRegions(map);
@@ -167,6 +169,12 @@ export default {
       console.log(projection)
       window.map.setProjection(projection)
     })
+    let lastRender = performance.now()
+    map.on('render', () => {
+      const diff = performance.now() - lastRender
+      console.log('render', Math.round(diff))
+      lastRender = performance.now()
+    })
   },
   created() {
     this.updateMapStyleDebounced = debounce(() => {
@@ -227,7 +235,10 @@ export default {
       const map = window.map
       report('Update meridians', () => updateMeridians({ map }))
       report('Update expeditions', () =>
-        updateHashStyle({ map: window.map, filters: this.filters }),
+        updateExpeditionsStyle({
+          map: window.map,
+          filters: this.filters,
+        }),
       )
       report('Update graticules', () =>
         setGraticuleStyle({ map: window.map, filters: this.filters }),
@@ -244,6 +255,7 @@ export default {
     },
     startAnimation() {
       this.stopAnimation()
+      this.animating = true
       if (this.filters.minYear == 2008) {
         this.animationDay = dateToDays(`2008-05-01`) // geohashing started on May 21st 2008
       } else {
@@ -275,6 +287,7 @@ export default {
       }
       this.timer = 1
       requestAnimationFrame(this.timerFunc)
+      window.map.U.toggle(/expeditions-flash/, this.animating)
     },
     stopAnimation() {
       if (this.timer) {
@@ -282,6 +295,8 @@ export default {
       }
       // window.map.off('idle', this.timerFunc);
       this.timer = 0
+      this.animating = false
+      window.map.U.toggle(/expeditions-flash/, this.animating)
       resetHashAnimation({
         map: window.map,
         filters: this.filters,
