@@ -191,7 +191,12 @@ export async function updateParticipants(map: mapU) {
   }
   map.U.addSymbolLayer('participants-label', 'participants', {
     textField: ['get', 'name'],
-    textSize: U.interpolate('count', { 0: 8, 12: 10, 50: 14, 100: 16, 200: 20 }),
+    textSize: U.interpolateZoom(
+      0,
+      U.interpolate('count', { 0: 6, 12: 8, 40: 10, 100: 12, 200: 14 }),
+      7,
+      U.interpolate('count', { 0: 8, 12: 10, 40: 16, 100: 18, 200: 22 }),
+    ),
     textColor: ifHighlighted(
       await colorFunc({ colorVis: 'year', lighten: 10 }),
       'hsla(0, 0%, 60%, 0.8)',

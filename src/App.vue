@@ -310,7 +310,14 @@ body,
   height: 30px;
   width: 30px;
   /* margin: 18px 28px; */
-  filter: invert(1) brightness(0.75);
+  filter: invert(1) brightness(0.6);
+}
+.activeTab img {
+  filter: invert(1) brightness(1) drop-shadow(0 0 2px #09f);
+}
+
+.tab:hover img {
+  filter: invert(1) brightness(1) drop-shadow(0px 0px 4px #bbb);
 }
 
 .animationMonth {

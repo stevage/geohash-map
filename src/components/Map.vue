@@ -121,7 +121,7 @@ export default {
     EventBus.$on('tab-change', (tab: string) => {
       map.U!.toggle(
         /^expedition/,
-        tab === 'expeditions' || (tab === 'participants' && window.Filters.filters.participants),
+        tab === 'expeditions' || (tab === 'participants' && window.app.Participant.participant),
       )
       map.U!.toggle(/^participants/, tab === 'participants')
       if (tab === 'participants') {

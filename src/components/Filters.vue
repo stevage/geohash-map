@@ -45,7 +45,7 @@
   h3.mb1 Map
   .group
     label.mb2.db
-      span Color by
+      span.mr2 Color
       select(v-model="filters.colorVis" :disabled="!enabled")
         option(value="year") Year
         option(value="month") Month
@@ -58,9 +58,9 @@
         option(value="hardship") Hardship
 
     label.db
-      span Scale by
+      span.mr2 Scale
       select(v-model="filters.scaleExpeditionsBy" :disabled="!enabled")
-        option(value="none") Don't scale
+        option(value="none") -
         option(value="participantCount") Number of participants
         option(value="reportKb") Report size
         option(value="achievementCount") Number of achievements
