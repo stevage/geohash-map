@@ -212,6 +212,43 @@ export async function updateExpeditionsStyle({
     circleBlur: 0.5,
     circleRadius: circleRadiusFunc({ isGlow: true, filters }),
     circleSortKey: ['get', 'days'],
+    minzoom: 8,
+    visibility,
+  })
+
+  // Note: the map would render much faster in congested areas (eg Germany zoom < 7)if we didn't have both a -circles and -glow layer.
+  const globalSuccessFail = (globalRadius: number, successRadius: number, failRadius: number) => [
+    'case',
+    ['get', 'global'],
+    globalRadius,
+    ['case', ['get', 'success'], successRadius, failRadius],
+  ]
+  /* ok what do I want
+
+  below zoom 10:
+  - ring or solid, same radius total
+  - > 10
+  */
+  const circleStrokeWidthExpr = U.stepZoom(globalSuccessFail(0, 0, 0), {
+    1: globalSuccessFail(1, 0, 0),
+    3: globalSuccessFail(2, 0, 2),
+    6: globalSuccessFail(2, 0.5, 2),
+    8: globalSuccessFail(4, 1, 2),
+  })
+  map.U.addCircleLayer('expeditions-circles', 'expeditions', {
+    circleColor: circlesCircleColor(activeColorFunc),
+    // circleColor: U.stepZoom(activeColorFunc, {
+    //   3: ['case', ['get', 'success'], activeColorFunc, 'transparent'],
+    // }),
+
+    circleStrokeColor: circlesStrokeColor(activeColorFunc),
+    circleStrokeWidth: circleStrokeWidthExpr,
+
+    circleRadius: circleRadiusFunc({ filters }),
+    circleSortKey: ['get', 'days'],
+    // circleOpacity: ['case', ['feature-state', 'show'], 1, 0],
+    circleOpacity: ['to-number', ['feature-state', 'opacity']],
+    circleStrokeOpacity: ['case', ['to-boolean', ['feature-state', 'show']], 1, 0],
     visibility,
   })
   map.U.addCircleLayer('expeditions-clickable', 'expeditions', {
@@ -221,24 +258,6 @@ export async function updateExpeditionsStyle({
     visibility,
   })
 
-  // Note: the map would render much faster in congested areas (eg Germany zoom < 7)if we didn't have both a -circles and -glow layer.
-  map.U.addCircleLayer('expeditions-circles', 'expeditions', {
-    circleColor: circlesCircleColor(activeColorFunc),
-    circleStrokeColor: circlesStrokeColor(activeColorFunc),
-    circleStrokeWidth: U.stepZoom(['case', ['get', 'global'], 0, 0], {
-      1: ['case', ['get', 'global'], 1, 0],
-      3: ['case', ['get', 'global'], 2, ['case', ['get', 'success'], 0, 2]],
-      6: ['case', ['get', 'global'], 2, ['case', ['get', 'success'], 0.5, 2]],
-
-      8: ['case', ['get', 'global'], 4, ['case', ['get', 'success'], 1, 2]],
-    }),
-    circleRadius: circleRadiusFunc({ filters }),
-    circleSortKey: ['get', 'days'],
-    // circleOpacity: ['case', ['feature-state', 'show'], 1, 0],
-    circleOpacity: ['to-number', ['feature-state', 'opacity']],
-    circleStrokeOpacity: ['case', ['to-boolean', ['feature-state', 'show']], 1, 0],
-    visibility,
-  })
   map.U.addCircleLayer('expedition-selected', 'expedition-selected', {
     circleColor: 'transparent',
     circleStrokeColor: 'yellow',

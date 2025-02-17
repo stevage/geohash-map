@@ -12,44 +12,23 @@ export function circleRadiusFunc({
   isFlash,
   filters,
   isClickable,
+  type,
+  subtractStroke = false,
 }: CircleRadiusFuncParams = {}) {
-  const extra = isFlash ? 30 : isGlow ? 2 : isClickable ? 4 : 0
-  const getRadius = (r: number) =>
-    ({
-      none: ['+', r, extra],
-      participantCount: [
-        '+',
-        [
-          '*',
-          //   ['sqrt', ['length', ['get', 'participants']]],
-          //   ['length', ['get', 'participants']],
-          //   ['^', ['length', ['get', 'participants']], 0.75],
-          ['log2', ['length', ['get', 'participants']]],
-          r,
-        ],
-        extra,
-      ],
-      reportKb: [
-        '+',
-        [
-          '*',
-          // ['+', 1, ['sqrt', ['get', 'reportKb']]],
-          ['*', 0.5, ['get', 'reportKb']],
-          //   ['sqrt', ['length', ['get', 'participants']]],
-          //   ['length', ['get', 'participants']],
-          //   ['^', ['length', ['get', 'participants']], 0.75],
-          // ['log2', ['length', ['get', 'participants']]],
-          r,
-        ],
-        extra,
-      ],
+  const getRadius = (r: number, strokeWidth?: number = 2) => {
+    const d = ['case', ['get', 'success'], strokeWidth, 0]
+    const extra = isFlash ? 30 : isGlow ? 2 : isClickable ? 6 : d
+    return {
+      none: ['+', r, extra], //['case', ['get', 'success'], strokeWidth, 0]],
+      participantCount: ['+', ['*', ['log2', ['get', 'participantsCount']], r], extra],
+      reportKb: ['+', ['*', ['*', 0.5, ['get', 'reportKb']], r], extra],
       achievementCount: ['+', ['*', ['length', ['get', 'achievements']], r], extra],
       r,
-    })[filters!.scaleExpeditionsBy]
-
+    }[filters!.scaleExpeditionsBy]
+  }
   // new way
   return U.interpolateZoom({
-    1: isFlash ? 5 : isGlow ? 0 : getRadius(1),
+    1: isFlash ? 5 : isGlow ? 0 : getRadius(1, 0),
     3: isFlash ? 10 : isGlow ? getRadius(1) : getRadius(1),
     5: isFlash ? 15 : getRadius(2),
     8: getRadius(3),
