@@ -93,6 +93,16 @@ export default {
     window.map = map
     this.$emit('map-created', map)
 
+    if (window.innerWidth > 600) {
+      // disable compass
+      map.addControl(
+        new mapboxgl.NavigationControl({
+          showCompass: false,
+        }),
+        'bottom-right',
+      )
+    }
+
     await map.U!.onLoad()
     // initMappingRegions(map);
 
@@ -172,7 +182,7 @@ export default {
     let lastRender = performance.now()
     map.on('render', () => {
       const diff = performance.now() - lastRender
-      console.log('render', Math.round(diff))
+      // console.log('render', Math.round(diff))
       lastRender = performance.now()
     })
   },
@@ -411,5 +421,14 @@ map.on('idle', renderFunc)
 .mapboxgl-ctrl-scale {
   background: #222;
   color: #bbb;
+}
+
+.mapboxgl-ctrl-zoom-in,
+.mapboxgl-ctrl-zoom-out {
+  background: #111 !important;
+  /* color: #fff; */
+  /* filter: invert(1); */
+  /* make image lighter */
+  filter: brightness(3);
 }
 </style>

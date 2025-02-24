@@ -17,17 +17,30 @@
                 th.tl Date
             //- th.tl Pax
                 th.tl Who
+            //- tr(v-for="expedition in expeditions")
             tr(v-for="expedition in [...expeditions].reverse()")
+
                 td.f7.pr2
                     a(target="_blank" :href="expLink(expedition)") {{ expedition.properties.success ? '✔' : '✖' }}
 
-                td.f7.pr2
+                td.f7.pr2(style="min-width: 7em")
                     a(target="_blank" :href="expLink(expedition)") {{ expedition.properties.id.slice(0,10) }}
                 //- td {{ expedition.properties.participants.length }}
                 td.f7
                     a(target="_blank" :href="expLink(expedition)") {{ expedition.properties.participantsString }}
       .dib.ma2.mt4.pa2.ba.b--grey.f6.grey.pointer(@click="copyExpeditions") Copy table for wiki
     div(v-else) Locked graticule!
+  div.mt4.f7.overflow-y-scroll.h4
+    table
+      thead
+        th.tl Year
+        th.tl Success
+        th.tl Attempt rate
+      tbody
+        tr(v-for="year of Object.keys(statsByYear).sort().reverse()")
+          td.pr4 {{ year }}
+          td.pr4 {{ statsByYear[year].success }} of {{ statsByYear[year].total }}
+          td {{ statsByYear[year].attemptRate }}%
   div.mt4.overflow-y-scroll.h5
     WikiPage(:pageId="`${info.graticule.properties.name}`")
 </template>
@@ -38,6 +51,9 @@ import GraticuleRecords from '@/components/GraticuleRecords.vue'
 import WikiPage from '@/components/WikiPage.vue'
 import { setUrlParam } from '@/util'
 import { Feature } from 'geojson'
+
+import { expeditionsByGraticule } from '@/mapping/graticules/graticuleStats'
+import { Temporal } from 'temporal-polyfill'
 
 type Info = {
   graticule: {
@@ -57,6 +73,7 @@ export default {
   data: () =>
     ({
       info: undefined,
+      expeditions: [] as Feature[],
     }) as { info: Info | undefined },
   components: { GraticuleRecords, WikiPage },
   created() {
@@ -68,11 +85,32 @@ export default {
         .sort((a, b) => b[1].area - a[1].area)
         .filter(([key, use]) => use.area > 5e6)
     },
-    expeditions() {
-      return window.expeditionsByGraticule[this.info.graticule.properties.id] || []
-    },
     percentWater() {
       return (((this.info.uses.water?.area || 0) / this.info.area) * 100).toFixed(1)
+    },
+    statsByYear() {
+      const stats = {} as Record<string, { success: number; total: number; days: number }>
+      for (const exp of this.expeditions) {
+        const year = exp.properties.id.slice(0, 4)
+        if (!stats[year]) stats[year] = { success: 0, total: 0, days: 0 }
+        stats[year].total++
+        if (exp.properties.success) stats[year].success++
+
+        // calculate days in that year. 365, or 365 for leap years. if current year, use days up to now
+        // don't use getDayOfYear(), use temporal
+
+        if (new Date().getFullYear() === Number(year)) {
+          const today = Temporal.Now.plainDateISO()
+          const firstDayOfYear = today.with({ month: 1, day: 1 })
+          stats[year].days = today.since(firstDayOfYear).days
+        } else {
+          stats[year].days = +year % 4 === 0 ? 366 : 365
+        }
+        stats[year].attemptRate = ((stats[year].total / stats[year].days) * 100).toFixed(1)
+
+        // stats[year].days = new Date().getFullYear() === Number(year) ? new Date().getDayOfYear() : 365
+      }
+      return stats
     },
   },
 
@@ -112,9 +150,10 @@ export default {
     },
   },
   watch: {
-    info() {
+    async info() {
       const id = this?.info?.graticule?.properties?.id
       setUrlParam('graticule', id)
+      this.expeditions = (await expeditionsByGraticule())[id] || []
     },
   },
 }

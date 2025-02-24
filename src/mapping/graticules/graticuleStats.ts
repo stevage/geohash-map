@@ -1,5 +1,6 @@
 import { dateToDays } from '@/util'
 import type { Expedition } from '@/mapping/expeditions/expeditionsData'
+import type { Feature } from 'geojson'
 
 export type GraticuleStat = {
   expeditions: number
@@ -138,10 +139,19 @@ export function makeGraticuleStats({
         : successes.filter(([p, count]) => count === g.mostSuccessfulParticipantCount)[0][0]
   }
 
-  window.graticulesById = graticulesById
+  expeditionsByGraticuleResolve(expeditionsByGraticule)
   window.expeditionsByGraticule = expeditionsByGraticule
   window.maxParticipants = maxParticipants
   window.maxParticipantsGraticule = maxParticipantsGraticule
   // console.log('graticules', graticules);
   return graticules
+}
+
+let expeditionsByGraticuleResolve: (value: Record<string, Expedition[]>) => void
+const expeditionsByGraticuleP: Promise<Record<string, Expedition[]>> = new Promise((resolve) => {
+  expeditionsByGraticuleResolve = resolve
+})
+
+export async function expeditionsByGraticule() {
+  return expeditionsByGraticuleP
 }

@@ -22,13 +22,11 @@ declare global {
     HashInfo: typeof Vue
     AnimationControls: typeof Vue
     expeditions: any
-    graticulesById: Record<string, GraticuleStat>
     expeditionsByGraticule: Record<string, Expedition[]>
     maxParticipants: number
     maxParticipantsGraticule: string
     db: ExpeditionIndex
     si: any
-    graticules: GraticuleStats
     graticuleNamesP: Promise<any>
     graticuleNamesHash: Record<string, string>
     z: { [key: string]: any }

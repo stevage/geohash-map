@@ -4,7 +4,18 @@ import * as turf from '@turf/turf'
 // @ts-ignore TODO
 import type { Properties } from '@turf/turf'
 import humanizeDuration from 'humanize-duration'
-import type { Feature, Polygon, Point, FeatureCollection } from 'geojson'
+import type { Feature, Polygon, Point, FeatureCollection, GeoJsonProperties } from 'geojson'
+
+interface GraticuleStats {
+  [key: string]: {
+    [key: string]: {
+      expeditions: number
+      successes: number
+      failures: number
+      daysSinceExpedition?: number
+    }
+  }
+}
 
 export function makeGraticuleFeature(
   xstr: string,
@@ -34,17 +45,6 @@ export function makeGraticuleFeature(
 
 const splitBy10 = (string: string) => (string.match(/.{1,10}/g) || []).join('\n')
 
-interface GraticuleStats {
-  [key: string]: {
-    [key: string]: {
-      expeditions: number
-      successes: number
-      failures: number
-      daysSinceExpedition?: number
-    }
-  }
-}
-
 export function idStringToNumeric(yxstr: string = ''): number {
   // need to be very careful about -0
   const [ystr, xstr] = yxstr.split(',')
@@ -62,9 +62,6 @@ export function numericToIdString(n: number): string {
   const xstr = (x < 500 ? '-' : '') + (x % 500)
   return `${ystr},${xstr}`
 }
-window.z = window.z || {}
-window.z.idStringToNumeric = idStringToNumeric
-window.z.numericToIdString = numericToIdString
 
 export function makeGraticuleFeatures({
   graticuleStats,
@@ -208,6 +205,27 @@ export function makeGraticuleFeatures({
     type: 'FeatureCollection',
     features: [...graticules, ...graticuleLabels, ...graticuleCenterLabels],
   } as FeatureCollection<Polygon | Point>
-  window.app.graticules = fc
+  graticuleFeaturesResolve(fc)
+  gfc = fc
   return fc
 }
+let gfc
+let graticuleFeaturesResolve: (value: FeatureCollection<Polygon | Point>) => void
+const graticulesFC: Promise<FeatureCollection<Polygon | Point, GeoJsonProperties>> = new Promise(
+  (resolve) => {
+    graticuleFeaturesResolve = resolve
+  },
+)
+
+export async function getGraticuleFeature(
+  xstr: string,
+  ystr: string,
+): Promise<Feature | undefined> {
+  const g = await graticulesFC
+  const graticule = g.features.find((f) => f.properties!.x === xstr && f.properties!.y === ystr)
+  return graticule
+}
+
+window.z = window.z || {}
+window.z.idStringToNumeric = idStringToNumeric
+window.z.numericToIdString = numericToIdString

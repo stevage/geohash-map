@@ -1,7 +1,11 @@
 import { EventBus } from '@/EventBus'
 import * as turf from '@turf/turf'
 import { makeGraticuleStats } from '@/mapping/graticules/graticuleStats'
-import { makeGraticuleFeatures, makeGraticuleFeature } from '@/mapping/graticules/graticuleFeatures'
+import {
+  makeGraticuleFeatures,
+  makeGraticuleFeature,
+  getGraticuleFeature,
+} from '@/mapping/graticules/graticuleFeatures'
 import { getGraticuleNames } from './graticules/graticuleNames'
 import { getClassAreasByVectorLayer } from './graticules/graticuleLandClasses'
 import { addGraticuleLayers, updateGraticuleStyle } from './graticules/graticuleStyle'
@@ -31,10 +35,8 @@ async function recalculateGraticules({ graticuleStats, map }) {
   map.U.setData('graticules', makeGraticuleFeatures({ graticuleStats, map }))
 }
 
-function selectGraticuleByXY(map, x, y) {
-  const graticule = window.app.graticules.features.find(
-    (f) => f.properties.x === x && f.properties.y === y,
-  )
+async function selectGraticuleByXY(map: UtilsMap, x: string, y: string) {
+  const graticule = await getGraticuleFeature(x, y)
 
   const bbox = turf.bbox(graticule)
 
@@ -60,7 +62,8 @@ function clickGraticuleLabel(map: UtilsMap, e: MapMouseEvent) {
 }
 
 EventBus.$on('select-graticule-by-id', (id) => {
-  selectGraticuleByXY(window.map, ...id.split(','))
+  const [y, x] = id.split(',')
+  selectGraticuleByXY(window.map, x, y)
 })
 
 export function setGraticuleStyle({ map, filters }: { map: UtilsMap; filters: Filters }) {

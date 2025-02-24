@@ -84,14 +84,6 @@ export function addGraticuleLayers(map: mapU) {
 function graticuleColorByParticipantsFunc(
   type: 'firstParticipants' | 'lastParticipants' | 'mostSuccessfulParticipants',
 ) {
-  // const bounds = map.getBounds();
-  // TODO filter out dupes
-  // const visibleGraticules = window.app.graticules.features.filter(
-  //     (f) =>
-  //         // probably a faster, more direct way to get this, but then we need to deal with signs etc
-  //         bounds.contains(f.geometry.coordinates[0][0]) ||
-  //         bounds.contains(f.geometry.coordinates[0][2])
-  // );
   const map = window.map
   // TODO filter out dupes
   const visibleGraticules = map.queryRenderedFeatures({

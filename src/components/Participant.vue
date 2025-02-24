@@ -27,7 +27,8 @@ import HashStats from '@/components/HashStats.vue'
             td.pr4 {{ expedition.properties.id.slice(0, 10) }}
             td {{ expedition.properties.graticule }}
             td.green {{ expedition.properties.success ? /* green check mark */ '✓' : /* red cross mark */ '' }}
-    WikiPage.mt3(:pageId="`user:${participant}`")
+            td {{ expedition.properties.participantsCount > 1 ? `+${expedition.properties.participantsCount} others` : '' }}
+    WikiPage.mt3(v-if="!multipleParticipants" :pageId="`user:${participant}`")
 
 </template>
 
@@ -54,11 +55,21 @@ export default {
     async updateParticipant() {
       setSelectedParticipant(this.participant || '')
       if (this.participant) {
-        const eByP = await getExpeditionsByParticipant(this.participant)
-        this.expeditions = [...eByP[this.participant].expeditions].reverse()
+        const eByP = await getExpeditionsByParticipant()
+        const participants = this.participant.split(/\s*,\s*/)
+
+        const es = participants.flatMap((p) => eByP[p]?.expeditions || [])
+
+        // TODO sort properly when there are multiple participants
+        this.expeditions = [...es.reverse()]
       } else {
         this.expeditions = []
       }
+    },
+  },
+  computed: {
+    multipleParticipants() {
+      return this.participant?.includes(',')
     },
   },
   watch: {
